@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Procedural Building Composer — v7.3 Shape Fix Attempt 2</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.3/mapbox-gl.css" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.css" rel="stylesheet">
+
+<style>
+ html,body,#map{height:100%;margin:0;padding:0;font:14px/1.3 "Helvetica Neue",Arial}
+ #controls{position:absolute;top:10px;right:10px;z-index:2;background:#ffffffee;
+           border-radius:6px;padding:10px 12px;box-shadow:0 0 6px #0003;max-width:380px; max-height: calc(100vh - 20px); overflow-y: auto;}
+ #controls table{width:100%;border-collapse:collapse;margin:0}
+ #controls td{padding:2px 0}
+ #controls input[type="number"],#controls input[type="color"],#controls select{width:100%;box-sizing: border-box;}
+ #controls input[type="range"]{width:100%;}
+ #controls button{width:100%;margin-top:8px;padding:6px;border:0;border-radius:4px;
+                  background:#3887be;color:#fff;font-weight:bold;cursor:pointer}
+ #controls button#randomizeParams { background: #6c757d; }                 
+ #controls h3 { 
+    margin-top: 12px; 
+    margin-bottom: 5px; 
+    font-size: 1em; 
+    border-bottom: 1px solid #ccc; 
+    padding-bottom: 3px;
+    cursor: pointer;
+    user-select: none;
+ }
+ #controls h3 .toggle-icon { margin-right: 5px; }
+ #controls .collapsible-content { display: table-row-group; /* Initially visible */ }
+ #controls .collapsible-content.collapsed { display: none; }
+
+#topBar{
+  position:absolute;top:10px;left:10px;z-index:3;
+  display:flex;gap:8px;align-items:flex-start;
+}
+#topBarLeft{
+  display:flex;flex-direction:column;gap:8px;
+}
+#uploadPanel{
+  background:#ffffffee;padding:10px 12px;border-radius:6px;
+  box-shadow:0 0 6px #0003;font:14px/1.3 "Helvetica Neue",Arial;
+  width:240px;
+}
+#uploadPanel .panel-header{
+  display:flex;align-items:center;cursor:pointer;font-weight:bold;
+  user-select:none;font-size:14px;
+}
+#uploadPanel .panel-header .toggle-icon{margin-right:6px;}
+#uploadPanel .panel-content{margin-top:8px;}
+#uploadPanel.collapsed .panel-content{display:none;}
+#uploadPanel label{display:block;font-size:13px;margin-bottom:6px;}
+#uploadPanel input[type="file"]{width:100%;font-size:13px;}
+#uploadStatus{font-size:12px;color:#444;margin-top:4px;}
+
+ #ctxToggle{
+  position:relative;
+  background:#f7f7f7;padding:6px 8px;border-radius:6px;
+  box-shadow:inset 0 0 0 1px #0001;font:14px/1.3 "Helvetica Neue",Arial;
+}
+#ctxToggle input{vertical-align:middle;margin-right:4px}
+
+</style>
+</head><body>
+<div id="map"></div>
+<!-- ==== upload & geocoder row =================================== -->
+<div id="topBar">
+  <div id="topBarLeft">
+    <div id="ctxToggle">
+      <label><input type="checkbox" id="show3d" checked>
+             Context 3D buildings</label>
+    </div>
+    <div id="uploadPanel">
+      <div class="panel-header"><span class="toggle-icon">▾</span>Custom Footprint</div>
+      <div class="panel-content">
+        <label>Upload GeoJSON (≤ 1 MB)
+          <input type="file" id="geoUpload" accept=".geojson,.json,application/geo+json,application/json">
+        </label>
+        <div id="uploadStatus">Supports Polygon or MultiPolygon (Feature/Collection).</div>
+      </div>
+    </div>
+  </div>
+  <div id="geocoder"></div>
+</div>
+
+<div id="controls">
+  <button id="downloadGeo" style="margin-bottom:8px;background:#5c9e31">⬇️ Download GeoJSON</button>
+<table>
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Tower Core</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Floors</td><td><input id="floors" type="number" min="1" max="50" value="10"></td></tr>
+<tr><td>Floor Ht (m)</td><td><input id="floorHeight" type="number" value="3.5" step="0.1" min="2.0"></td></tr>
+<tr><td>Taper mode</td><td><!-- Tower Core ▸ Taper mode -->
+  <select id="taperMode">
+    <option value="none">none</option>
+    <option value="cont">continuous</option>
+    <option value="step">stepped</option>
+    <option value="rounded">rounded</option><!-- NEW -->
+  </select></td></tr>
+<tr><td>Taper value</td><td><input id="taper" type="range" min="-0.5" max="0.5" step="0.02" value="0"></td></tr>
+<tr><td>Step every</td><td><input id="stepEvery" type="number" value="4" min="1"></td></tr>
+<tr><td>Step factor</td><td><input id="stepFactor" type="number" step="0.01" value="-0.05"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Façade & Windows</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Facade α</td><td><input id="facadeAlpha" type="number" min="0" max="1" step="0.05" value="1"></td></tr>
+<tr><td>Facade colour</td><td><input id="wallColor" type="color" value="#d1ccc0"></td></tr>
+<tr><td>Wall texture</td><td><select id="wallTex"><option>none</option><option>brick</option><option>stone</option><option>glass</option><option>metal</option></select></td></tr>
+<tr><td>Window α</td><td><input id="windowAlpha" type="number" min="0" max="1" step="0.05" value="0.7"></td></tr>
+<tr><td>Window colour</td><td><input id="windowColor" type="color" value="#5EA3DB"></td></tr>
+<tr><td>Border W (m)</td><td><input id="borderW" type="number" min="0.0" max="0.5" step="0.05" value="0.15"></td></tr>
+<tr><td>Border colour</td><td><input id="borderColor" type="color" value="#F0F0F0"></td></tr>
+<tr><td>Vert. Mullions</td><td><input id="mullionVertCount" type="number" min="0" max="10" value="1"></td></tr>
+<tr><td>Horiz. Mullions</td><td><input id="mullionHorzCount" type="number" min="0" max="5" value="1"></td></tr>
+<tr><td>Mullion Thick (m)</td><td><input id="mullionThickness" type="number" min="0.01" max="0.2" step="0.01" value="0.06"></td></tr>
+<tr><td>Mullion Colour</td><td><input id="mullionColor" type="color" value="#4B4B4B"></td></tr>
+<!-- ▸  Exoskeleton  -->
+<tr><td colspan="2"><strong>Exoskeleton Structure</strong></td></tr>
+<tr><td>Type</td><td>
+  <select id="exoType">
+    <option value="none">none</option>
+    <option value="lattice">Lattice</option>
+    <option value="truss">Trussed frame</option>
+    <option value="custom">Custom</option>
+  </select>
+</td></tr>
+<tr><td>Member Size (m)</td><td><input id="exoSize"    type="number" min="0.05" step="0.05" value="0.3"></td></tr>
+<tr><td>Offset (m)</td><td><input id="exoOffset"  type="number" min="0"    step="0.1"  value="0.5"></td></tr>
+<tr><td>Conn. Density</td><td><input id="exoDensity" type="number" min="1" max="20" value="4"></td></tr>
+<tr><td>Colour</td><td><input id="exoColor" type="color" value="#666666"></td></tr>
+
+<!-- ▸  Mega‑Truss  -->
+<tr><td colspan="2"><strong>Mega‑Truss Expression</strong></td></tr>
+<tr><td>Height (floors)</td><td><input id="trussSpan"  type="number" min="0" max="10" value="0"> </td></tr>
+<tr><td>Levels (list)</td><td><input id="trussLevels" type="text"   value="" placeholder="e.g. 8,20"></td></tr>
+<tr><td>Style</td><td>
+  <select id="trussStyle">
+    <option value="warren">Warren</option>
+    <option value="pratt">Pratt</option>
+    <option value="custom">Custom</option>
+  </select>
+</td></tr>
+<tr><td>Member Size (m)</td><td><input id="trussSize" type="number" min="0.1" step="0.05" value="0.5"></td></tr>
+<tr><td>Colour</td><td><input id="trussColor" type="color" value="#444444"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Separators</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Sep Ht (m)</td><td><input id="sepH" type="number" value="0.3" step="0.05" min="0"></td></tr>
+<tr><td>Sep W (m)</td><td><input id="sepW" type="number" value="0.3" step="0.05" min="0"></td></tr>
+<tr><td>Sep colour</td><td><input id="sepColor" type="color" value="#505050"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Balconies</h3></th></tr>
+<tbody class="collapsible-content">
+  <tr><td>Balcony Type</td><td>                 <!-- 🟦 NEW -->
+    <select id="balconyType">
+      <option value="projecting" selected>Projecting (longest edge)</option>
+      <option value="wrap">Continuous wrap‑around</option>
+      <option value="alternating">Alternating segments</option>
+      <option value="corner">Corner only</option>
+      <option value="stacked">Stacked / split façade</option>
+    </select>
+  </td></tr>
+<tr><td>Depth (m)</td><td><input id="balconyDepth" type="number" value="1.5" step="0.1" min="0"></td></tr>
+<tr><td>Every n floors</td><td><input id="balEvery" type="number" value="2" min="1"></td></tr>
+<tr><td>Colour</td><td><input id="balColor" type="color" value="#E0E0E0"></td></tr>
+<tr><td>Railing Ht (m)</td><td><input id="railingHeight" type="number" min="0.5" max="1.5" step="0.1" value="1.0"></td></tr>
+<tr><td>Railing Thick (m)</td><td><input id="railingThickness" type="number" min="0.05" max="0.3" step="0.01" value="0.1"></td></tr>
+<tr><td>Railing Colour</td><td><input id="railingColor" type="color" value="#606060"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Podium</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Podium floors</td><td><input id="podiumFloors" type="number" value="3" min="0"></td></tr>
+<tr><td>Outset (m)</td><td><input id="podiumOut" type="number" value="2.5" step="0.1" min="0"></td></tr>
+<tr><td>Podium α</td><td><input id="podiumAlpha" type="number" min="0" max="1" step="0.05" value="1"></td></tr>
+<tr><td>Podium colour</td><td><input id="podiumColor" type="color" value="#A0A0A0"></td></tr>
+<tr><td>Ground Floor Ht?</td><td><input id="podiumSpecialGroundFloor" type="checkbox" checked></td></tr>
+<tr><td>Ground Flr Ht (m)</td><td><input id="podiumGroundFlrHt" type="number" value="5.0" step="0.1"></td></tr>
+<tr><td>Podium Win. Ratio</td><td><input id="podiumWindowRatio" type="number" min="0.0" max="0.95" step="0.05" value="0.75"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Roof & Cornice</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Main Roof Slab Ht (m)</td><td><input id="roofSlabHeight" type="number" value="0.4" step="0.05" min="0.1"></td></tr>
+<tr><td>Roof colour</td><td><input id="roofColor" type="color" value="#3D3D3D"></td></tr>
+<tr><td>Roof texture</td><td><select id="roofTex"><option>none</option><option>glass</option><option>metal</option><option>stone</option></select></td></tr>
+<tr><td>Parapet Ht (m)</td><td><input id="parapetHeight" type="number" value="1.2" step="0.1" min="0"></td></tr>
+<tr><td>Parapet Thick (m)</td><td><input id="parapetThickness" type="number" value="0.35" step="0.05" min="0.05"></td></tr>
+<tr><td>Parapet Colour</td><td><input id="parapetColor" type="color" value="#5A5A5A"></td></tr>
+<tr><td>Penthouse Floors</td><td><input id="penthouseFloors" type="number" value="1" min="0"></td></tr>
+<tr><td>Penthouse Scale</td><td><input id="penthouseScale" type="range" min="0.2" max="0.8" step="0.05" value="0.5"></td></tr>
+<tr><td>Penthouse Colour</td><td><input id="penthouseColor" type="color" value="#656565"></td></tr>
+<tr><td>Main Cornice Ht (m)</td><td><input id="corniceMainHeight" type="number" value="0.6" step="0.05" min="0"></td></tr>
+<tr><td>Main Cornice Out (m)</td><td><input id="corniceMainOutset" type="number" value="0.4" step="0.05" min="0"></td></tr>
+<tr><td>Main Cornice Colour</td><td><input id="corniceColor" type="color" value="#8B7355"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Vertical Elements</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Enable Ribs</td><td><input id="enableRibs" type="checkbox"></td></tr>
+<tr><td>Rib Count/Segment</td><td><input id="ribCount" type="number" min="0" max="10" value="2"></td></tr>
+<tr><td>Rib Depth (m)</td><td><input id="ribDepth" type="number" min="0.1" max="2" step="0.05" value="0.3"></td></tr>
+<tr><td>Rib Width (m)</td><td><input id="ribWidth" type="number" min="0.05" max="1" step="0.01" value="0.15"></td></tr>
+<tr><td>Rib Colour</td><td><input id="ribColor" type="color" value="#908070"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Internal Structure (Visual)</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Enable Floor Slabs</td><td><input id="enableSlabs" type="checkbox" checked></td></tr>
+<tr><td>Slab Thick (m)</td><td><input id="slabThick" type="number" min="0.1" max="1" step="0.05" value="0.3"></td></tr>
+<tr><td>Slab Colour</td><td><input id="slabColor" type="color" value="#C0C0C0"></td></tr>
+<tr><td>Enable Int. Pillars</td><td><input id="enablePillars" type="checkbox"></td></tr>
+<tr><td>Pillar Size (m)</td><td><input id="pillarSize" type="number" min="0.2" max="1.5" step="0.05" value="0.5"></td></tr>
+<tr><td>Pillar Rows</td><td><input id="pillarRows" type="number" min="1" max="10" value="2"></td></tr>
+<tr><td>Pillar Cols</td><td><input id="pillarCols" type="number" min="1" max="10" value="2"></td></tr>
+<tr><td>Pillar Colour</td><td><input id="pillarColor" type="color" value="#7F7F7F"></td></tr>
+<tr><td>Enable Central Core</td><td><input id="enableCentralCore" type="checkbox"></td></tr>
+<tr><td>Core Scale Factor</td><td><input id="centralCoreScale" type="range" min="0.1" max="0.7" step="0.05" value="0.3"></td></tr>
+<tr><td>Core Colour</td><td><input id="centralCoreColor" type="color" value="#595959"></td></tr>
+</tbody>
+
+<tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Shape Details</h3></th></tr>
+<tbody class="collapsible-content">
+<tr><td>Overall Roundness (m)</td><td><input id="overallRoundness" type="number" min="0" max="5" step="0.05" value="0"></td></tr>
+</tbody>
+
+</table>
+<button id="regenerate">Regenerate</button>
+<button id="randomizeParams">🎲 Random</button>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.3/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<!--  index.html  (top of file) -->
+<script type="module">
+
+import { LOCAL_TEXTURES } from '/playground/building-generator/gemini/textures.js'; 
+/* ---------- map & patterns ---------- */
+mapboxgl.accessToken='pk.eyJ1IjoicGhpbG5pY29sYXNqYW1lcyIsImEiOiJjaXYycGU2a2cwMmZ1MnlwNjZ4YWEzbzRmIn0.hZO-ZaGNzM4jXhbvqtOH3w';
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/streets-v12',
+  center:[-74.0060, 40.7128],zoom:15.5,pitch:55,bearing:20});
+
+/* geocoder */
+const geocoder = new MapboxGeocoder({
+  accessToken: mapboxgl.accessToken,
+  mapboxgl,
+  marker: false
+});
+const geocoderContainer = document.getElementById('geocoder');
+if (geocoderContainer) geocoder.addTo(geocoderContainer);
+geocoder.on('result', e => {
+  if (!e || !e.result || !Array.isArray(e.result.center)) return;
+  map.flyTo({ center: e.result.center, zoom: Math.max(map.getZoom(), 15), essential: true });
+});
+
+/* at the very top of <script type="module"> */
+const TEXTURE_ROOT = new URL('textures/', document.baseURI);  // one directory up from gemini
+
+const PAT = Object.fromEntries(
+  LOCAL_TEXTURES.map(rawName => {
+    const key = rawName.replace(/\.png$/,'');            //  "3px-tile"
+    const url = new URL(rawName, TEXTURE_ROOT).href;     //  absolute, %20‑escaped
+    return [key, url];
+  })
+);
+
+let lastGeo = null;            // holds the full geometry tree
+
+/* ---------- context‑building layer helpers ------------------------ */
+const BASE_LAYER_ID = 'ctx-3d-buildings';
+const removedIds    = new Set();                    // buildings hidden after click
+
+function makeContextFilter () {
+  const ids = [...removedIds];          // spread once for clarity
+
+  /*  classic‑grammar filter:
+      - keep only features where “extrude” === "true"
+      - and whose $id is **not** in our hidden‑id set                      */
+  return ids.length
+    ? ['all',
+        ['==', 'extrude', 'true'],
+        ['!in', '$id', ...ids]          // ← this is the only bit that changed
+      ]
+    : ['all',
+        ['==', 'extrude', 'true']
+      ];
+}
+
+function addContextBuildings () {
+  if (map.getLayer(BASE_LAYER_ID)) return;          // already present
+  map.addLayer({
+    id            : BASE_LAYER_ID,
+    source        : 'composite',
+    'source-layer': 'building',
+    minzoom       : 15,
+    type          : 'fill-extrusion',
+    filter        : makeContextFilter(),            // ← uses the helper above
+    paint         : {
+      'fill-extrusion-color' : '#F7F7F7',
+      'fill-extrusion-height': ['get', 'height'],
+      'fill-extrusion-base'  : ['coalesce', ['get', 'min_height'], 0],
+      'fill-extrusion-opacity': 1
+    }
+  });
+}
+
+function updateContextFilter () {
+  if (map.getLayer(BASE_LAYER_ID))
+    map.setFilter(BASE_LAYER_ID, makeContextFilter());
+}
+
+function removeContextBuildings () {
+  map.getLayer(BASE_LAYER_ID) && map.removeLayer(BASE_LAYER_ID);
+}
+
+/* toggle wiring */
+document.getElementById('show3d').addEventListener('change', e=>{
+  e.target.checked ? addContextBuildings() : removeContextBuildings();
+});
+map.on('load', ()=>{ if (document.getElementById('show3d').checked) addContextBuildings(); });
+
+map.on('load',()=>{
+  for (const [name, url] of Object.entries(PAT)) {
+    map.loadImage(url, (err, img) => {
+      if (err) { console.warn(`texture ${name} failed`, err); return; }
+
+      /*  ↓ tell Mapbox “treat every 4 × 4 device pixels as ONE sprite pixel”  */
+      if (!map.hasImage(name)) map.addImage(name, img, { pixelRatio: 4 });
+    });
+  }
+
+  // 2. (re)build the dropdowns
+  ['wallTex','roofTex'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';                    // clear existing
+    sel.add(new Option('none','none'));
+    for (const name of Object.keys(PAT))
+      sel.add(new Option(name, name));
+  });
+
+  /* ---- lighting --------------------------------------------------- */
+  /*
+  map.setLights([
+    {
+      id: 'ambient',
+      type: 'ambient',
+      properties: {                  // ← MUST wrap everything here
+        intensity: 0.5,
+        color: '#ffffff'
+      }
+    },
+    {
+      id: 'sun',
+      type: 'directional',
+      properties: {
+        direction: [210, 35],        // [azimuth°, elevation°]
+        intensity: 0.5,
+        color: '#ffdfa6'
+      }
+    },
+    {
+      id: 'skyFill',
+      type: 'directional',
+      properties: {
+        direction: [0, 90],
+        intensity: 0.5,
+        color: '#cfe8ff'
+      }
+    }
+  ]);
+*/
+  });
+
+/* ---------- utils ---------- */
+const $=id=>document.getElementById(id);
+const safe=(fn, context = "")=>{try{const result = fn(); return result === undefined ? null : result;}catch(err){console.warn(`Safe op failed (${context}):`, err); return null;}};
+const safeClone=g=>g ? safe(()=>turf.clone(g), "clone") : null;
+const safeBuf=(g,d, context = "buffer", opts = {units:'meters'})=>g ? safe(()=> d === 0 ? turf.clone(g) : turf.buffer(g,d,opts), context) : null;
+const safeDiff=(a,b, context = "difference")=> (a && b && a.geometry && b.geometry) ? safe(()=>turf.difference(a,b), context) : null;
+const safeInt=(a,b, context = "intersect")=> (a && b && a.geometry && b.geometry) ? safe(()=>turf.intersect(a,b), context) : null;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const lightenHex = (hex, pct = 0.2) => {
+    let h = hex.replace('#','');
+    if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+    const n = c => Math.min(255, Math.round(parseInt(c,16) + (255-parseInt(c,16))*pct))
+                      .toString(16).padStart(2,'0');
+    return '#'+n(h.slice(0,2))+n(h.slice(2,4))+n(h.slice(4,6));
+};
+
+const MIN_POLY_AREA = 5;
+const polyArea = poly => safe(() => turf.area(poly), "area check") || 0;
+const isUsablePoly = poly => poly && poly.geometry && polyArea(poly) >= MIN_POLY_AREA;
+
+function chooseLargestPolygon(polys = []) {
+  let best = null, bestArea = 0;
+  polys.forEach(p => {
+    if (!p) return;
+    const feat = p.type === 'Feature' ? p : (p.geometry ? turf.feature(p.geometry) : p);
+    if (!feat) return;
+    const a = polyArea(feat);
+    if (a > bestArea) { bestArea = a; best = feat; }
+  });
+  return best;
+}
+
+function collectCandidatePolys(input, bucket = []) {
+  if (!input) return bucket;
+
+  if (input.type === 'FeatureCollection' && Array.isArray(input.features)) {
+    input.features.forEach(f => collectCandidatePolys(f, bucket));
+    return bucket;
+  }
+  if (input.type === 'Feature') {
+    collectCandidatePolys(input.geometry, bucket);
+    return bucket;
+  }
+  if (input.type === 'GeometryCollection' && Array.isArray(input.geometries)) {
+    input.geometries.forEach(g => collectCandidatePolys(g, bucket));
+    return bucket;
+  }
+  if (input.type === 'Polygon') {
+    const poly = safe(() => turf.polygon(input.coordinates), "Polygon collect");
+    poly && bucket.push(poly);
+    return bucket;
+  }
+  if (input.type === 'MultiPolygon') {
+    input.coordinates.forEach(coords => {
+      const poly = safe(() => turf.polygon(coords), "MultiPolygon part");
+      poly && bucket.push(poly);
+    });
+    return bucket;
+  }
+  if (input.type === 'LineString') {
+    const line = turf.lineString(input.coordinates);
+    const lineLength = turf.length(line, {units: 'meters'});
+    if (lineLength > 2) {
+      const buf = safeBuf(line, Math.max(1, lineLength * 0.05), "LineString buffer");
+      buf && bucket.push(buf);
+    }
+    return bucket;
+  }
+  if (input.type === 'MultiLineString') {
+    input.coordinates.forEach(coords => collectCandidatePolys({type:'LineString', coordinates:coords}, bucket));
+    return bucket;
+  }
+  return bucket;
+}
+
+function refineFootprint(poly) {
+  let processedPoly = safeClone(poly);
+  if (!processedPoly) return null;
+
+  const unkinkedCollections = safe(() => turf.unkinkPolygon(processedPoly), "Unkink");
+  if (unkinkedCollections && unkinkedCollections.features.length > 0) {
+    const largestUnkinked = chooseLargestPolygon(unkinkedCollections.features);
+    if (isUsablePoly(largestUnkinked)) processedPoly = largestUnkinked;
+  }
+  if (!isUsablePoly(processedPoly)) return null;
+
+  let truncatedPoly = safe(() => turf.truncate(processedPoly, {precision: 6, coordinates: 2}), "Truncate");
+  if (!isUsablePoly(truncatedPoly)) truncatedPoly = processedPoly;
+
+  let cleanedPoly = safe(() => turf.cleanCoords(truncatedPoly), "CleanCoords");
+  if (!isUsablePoly(cleanedPoly)) cleanedPoly = truncatedPoly;
+  if (!isUsablePoly(cleanedPoly)) return null;
+
+  let simplifiedPoly = safe(() => turf.simplify(cleanedPoly, {tolerance: 0.1, highQuality: true}), "Simplify");
+  const minDistinctVertices = 4;
+  const coordsLen = simplifiedPoly && simplifiedPoly.geometry && simplifiedPoly.geometry.coordinates && simplifiedPoly.geometry.coordinates[0]
+    ? simplifiedPoly.geometry.coordinates[0].length
+    : 0;
+  let useCleanedPoly = false;
+  if (!isUsablePoly(simplifiedPoly)) useCleanedPoly = true;
+  else if (coordsLen && coordsLen < minDistinctVertices + 1) useCleanedPoly = true;
+
+  if (useCleanedPoly) simplifiedPoly = safeClone(cleanedPoly);
+  if (!isUsablePoly(simplifiedPoly)) return null;
+  return simplifiedPoly;
+}
+
+function prepareFootprints(rawGeom) {
+  const candidates = [];
+  collectCandidatePolys(rawGeom, candidates);
+
+  return candidates
+    .map(candidate => refineFootprint(candidate))
+    .filter(isUsablePoly);
+}
+
+function prepareFootprint(rawGeom) {
+  const prepared = prepareFootprints(rawGeom);
+  const basePoly = chooseLargestPolygon(prepared);
+  if (!isUsablePoly(basePoly)) return null;
+
+  return basePoly;
+}
+
+/* ---------- state ---------- */
+let pid=0,lastPoly=null,layers=[];
+
+/* ---------- config gather ---------- */
+function cfg(){return{
+  floors:+$('floors').value,F:+$('floorHeight').value,
+  taperMode:$('taperMode').value,taper:+$('taper').value,stepEvery:+$('stepEvery').value,stepFactor:+$('stepFactor').value,
+
+  facadeAlpha:+$('facadeAlpha').value,wallColor:$('wallColor').value,wallTex:$('wallTex').value,
+  windowAlpha: +$('windowAlpha').value,
+  windowColor:$('windowColor').value,wnw:1, 
+  bW:+$('borderW').value,bCol:$('borderColor').value,
+  mullionV:+$('mullionVertCount').value,mullionH:+$('mullionHorzCount').value,
+  mullionThick:+$('mullionThickness').value,mullionCol:$('mullionColor').value,
+
+  sH:+$('sepH').value,sW:+$('sepW').value,sCol:$('sepColor').value,
+
+  balD:+$('balconyDepth').value,balN:+$('balEvery').value,balCol:$('balColor').value,
+  railH:+$('railingHeight').value,railThick:+$('railingThickness').value,railCol:$('railingColor').value,
+
+  podF:+$('podiumFloors').value,podOut:+$('podiumOut').value,podCol:$('podiumColor').value,podA:+$('podiumAlpha').value,
+  podiumSpecialGroundFloor: $('podiumSpecialGroundFloor').checked,
+  podiumGroundFlrHt: +$('podiumGroundFlrHt').value,
+  podiumWinRatio: +$('podiumWindowRatio').value,
+
+  roofSlabH: +$('roofSlabHeight').value, roofCol:$('roofColor').value,roofTex:$('roofTex').value,
+  parapetH: +$('parapetHeight').value, parapetThick: +$('parapetThickness').value, parapetCol:$('parapetColor').value,
+  penthouseF: +$('penthouseFloors').value, penthouseScale: +$('penthouseScale').value, penthouseCol:$('penthouseColor').value,
+  corniceH: +$('corniceMainHeight').value, corniceOut: +$('corniceMainOutset').value, corniceCol:$('corniceColor').value,
+
+  enableRibs: $('enableRibs').checked, ribCount: +$('ribCount').value, ribDepth: +$('ribDepth').value,
+  ribWidth: +$('ribWidth').value, ribColor: $('ribColor').value,
+
+  enableSlabs: $('enableSlabs').checked, slabThick: +$('slabThick').value, slabColor: $('slabColor').value,
+  enablePillars: $('enablePillars').checked, pillarSize: +$('pillarSize').value,
+  pillarRows: +$('pillarRows').value, pillarCols: +$('pillarCols').value, pillarColor: $('pillarColor').value,
+  enableCentralCore: $('enableCentralCore').checked, centralCoreScale: +$('centralCoreScale').value, centralCoreColor: $('centralCoreColor').value,
+  
+  overallRoundness: +$('overallRoundness').value,
+  exoType   : $('exoType').value,
+  exoSize   : +$('exoSize').value,
+  exoOffset : +$('exoOffset').value,
+  exoDensity: +$('exoDensity').value,
+  exoColor  : $('exoColor').value,
+
+  trussSpan  : +$('trussSpan').value,
+  trussLvls  : $('trussLevels').value.split(',').map(s=>+s.trim()).filter(n=>!isNaN(n)),
+  trussStyle : $('trussStyle').value,
+  trussSize  : +$('trussSize').value,
+  trussColor : $('trussColor').value,
+  balType : $('balconyType').value,
+
+};}
+
+/* ---------- main click & regenerate ---------- */
+$('regenerate').onclick=()=>lastPoly&&render(lastPoly,cfg());
+$('randomizeParams').onclick=()=>randomizeParameters();
+
+map.on('click',e=>{
+  const features=map.queryRenderedFeatures(e.point,{layers:['building']});
+  if(!features || features.length === 0)return;
+  const f = features[0];
+
+  /* hide that base‑map building so our custom tower replaces it */
+  if (f.id !== undefined){ removedIds.add(f.id); updateContextFilter(); }
+
+  const candidatePoly = prepareFootprint(f);
+  if (!candidatePoly) {
+    console.warn("Could not derive a valid polygon or it's too small from clicked feature:", f);
+    return;
+  }
+
+  pid++;
+  lastPoly = candidatePoly;
+  render(lastPoly,cfg());
+});
+
+/* ---------- render ---------- */
+function render(poly,o){
+  layers.forEach(id => map.getLayer(id)  && map.removeLayer(id));   // ①  
+  layers.forEach(id => map.getSource(id) && map.removeSource(id));  // ②
+  layers = [];
+
+  const footprints = Array.isArray(poly) ? poly : [poly];
+  if (!footprints.length) return;
+
+  const g = buildMerged(footprints, o);
+  if (!g) return;
+  lastGeo = g;                   // ← remember for download
+  const L = [
+  /* key                     colour                opacity         pattern */
+  ['podium',            o.podCol,            o.podA,          o.wallTex],
+
+  // interior / structural bits stay fully opaque
+  ['floorSlabs',        o.slabColor,         1,               'none'],
+  ['centralCore',       o.centralCoreColor,  1,               'none'],
+
+  // ← only the main wall skin obeys Facade α
+  ['core',              o.wallColor,         o.facadeAlpha,   o.wallTex],
+
+  ['windows',           o.windowColor,       o.windowAlpha,   'glass'],
+
+  ['borders',           o.bCol,              1,               'none'],
+  ['mullions',          o.mullionCol,        1,               'none'],
+  ['seps',              o.sCol,              1,               'none'],
+  ['balconies',         o.balCol,            1,               'none'],
+  ['railings',          o.railCol,           1,               'none'],
+  ['pillars',           o.pillarColor,       1,               'none'],
+  ['cornices',          o.corniceCol,        1,               o.wallTex],
+
+  ['roof',              o.roofCol,           1,               o.roofTex],
+  ['parapets',          o.parapetCol,        1,               o.wallTex],
+  ['rooftopStructures', o.penthouseCol,      1,               o.wallTex],
+
+  ['verticalRibs',      o.ribColor,          1,               'none'],
+  ['exoskeleton',       o.exoColor,          1,               'none'],
+  ['megaTruss',         o.trussColor,        1,               'none'],
+];
+
+  L.forEach(([k, c, a, p]) => {
+    if (!g[k] || !g[k].features.length) return;
+
+    const srcId = `${k}-${pid}`;
+    map.addSource(srcId, { type: 'geojson', data: g[k] });
+    layers.push(srcId);   
+
+    /* -------- base colour layer (always) ---------------- */
+    const basePaint = {
+      'fill-extrusion-color'      : (k === 'windows' ? lightenHex(c, 0.25) : c),
+
+      /* geometry */
+      'fill-extrusion-height'     : ['get', 'h'],
+      'fill-extrusion-base'       : ['get', 'b'],
+
+      /* appearance */
+      'fill-extrusion-opacity'    : a,
+      'fill-extrusion-edge-radius': 0.15,          // ✨ softly bevel edges (m)
+      'fill-extrusion-rounded-roof': true,         // ✨ gently domed roof
+      'fill-extrusion-radiance'   : 0.4,           // ✨ façade catches the sun
+      'fill-extrusion-shadow-intensity': 0.35      // ✨ self‑shadow for depth
+    };
+    if (k === 'windows')
+      basePaint['fill-extrusion-emissive-strength'] = 0.6;
+
+    const baseId = `${srcId}-col`;
+    map.addLayer({ id: baseId, type: 'fill-extrusion', source: srcId, paint: basePaint });
+    layers.push(baseId);
+
+    /* -------- pattern overlay (only when a pattern is chosen) ---- */
+    if (p !== 'none' && map.hasImage(p)) {
+      const patPaint = {
+        'fill-extrusion-pattern' : p,
+        'fill-extrusion-height'  : ['get', 'h'],
+        'fill-extrusion-base'    : ['get', 'b'],
+        'fill-extrusion-opacity' : a,
+
+        /* keep the fancy bits consistent */
+        'fill-extrusion-edge-radius' : 0.15,
+        'fill-extrusion-rounded-roof': true,
+        'fill-extrusion-radiance'    : 0.4,
+        'fill-extrusion-shadow-intensity': 0.35
+      };
+      const patId = `${srcId}-pat`;
+      map.addLayer({ id: patId, type: 'fill-extrusion', source: srcId, paint: patPaint });
+      layers.push(patId);
+    }
+  });
+}
+
+function buildMerged(footprints, o) {
+  if (!footprints.length) return null;
+  const first = build(footprints[0], o);
+  if (footprints.length === 1) return first;
+
+  const merged = {};
+  Object.keys(first).forEach(k => {
+    merged[k] = first[k] && first[k].features ? [...first[k].features] : [];
+  });
+
+  for (let i = 1; i < footprints.length; i++) {
+    const g = build(footprints[i], o);
+    Object.keys(merged).forEach(k => {
+      if (g[k] && g[k].features && g[k].features.length) {
+        merged[k].push(...g[k].features);
+      }
+    });
+  }
+
+  Object.keys(merged).forEach(k => {
+    merged[k] = turf.featureCollection(merged[k]);
+  });
+
+  return merged;
+}
+
+/**
+ * makeBalconies(shell,…)
+ * @returns {Feature[]} array of GeoJSON polygons carrying {b,h}
+ */
+ function makeBalconies(shell, i, o, base, top){
+  const B = [];                     // results
+  const d = o.balD;                 // depth (m)
+  if (d <= 0) return B;
+
+  const inner = safeBuf(shell,-0.05,"bal inner");   // for clipping
+
+  const add = poly => {
+    const raw  = safeDiff(poly, inner,"bal clip");
+    if (raw && raw.geometry && turf.area(raw) > 0.1)
+      B.push(turf.feature(raw.geometry,{b:base+0.1*o.F,h:base+0.3*o.F}));
+  };
+
+  switch(o.balType){
+
+    case 'wrap': {                  // full necklace
+      const band = safeDiff(safeBuf(shell,d,"bal wrap"),shell,"bal wrap diff");
+      band && add(band);
+      break;
+    }
+
+    case 'alternating': {           // every other segment around shell
+      safe(()=>turf.segmentEach(shell,(seg,idx)=>{
+        if (idx % 2) return;
+        const buf = safeBuf(seg,d,"bal alt");
+        buf && add(buf);
+      }));
+      break;
+    }
+
+    case 'corner': {                // little squares at vertices
+      const coords = shell.geometry.coordinates[0];
+      for (let v=0; v<coords.length-1; v++){
+        const pt = turf.point(coords[v]);
+        const sq = turf.buffer(pt,d,{units:'meters',steps:4});
+        sq && add(sq);
+      }
+      break;
+    }
+
+    case 'stacked': {               // switch sides every floor
+      const side = (i % 2);         // 0 = left, 1 = right
+      let segs = [];
+      safe(()=>turf.segmentEach(shell,s=>segs.push(s.geometry)));
+      if (segs.length){
+        const seg = segs[ side ? segs.length-1 : 0 ]; // pick first / last
+        const buf = safeBuf(seg,d,"bal stack");
+        buf && add(buf);
+      }
+      break;
+    }
+
+    case 'projecting':              // longest edge  (current behaviour)
+    default:{
+      let longest=null,len=0;
+      safe(()=>turf.segmentEach(shell,s=>{
+        const l=turf.length(s,{units:'meters'});
+        if(l>len){len=l;longest=s;}
+      }));
+      if(longest && longest.geometry){
+        const buf = safeBuf(longest.geometry,d,"bal proj");
+        buf && add(buf);
+      }
+    }
+  }
+  return B;
+}
+
+
+/* ---------- build geometry ---------- */
+function build(footprintPoly,o){
+  const F=o.F; 
+  const out={core:[],windows:[],borders:[],seps:[],balconies:[],roof:[],podium:[],
+             mullions:[],railings:[],cornices:[],parapets:[],rooftopStructures:[],
+             floorSlabs: [], verticalRibs: [], pillars: [], centralCore: [],exoskeleton: [],
+             megaTruss  : [], };
+
+  let currentPodiumHeight = 0;
+  if (o.podF > 0) {
+    const podiumBaseExt = o.podOut > 0 ? safeBuf(footprintPoly, o.podOut, "Podium outset") : safeClone(footprintPoly);
+    if (podiumBaseExt && podiumBaseExt.geometry) {
+      const podiumShell = scale(podiumBaseExt, o, -1); 
+      if (podiumShell && podiumShell.geometry) {
+        for (let j = 0; j < o.podF; j++) {
+          const pFloorH = (j === 0 && o.podiumSpecialGroundFloor) ? o.podiumGroundFlrHt : F;
+          const pBase = currentPodiumHeight;
+          const pTop = pBase + pFloorH;
+          out.podium.push(turf.feature(podiumShell.geometry, { b: pBase, h: pTop }));
+
+          if(o.enableSlabs && o.slabThick > 0){
+            out.floorSlabs.push(turf.feature(podiumShell.geometry, { b: pTop - Math.min(o.slabThick, pFloorH), h: pTop }));
+          }
+
+          const pRecessInset = -Math.min(o.bW * 1.5, (safe(()=>turf.area(podiumShell)) || 0) > 10 ? 0.15 * Math.sqrt((safe(()=>turf.area(podiumShell)) || 0)) : 0.3);
+          const pWindowRecess = safeBuf(podiumShell, pRecessInset, "Podium window recess");
+
+          if (pWindowRecess && pWindowRecess.geometry && Math.random() < o.podiumWinRatio) {
+              const windowBase = pBase + 0.15 * pFloorH;
+              const windowTop = pTop - 0.15 * pFloorH;
+              if (o.bW > 0) {
+                  const glassPoly = safeBuf(pWindowRecess, -o.bW, "Podium Glass from recess");
+                  if (glassPoly && glassPoly.geometry && (safe(()=>turf.area(glassPoly)) || 0) > 0) {
+                       out.windows.push(turf.feature(glassPoly.geometry, { b: windowBase, h: windowTop }));
+                  }
+                  const borderPoly = safeDiff(pWindowRecess, glassPoly, "Podium Window Frame");
+                  if (borderPoly && borderPoly.geometry && (safe(()=>turf.area(borderPoly)) || 0) > 0) {
+                      out.borders.push(turf.feature(borderPoly.geometry, { b: windowBase, h: windowTop }));
+                  }
+              } else {
+                  out.windows.push(turf.feature(pWindowRecess.geometry, { b: windowBase, h: windowTop }));
+              }
+          }
+          currentPodiumHeight = pTop;
+        }
+      }
+    }
+  }
+  const totalPodiumHeight = currentPodiumHeight;
+
+  /* ===== Exoskeleton ===== */
+  if (o.exoType !== 'none' && o.exoSize > 0) {
+    const frameShell = safeBuf(footprintPoly, o.exoOffset, "exo offset");
+    if (frameShell && frameShell.geometry) {
+
+      const segs = [];
+      safe(()=>turf.segmentEach(frameShell, s=>segs.push(s.geometry)), "exo seg collect");
+
+      const density = Math.max(1, o.exoDensity);
+      segs.forEach(seg=>{
+        const len = turf.length(seg,{units:'meters'});
+        for (let i=0;i<=density;i++){
+          const p = turf.along(seg, (len/density)*i,{units:'meters'}).geometry.coordinates;
+          // vertical post
+          const post = turf.buffer(turf.point(p), o.exoSize/2,{units:'meters',steps:4});
+          post && out.exoskeleton.push(turf.feature(post.geometry,{b:0,h:totalPodiumHeight+o.floors*o.F}));
+        }
+      });
+
+      if (o.exoType !== 'lattice'){   // add horizontals
+        for (let lvl=0; lvl<=o.floors; lvl+=Math.ceil(o.floors/density)){
+          const b = totalPodiumHeight+lvl*o.F;
+          const h = b+o.exoSize;
+          out.exoskeleton.push(turf.feature(frameShell.geometry,{b,h}));
+        }
+      }
+
+      if (o.exoType === 'truss'){     // add diagonals (simple)
+        segs.forEach(seg=>{
+          const diag = turf.buffer(seg, o.exoSize/2,{units:'meters',steps:4});
+          diag && out.exoskeleton.push(turf.feature(diag.geometry,{b:0,h:totalPodiumHeight+o.floors*o.F}));
+        });
+      }
+    }
+  }
+
+  for(let i=0;i<o.floors;i++){
+    const base = totalPodiumHeight + i*F, top = base+F;
+    const shell = scale(footprintPoly,o,i);
+    if (!shell || !shell.geometry || (safe(()=>turf.area(shell)) || 0) < 0.1) continue;
+
+    out.core.push(turf.feature(shell.geometry,{b:base,h:top}));
+
+    /* ===== Mega‑truss on selected levels ===== */
+    if (o.trussSpan>0 && o.trussLvls.includes(i) && o.trussSize>0){
+      const spanFloors = Math.min(o.trussSpan, o.floors-i);
+      const topLevel   = i + spanFloors;
+      const trussBase  = base;
+      const trussTop   = totalPodiumHeight + topLevel*F;
+
+      // outline for clipping
+      const trussShell = safeBuf(shell, o.trussSize/2,"truss shell");
+
+      // style‑specific diagonals
+      const makeDiag = (flip=false)=>{
+        safe(()=>turf.segmentEach(shell, seg=>{
+          const [a,b]=flip?seg.geometry.coordinates.reverse():seg.geometry.coordinates;
+          const diag = turf.lineString([a,b]);
+          const buf  = safeBuf(diag, o.trussSize/2,{units:'meters',steps:4});
+          buf && out.megaTruss.push(turf.feature(buf.geometry,{b:trussBase,h:trussTop}));
+        }),"truss diag");
+      };
+
+      if (o.trussStyle==='warren') makeDiag(false), makeDiag(true);
+      else if (o.trussStyle==='pratt') makeDiag(false);
+      else /* custom */ makeDiag(true);
+
+      // top & bottom chords
+      out.megaTruss.push(
+        turf.feature(trussShell.geometry,{b:trussBase ,h:trussBase+o.trussSize}),
+        turf.feature(trussShell.geometry,{b:trussTop-o.trussSize,h:trussTop})
+      );
+    }
+
+    if(o.enableSlabs && o.slabThick > 0){
+      out.floorSlabs.push(turf.feature(shell.geometry, { b: top - Math.min(o.slabThick, F), h: top }));
+    }
+
+    if(o.enableCentralCore && o.centralCoreScale > 0) {
+        const corePoly = safe(()=> turf.transformScale(safeClone(shell), o.centralCoreScale, {origin:'centroid'}), "Central core scale");
+        corePoly && corePoly.geometry && out.centralCore.push(turf.feature(corePoly.geometry, {b:base, h:top}));
+    }
+    
+    const insetWidthFactor = 1.5; 
+    const recessInsetAmount = -Math.min(o.bW * insetWidthFactor, (safe(()=>turf.area(shell)) || 0) > 1 ? 0.15 * Math.sqrt((safe(()=>turf.area(shell)) || 0)) : 0.3);
+    const windowRecessPoly = safeBuf(shell, recessInsetAmount, "Window recess main");
+
+    if(windowRecessPoly && windowRecessPoly.geometry && o.wnw > 0){ 
+      const windowBase = base + 0.15 * F;
+      const windowTop = top - 0.15 * F;
+      let glassPolyForMullions = null;
+
+      if (o.bW > 0) {
+          const glassPoly = safeBuf(windowRecessPoly, -o.bW, "Glass poly from recess");
+          if (glassPoly && glassPoly.geometry && (safe(()=>turf.area(glassPoly)) || 0) > 0.01) {
+               out.windows.push(turf.feature(glassPoly.geometry, { b: windowBase, h: windowTop }));
+               glassPolyForMullions = glassPoly;
+          }
+          const borderPoly = safeDiff(windowRecessPoly, glassPoly, "Window Frame from recess and glass");
+          if (borderPoly && borderPoly.geometry && (safe(()=>turf.area(borderPoly)) || 0) > 0.01) {
+              out.borders.push(turf.feature(borderPoly.geometry, { b: windowBase, h: windowTop }));
+          }
+      } else { 
+          out.windows.push(turf.feature(windowRecessPoly.geometry, { b: windowBase, h: windowTop }));
+          glassPolyForMullions = windowRecessPoly;
+      }
+      
+      if (glassPolyForMullions && (o.mullionV > 0 || o.mullionH > 0) && o.mullionThick > 0) {
+        try {
+            const bbox = turf.bbox(glassPolyForMullions.geometry);
+            if (!bbox || bbox[0] === Infinity) throw new Error("Invalid bbox for mullions");
+            const [minX, minY, maxX, maxY] = bbox;
+            const width = maxX - minX; const height = maxY - minY;
+
+            for (let mv = 0; mv < o.mullionV; mv++) {
+              if (width <= o.mullionThick * 2) continue; 
+              const x = minX + (mv + 1) * width / (o.mullionV + 1);
+              const line = turf.lineString([[x, minY - 0.1*height], [x, maxY + 0.1*height]]); 
+              const bufferedLine = safeBuf(line, o.mullionThick / 2, "MullionV buf");
+              const mullionPoly = safeInt(bufferedLine, glassPolyForMullions, "MullionV int");
+              mullionPoly && mullionPoly.geometry && (safe(()=>turf.area(mullionPoly)) || 0) > 0.001 && out.mullions.push(turf.feature(mullionPoly.geometry, { b: windowBase, h: windowTop }));
+            }
+            for (let mh = 0; mh < o.mullionH; mh++) {
+              if (height <= o.mullionThick * 2) continue;
+              const y = minY + (mh + 1) * height / (o.mullionH + 1);
+              const line = turf.lineString([[minX - 0.1*width, y], [maxX + 0.1*width, y]]);
+              const bufferedLine = safeBuf(line, o.mullionThick / 2, "MullionH buf");
+              const mullionPoly = safeInt(bufferedLine, glassPolyForMullions, "MullionH int");
+              mullionPoly && mullionPoly.geometry && (safe(()=>turf.area(mullionPoly)) || 0) > 0.001 && out.mullions.push(turf.feature(mullionPoly.geometry, { b: windowBase, h: windowTop }));
+            }
+        } catch (bboxErr) { console.warn("Mullion bbox/gen error:", bboxErr); }
+      }
+    }
+
+    if(o.sH > 0 && o.sW > 0){
+      const band=safeDiff(safeBuf(shell,o.sW, "Separator buf"),shell, "Separator diff"); band && band.geometry && out.seps.push(turf.feature(band.geometry,{b:base,h:base+o.sH}));
+    }
+    
+   /* ---- Vertical ribs (evenly spaced round every façade) ---- */
+if (o.enableRibs && o.ribDepth > 0 && o.ribWidth > 0) {
+    safe(() => turf.segmentEach(shell, (seg) => {
+        if (!seg || seg.geometry.type !== 'LineString') return;
+
+        const segLen = turf.length(seg, { units: 'meters' });
+        if (segLen < o.ribWidth) return;           // too short to bother
+
+        const [a, b] = seg.geometry.coordinates;
+        const bearingAB          = turf.bearing(a, b);
+        let outwardBearing       = bearingAB + 90; // provisional exterior normal
+
+        // quick test to decide which side is outside
+        const mid   = turf.along(seg, segLen / 2, { units: 'meters' }).geometry.coordinates;
+        const probe = turf.destination(mid, 0.25, outwardBearing, { units: 'meters' }).geometry.coordinates;
+        if (turf.booleanPointInPolygon(probe, shell)) outwardBearing = bearingAB - 90;
+
+        const ribTotal = (o.ribCount === 0 ? 1 : o.ribCount);     // at least one rib
+        for (let i = 0; i < ribTotal; i++) {
+            const t = o.ribCount === 0 ? 0.5 : (i + 1) / (ribTotal + 1); // ½ or 1/(n+1) spacing
+            const centre = turf.along(seg, segLen * t, { units: 'meters' }).geometry.coordinates;
+
+            const p1 = turf.destination(centre,  o.ribWidth / 2, bearingAB + 180, { units: 'meters' }).geometry.coordinates;
+            const p2 = turf.destination(centre,  o.ribWidth / 2, bearingAB,       { units: 'meters' }).geometry.coordinates;
+            const p3 = turf.destination(p2,      o.ribDepth,      outwardBearing, { units: 'meters' }).geometry.coordinates;
+            const p4 = turf.destination(p1,      o.ribDepth,      outwardBearing, { units: 'meters' }).geometry.coordinates;
+
+            const rib = turf.polygon([[p1, p2, p3, p4, p1]]);
+            if (turf.area(rib) > 0.001)
+                out.verticalRibs.push(turf.feature(rib.geometry, { b: base, h: top }));
+        }
+    }), "Vertical ribs");
+}
+
+    if(o.enablePillars && o.pillarSize > 0 && o.pillarRows > 0 && o.pillarCols > 0){
+        safe(() => {
+            const shellBbox = turf.bbox(shell);
+            const cellWidth = (shellBbox[2] - shellBbox[0]) / (o.pillarCols + 1);
+            const cellHeight = (shellBbox[3] - shellBbox[1]) / (o.pillarRows + 1);
+
+            for(let r=1; r<=o.pillarRows; r++){
+                for(let c=1; c<=o.pillarCols; c++){
+                    const ptCoords = [shellBbox[0] + c * cellWidth, shellBbox[1] + r * cellHeight];
+                    if(turf.booleanPointInPolygon(ptCoords, shell)){
+                        const pillarPt = turf.point(ptCoords);
+                        const pillarFootprint = turf.buffer(pillarPt, o.pillarSize / 2, {units: 'meters', steps: 4});
+                        const pillarSquare = turf.convex(pillarFootprint); 
+
+                        if(pillarSquare && pillarSquare.geometry){
+                            out.pillars.push(turf.feature(pillarSquare.geometry, {b:base, h:top - (o.enableSlabs ? o.slabThick : 0)}));
+                        }
+                    }
+                }
+            }
+        }, "Pillars gen");
+    }
+
+/* ---- Balconies -------------------------------------------- */
+if (i % o.balN === 0 && i < o.floors-1){
+  makeBalconies(shell, i, o, base, top).forEach(b=>out.balconies.push(b));
+
+  /* rails (unchanged) */
+  if (o.railH > 0 && o.railThick > 0){
+    out.balconies.slice(-1).forEach(bal=>{
+      const rail = safeDiff(
+        safeBuf(bal,o.railThick,"rail buf"), bal, "rail diff");
+      rail && rail.geometry && turf.area(rail)>0.01 &&
+        out.railings.push(
+          turf.feature(rail.geometry,{b:bal.properties.h, h:bal.properties.h+o.railH}));
+    });
+  }
+}
+  }
+  /* Roof */
+  const mainRoofBase = totalPodiumHeight + o.floors*F;
+  const topFloorShell = scale(footprintPoly,o,o.floors > 0 ? o.floors-1 : 0);
+
+  if (topFloorShell && topFloorShell.geometry && (safe(()=>turf.area(topFloorShell)) || 0) > 0.1) {
+    if (o.corniceH > 0 && o.corniceOut > 0) {
+        const corniceOuter = safeBuf(topFloorShell, o.corniceOut, "Cornice outer buf");
+        const corniceFootprint = safeDiff(corniceOuter, topFloorShell, "Cornice diff");
+        corniceFootprint && corniceFootprint.geometry && out.cornices.push(turf.feature(corniceFootprint.geometry, {b: mainRoofBase - o.corniceH, h: mainRoofBase}));
+    }
+
+    out.roof.push(turf.feature(topFloorShell.geometry,{b:mainRoofBase,h:mainRoofBase+o.roofSlabH}));
+    const mainRoofTop = mainRoofBase + o.roofSlabH;
+
+    if (o.parapetH > 0 && o.parapetThick > 0) {
+        const parapetInner = safeBuf(topFloorShell, -o.parapetThick, "Parapet inner buf");
+        const parapetFootprint = safeDiff(topFloorShell, parapetInner, "Parapet diff");
+        parapetFootprint && parapetFootprint.geometry && out.parapets.push(turf.feature(parapetFootprint.geometry, {b: mainRoofTop, h: mainRoofTop + o.parapetH}));
+    }
+
+    if (o.penthouseF > 0 && o.penthouseScale > 0) {
+        const penthouseBasePolyUnscaled = scale(footprintPoly,o,o.floors); 
+        if (penthouseBasePolyUnscaled && penthouseBasePolyUnscaled.geometry) {
+            const penthouseBasePoly = safe(()=> turf.transformScale(safeClone(penthouseBasePolyUnscaled), o.penthouseScale, {origin:'centroid'}), "Penthouse scale");
+            if (penthouseBasePoly && penthouseBasePoly.geometry) {
+                const penthouseWallBase = mainRoofTop;
+                const penthouseWallTop = penthouseWallBase + o.penthouseF * F;
+                out.rooftopStructures.push(turf.feature(penthouseBasePoly.geometry, {b: penthouseWallBase, h: penthouseWallTop}));
+                out.roof.push(turf.feature(penthouseBasePoly.geometry, {b: penthouseWallTop, h: penthouseWallTop + o.roofSlabH}));
+            }
+        }
+    }
+  }
+
+  for(const k in out) {
+    if (out[k] && Array.isArray(out[k])) {
+        out[k]=turf.featureCollection(out[k].filter(feat => feat && feat.geometry && safe(() => turf.area(feat) > 0.001, "Area check for final filter")));
+    } else {
+        out[k] = turf.featureCollection([]);
+    }
+  }
+  return out;
+}
+
+/* ---------- helpers ---------- */
+function scale(poly,o,lvl){
+  if (!poly || !poly.geometry) return safeClone(poly);
+  const currentPoly = safeClone(poly); 
+  if(!currentPoly) return null;
+
+  const currentLevel = Math.max(0, lvl); 
+  let scaleFactor = 1;
+
+if (o.taperMode === 'cont' && o.taper !== 0 && o.floors > 0) {
+
+    /* linear shift from –½ at the roof to +½ at the podium */
+    scaleFactor = 1 + o.taper * ((lvl / o.floors) - 0.5);
+
+} else if (o.taperMode === 'step' && o.stepFactor !== 0 && o.stepEvery > 0) {
+
+    scaleFactor = 1 + Math.floor(lvl / o.stepEvery) * o.stepFactor;
+
+} else if (o.taperMode === 'rounded' && o.taper !== 0 && o.floors > 0) {
+
+    /*  Smooth parabola centred on mid‑height:
+        curve = 1 – 4 × (t – 0.5)²  → ranges 0…1…0   */
+    const t      = (lvl + 0.5) / o.floors;   // 0…1 at mid‑slab
+    const curve  = 1 - 4 * Math.pow(t - 0.5, 2);
+    scaleFactor  = 1 + o.taper * curve;      // bulge (+) or groove (–)
+}
+
+if (scaleFactor < 0.05) scaleFactor = 0.05;  // sanity floor
+
+  let resultingShell = scaleFactor === 1 ? currentPoly : safe(() => turf.transformScale(currentPoly,scaleFactor,{origin:'centroid'}), "Scale transform") || currentPoly;
+  
+  if (resultingShell && resultingShell.geometry && o.overallRoundness > 0) {
+      const roundedBufferOut = safeBuf(resultingShell, o.overallRoundness, "Roundness buffer out", {units: 'meters', steps: 8});
+      if (roundedBufferOut && roundedBufferOut.geometry) {
+          const roundedBufferIn = safeBuf(roundedBufferOut, -o.overallRoundness, "Roundness buffer in", {units: 'meters', steps: 8});
+          if (roundedBufferIn && roundedBufferIn.geometry && (safe(()=>turf.area(roundedBufferIn)) || 0) > 0.01) {
+              resultingShell = roundedBufferIn;
+          } 
+      }
+  }
+  return resultingShell;
+}
+
+function randomizeParameters() {
+    const controls = $('controls');
+    const inputs = controls.querySelectorAll('input[type="number"], input[type="color"], input[type="range"], select, input[type="checkbox"]');
+
+    const setRandomNumeric = (input, defaultMin, defaultMax, defaultStep, isInt = false) => {
+        const min = parseFloat(input.min) || defaultMin;
+        const max = parseFloat(input.max) || (min + defaultMax);
+        const step = parseFloat(input.step) || defaultStep;
+        let val = rand(min, max);
+        val = Math.round(val / step) * step; 
+        if (isInt) val = Math.floor(val);
+        val = Math.max(min, Math.min(max, val));
+        input.value = val.toFixed(isInt ? 0 : (step.toString().includes('.') ? Math.max(1, step.toString().split('.')[1].length) : 0));
+    };
+
+    inputs.forEach(input => {
+        if (input.id === 'podiumGroundFlrHt' && !$('podiumSpecialGroundFloor').checked) return;
+
+        if (input.type === 'number' || input.type === 'range') {
+            let isInt = !input.step || parseFloat(input.step) % 1 === 0;
+            if (['floors', 'stepEvery', 'balEvery', 'podiumFloors', 'penthouseFloors', 
+                 'mullionVertCount', 'mullionHorzCount', 'ribCount', 'pillarRows', 'pillarCols'].includes(input.id)) {
+                isInt = true;
+            }
+            if (input.id === 'floors') setRandomNumeric(input, 5, 40, 1, true);
+            else if (input.id === 'floorHeight') setRandomNumeric(input, 2.8, 5.0, 0.1);
+            else if (input.id === 'taper') setRandomNumeric(input, -0.5, 0.5, 0.02);
+            else if (input.id === 'windowAlpha') setRandomNumeric(input, 0.5, 1, 0.05);
+            else if (input.id === 'stepEvery') setRandomNumeric(input, 2, 10, 1, true);
+            else if (input.id === 'stepFactor') setRandomNumeric(input, -0.2, 0.2, 0.01);
+            else if (input.id === 'borderW') setRandomNumeric(input, 0.0, 0.4, 0.05); 
+            else if (input.id === 'mullionVertCount') setRandomNumeric(input, 0, 5, 1, true);
+            else if (input.id === 'mullionHorzCount') setRandomNumeric(input, 0, 3, 1, true);
+            else if (input.id === 'mullionThickness') setRandomNumeric(input, 0.02, 0.1, 0.01);
+            else if (input.id === 'balconyDepth') setRandomNumeric(input, 0, 2.5, 0.1);
+            else if (input.id === 'podiumFloors') setRandomNumeric(input, 0, 5, 1, true);
+            else if (input.id === 'podiumOut') setRandomNumeric(input, 0, 5, 0.5);
+            else if (input.id === 'overallRoundness') setRandomNumeric(input, 0, 2, 0.1);
+            else if (input.id === 'ribCount') setRandomNumeric(input, 0, 10, 1, true);
+            else if (input.id === 'ribDepth') setRandomNumeric(input, 0.1, 1.0, 0.05);
+            else if (input.id === 'ribWidth') setRandomNumeric(input, 0.1, 0.5, 0.05);
+            else { 
+                 setRandomNumeric(input, 0, 
+                    (parseFloat(input.max) || (parseFloat(input.min) || 0) + 10), 
+                    (parseFloat(input.step) || 0.1), isInt);
+            }
+        } else if (input.type === 'color') {
+            input.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        } else if (input.tagName === 'SELECT') {
+            if (input.options.length > 0) {
+              input.selectedIndex = Math.floor(Math.random() * input.options.length);
+            }
+        } else if (input.type === 'checkbox') {
+            input.checked = Math.random() < 0.5;
+        }
+        else if (input.id === 'balconyType')
+        input.selectedIndex = Math.floor(Math.random()*input.options.length);
+    });
+
+    if (lastPoly) render(lastPoly, cfg()); 
+}
+
+/* ---------- Upload handling ---------- */
+const uploadPanel = $('uploadPanel');
+const uploadHeader = uploadPanel ? uploadPanel.querySelector('.panel-header') : null;
+const uploadIcon = uploadHeader ? uploadHeader.querySelector('.toggle-icon') : null;
+const uploadStatusEl = $('uploadStatus');
+
+const setUploadStatus = (msg, isError = false) => {
+  if (!uploadStatusEl) return;
+  uploadStatusEl.textContent = msg;
+  uploadStatusEl.style.color = isError ? '#b00020' : '#444';
+};
+
+if (uploadHeader && uploadPanel) {
+  uploadHeader.addEventListener('click', () => {
+    uploadPanel.classList.toggle('collapsed');
+    if (uploadIcon) uploadIcon.textContent = uploadPanel.classList.contains('collapsed') ? '▸' : '▾';
+  });
+}
+
+$('geoUpload').addEventListener('change', handleGeoUpload);
+
+function handleGeoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 1024 * 1024) {
+    setUploadStatus('File exceeds 1 MB. Please choose a smaller file.', true);
+    alert('Please select a file under 1 MB.');
+    e.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    let parsed = null;
+    try { parsed = JSON.parse(ev.target.result); }
+    catch(err) { setUploadStatus('Invalid JSON. Please upload GeoJSON.', true); return; }
+
+    const footprints = prepareFootprints(parsed);
+    if (!footprints.length) {
+      setUploadStatus('No usable Polygon/MultiPolygon found in file.', true);
+      return;
+    }
+    lastPoly = footprints;
+    pid++;
+    render(lastPoly, cfg());
+    const polyCount = footprints.length;
+    const polyLabel = polyCount === 1 ? 'polygon' : 'polygons';
+    setUploadStatus(`Loaded ${file.name} · ${polyCount} ${polyLabel} · ${Math.ceil(file.size/1024)} KB`);
+  };
+  reader.onerror = () => setUploadStatus('Could not read file.', true);
+  reader.readAsText(file);
+}
+
+/* ---------- UI Collapsibles ---------- */
+document.querySelectorAll('.collapsible-header').forEach(header => {
+    header.addEventListener('click', () => {
+        const content = header.closest('tr').nextElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        if (content && content.classList.contains('collapsible-content')) {
+            content.classList.toggle('collapsed');
+            if (icon) {
+              icon.textContent = content.classList.contains('collapsed') ? '▸' : '▾';
+            }
+        }
+    });
+});
+
+$('downloadGeo').onclick = () => {
+  if (!lastGeo) {
+    alert('Generate a building first.');
+    return;
+  }
+  const blob = new Blob(
+    [ JSON.stringify(lastGeo, null, 2) ],
+    { type: 'application/geo+json' }
+  );
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'building.geojson';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+};
+</script>
+</body>
+</html>
