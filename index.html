@@ -31,6 +31,31 @@
  #controls .collapsible-content { display: table-row-group; /* Initially visible */ }
  #controls .collapsible-content.collapsed { display: none; }
 
+#controlsHeader{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+  padding-bottom:6px;
+  border-bottom:1px solid #ddd;
+  font-weight:bold;
+}
+#controlsHeader button{
+  width:auto;
+  margin:0;
+  padding:4px 8px;
+  background:#e6e6e6;
+  color:#222;
+  font-weight:600;
+}
+#controlsToggle{
+  position:absolute;top:10px;right:10px;z-index:4;
+  background:#3887be;color:#fff;border:0;border-radius:6px;
+  padding:8px 10px;font-weight:bold;cursor:pointer;display:none;
+  box-shadow:0 0 6px #0003;
+}
+
 #topBar{
   position:absolute;top:10px;left:10px;z-index:3;
   display:flex;gap:8px;align-items:flex-start;
@@ -61,9 +86,32 @@
 }
 #ctxToggle input{vertical-align:middle;margin-right:4px}
 
+@media (max-width: 899px) {
+  #controls{
+    position:fixed;
+    top:10px;right:10px;bottom:10px;
+    width:min(92vw, 360px);
+    max-width:none;
+    max-height:none;
+    transform:translateX(calc(100% + 12px));
+    transition:transform 0.2s ease;
+    pointer-events:none;
+    z-index:4;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.controls-open #controls{
+    transform:translateX(0);
+    pointer-events:auto;
+  }
+  #controlsHeader{display:flex;}
+  #controlsToggle{display:block;}
+  body.controls-open #controlsToggle{display:none;}
+}
+
 </style>
 </head><body>
 <div id="map"></div>
+<button id="controlsToggle" type="button" aria-controls="controls" aria-expanded="false">Controls</button>
 <!-- ==== upload & geocoder row =================================== -->
 <div id="topBar">
   <div id="topBarLeft">
@@ -85,6 +133,10 @@
 </div>
 
 <div id="controls">
+  <div id="controlsHeader">
+    <span>Controls</span>
+    <button id="controlsClose" type="button" aria-label="Close controls">Close</button>
+  </div>
   <button id="downloadGeo" style="margin-bottom:8px;background:#5c9e31">⬇️ Download GeoJSON</button>
 <table>
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Tower Core</h3></th></tr>
@@ -239,7 +291,7 @@
 <!--  index.html  (top of file) -->
 <script type="module">
 
-import { LOCAL_TEXTURES } from '/playground/building-generator/gemini/textures.js'; 
+import { LOCAL_TEXTURES } from '/js/textures.js'; 
 /* ---------- map & patterns ---------- */
 mapboxgl.accessToken='pk.eyJ1IjoicGhpbG5pY29sYXNqYW1lcyIsImEiOiJjaXYycGU2a2cwMmZ1MnlwNjZ4YWEzbzRmIn0.hZO-ZaGNzM4jXhbvqtOH3w';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/streets-v12',
@@ -259,7 +311,7 @@ geocoder.on('result', e => {
 });
 
 /* at the very top of <script type="module"> */
-const TEXTURE_ROOT = new URL('textures/', document.baseURI);  // one directory up from gemini
+const TEXTURE_ROOT = new URL('js/textures/', document.baseURI);
 
 const PAT = Object.fromEntries(
   LOCAL_TEXTURES.map(rawName => {
@@ -391,6 +443,19 @@ const lightenHex = (hex, pct = 0.2) => {
                       .toString(16).padStart(2,'0');
     return '#'+n(h.slice(0,2))+n(h.slice(2,4))+n(h.slice(4,6));
 };
+
+const controlsToggle = $('controlsToggle');
+const controlsClose = $('controlsClose');
+const setControlsOpen = (isOpen) => {
+  document.body.classList.toggle('controls-open', isOpen);
+  if (controlsToggle) controlsToggle.setAttribute('aria-expanded', String(isOpen));
+};
+if (controlsToggle) {
+  controlsToggle.addEventListener('click', () => {
+    setControlsOpen(!document.body.classList.contains('controls-open'));
+  });
+}
+if (controlsClose) controlsClose.addEventListener('click', () => setControlsOpen(false));
 
 const MIN_POLY_AREA = 5;
 const polyArea = poly => safe(() => turf.area(poly), "area check") || 0;
