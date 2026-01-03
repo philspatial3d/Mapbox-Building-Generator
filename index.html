@@ -291,7 +291,7 @@
 <!--  index.html  (top of file) -->
 <script type="module">
 
-import { LOCAL_TEXTURES } from '/playground/building-generator/gemini/textures.js'; 
+import { LOCAL_TEXTURES } from '/js/textures.js'; 
 /* ---------- map & patterns ---------- */
 mapboxgl.accessToken='pk.eyJ1IjoicGhpbG5pY29sYXNqYW1lcyIsImEiOiJjaXYycGU2a2cwMmZ1MnlwNjZ4YWEzbzRmIn0.hZO-ZaGNzM4jXhbvqtOH3w';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/streets-v12',
@@ -311,7 +311,7 @@ geocoder.on('result', e => {
 });
 
 /* at the very top of <script type="module"> */
-const TEXTURE_ROOT = new URL('textures/', document.baseURI);  // one directory up from gemini
+const TEXTURE_ROOT = new URL('js/textures/', document.baseURI);
 
 const PAT = Object.fromEntries(
   LOCAL_TEXTURES.map(rawName => {
