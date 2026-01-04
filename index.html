@@ -18,6 +18,12 @@
  #controls button{width:100%;margin-top:8px;padding:6px;border:0;border-radius:4px;
                   background:#3887be;color:#fff;font-weight:bold;cursor:pointer}
  #controls button#randomizeParams { background: #6c757d; }                 
+ #presetPanel{margin-bottom:10px;}
+ #presetPanel label{display:block;font-size:13px;margin-bottom:4px;}
+ #presetPanel select{margin-bottom:6px;}
+ #presetPanel .preset-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+ #presetPanel .preset-actions button{margin-top:0;padding:6px;}
+ #presetPanel .preset-actions .preset-full{grid-column:1 / -1;}
  #controls h3 { 
     margin-top: 12px; 
     margin-bottom: 5px; 
@@ -136,6 +142,16 @@
   <div id="controlsHeader">
     <span>Controls</span>
     <button id="controlsClose" type="button" aria-label="Close controls">Close</button>
+  </div>
+  <div id="presetPanel">
+    <label for="presetSelect">Presets</label>
+    <select id="presetSelect"></select>
+    <div class="preset-actions">
+      <button id="presetSave" type="button">Save preset</button>
+      <button id="presetExport" type="button">Export preset</button>
+      <button id="presetImport" type="button" class="preset-full">Import preset</button>
+    </div>
+    <input id="presetImportFile" type="file" accept=".json,application/json" hidden>
   </div>
   <button id="downloadGeo" style="margin-bottom:8px;background:#5c9e31">⬇️ Download GeoJSON</button>
 <table>
@@ -618,6 +634,306 @@ function cfg(){return{
   balType : $('balconyType').value,
 
 };}
+
+/* ---------- presets ---------- */
+const PRESET_SCHEMA = 1;
+const PRESET_STORAGE_KEY = 'bg-presets-v1';
+const presetSelect = $('presetSelect');
+const presetSave = $('presetSave');
+const presetExport = $('presetExport');
+const presetImport = $('presetImport');
+const presetImportFile = $('presetImportFile');
+
+let curatedPresets = [];
+let savedPresets = [];
+
+const presetFieldMap = {
+  floors: 'floors',
+  F: 'floorHeight',
+  taperMode: 'taperMode',
+  taper: 'taper',
+  stepEvery: 'stepEvery',
+  stepFactor: 'stepFactor',
+  facadeAlpha: 'facadeAlpha',
+  wallColor: 'wallColor',
+  wallTex: 'wallTex',
+  windowAlpha: 'windowAlpha',
+  windowColor: 'windowColor',
+  bW: 'borderW',
+  bCol: 'borderColor',
+  mullionV: 'mullionVertCount',
+  mullionH: 'mullionHorzCount',
+  mullionThick: 'mullionThickness',
+  mullionCol: 'mullionColor',
+  sH: 'sepH',
+  sW: 'sepW',
+  sCol: 'sepColor',
+  balD: 'balconyDepth',
+  balN: 'balEvery',
+  balCol: 'balColor',
+  railH: 'railingHeight',
+  railThick: 'railingThickness',
+  railCol: 'railingColor',
+  podF: 'podiumFloors',
+  podOut: 'podiumOut',
+  podCol: 'podiumColor',
+  podA: 'podiumAlpha',
+  podiumSpecialGroundFloor: 'podiumSpecialGroundFloor',
+  podiumGroundFlrHt: 'podiumGroundFlrHt',
+  podiumWinRatio: 'podiumWindowRatio',
+  roofSlabH: 'roofSlabHeight',
+  roofCol: 'roofColor',
+  roofTex: 'roofTex',
+  parapetH: 'parapetHeight',
+  parapetThick: 'parapetThickness',
+  parapetCol: 'parapetColor',
+  penthouseF: 'penthouseFloors',
+  penthouseScale: 'penthouseScale',
+  penthouseCol: 'penthouseColor',
+  corniceH: 'corniceMainHeight',
+  corniceOut: 'corniceMainOutset',
+  corniceCol: 'corniceColor',
+  enableRibs: 'enableRibs',
+  ribCount: 'ribCount',
+  ribDepth: 'ribDepth',
+  ribWidth: 'ribWidth',
+  ribColor: 'ribColor',
+  enableSlabs: 'enableSlabs',
+  slabThick: 'slabThick',
+  slabColor: 'slabColor',
+  enablePillars: 'enablePillars',
+  pillarSize: 'pillarSize',
+  pillarRows: 'pillarRows',
+  pillarCols: 'pillarCols',
+  pillarColor: 'pillarColor',
+  enableCentralCore: 'enableCentralCore',
+  centralCoreScale: 'centralCoreScale',
+  centralCoreColor: 'centralCoreColor',
+  overallRoundness: 'overallRoundness',
+  exoType: 'exoType',
+  exoSize: 'exoSize',
+  exoOffset: 'exoOffset',
+  exoDensity: 'exoDensity',
+  exoColor: 'exoColor',
+  trussSpan: 'trussSpan',
+  trussStyle: 'trussStyle',
+  trussSize: 'trussSize',
+  trussColor: 'trussColor',
+  balType: 'balconyType'
+};
+
+const normalizePreset = preset => {
+  if (!preset || typeof preset !== 'object') return null;
+  const name = typeof preset.name === 'string' ? preset.name.trim() : '';
+  if (!name) return null;
+  const config = preset.config && typeof preset.config === 'object' ? preset.config : null;
+  if (!config) return null;
+  return { schema: Number(preset.schema) || PRESET_SCHEMA, name, config };
+};
+
+const extractPresetList = payload => {
+  if (!payload) return [];
+  if (Array.isArray(payload.presets)) return payload.presets;
+  if (payload.config) return [payload];
+  if (Array.isArray(payload)) return payload;
+  return [];
+};
+
+const refreshPresetSelect = () => {
+  if (!presetSelect) return;
+  presetSelect.innerHTML = '';
+  presetSelect.add(new Option('Select preset...', ''));
+
+  if (curatedPresets.length) {
+    const group = document.createElement('optgroup');
+    group.label = 'Curated';
+    curatedPresets.forEach((preset, idx) => {
+      group.appendChild(new Option(preset.name, `curated:${idx}`));
+    });
+    presetSelect.appendChild(group);
+  }
+
+  if (savedPresets.length) {
+    const group = document.createElement('optgroup');
+    group.label = 'Saved';
+    savedPresets.forEach((preset, idx) => {
+      group.appendChild(new Option(preset.name, `saved:${idx}`));
+    });
+    presetSelect.appendChild(group);
+  }
+};
+
+const getPresetByValue = value => {
+  if (!value) return null;
+  const [source, idxRaw] = value.split(':');
+  const idx = Number(idxRaw);
+  if (!Number.isFinite(idx)) return null;
+  if (source === 'curated') return curatedPresets[idx] || null;
+  if (source === 'saved') return savedPresets[idx] || null;
+  return null;
+};
+
+const applyPresetConfig = config => {
+  if (!config || typeof config !== 'object') return;
+
+  Object.entries(presetFieldMap).forEach(([key, id]) => {
+    if (config[key] === undefined) return;
+    const el = $(id);
+    if (!el) return;
+    if (el.type === 'checkbox') {
+      el.checked = Boolean(config[key]);
+      return;
+    }
+    if (el.tagName === 'SELECT') {
+      const value = String(config[key]);
+      const hasOption = Array.from(el.options).some(opt => opt.value === value);
+      if (hasOption) el.value = value;
+      return;
+    }
+    el.value = config[key];
+  });
+
+  if (config.trussLvls !== undefined) {
+    const trussEl = $('trussLevels');
+    if (trussEl) {
+      trussEl.value = Array.isArray(config.trussLvls)
+        ? config.trussLvls.join(',')
+        : String(config.trussLvls);
+    }
+  }
+
+  if (lastPoly) render(lastPoly, cfg());
+};
+
+const loadSavedPresets = () => {
+  savedPresets = [];
+  try {
+    const raw = localStorage.getItem(PRESET_STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    savedPresets = extractPresetList(data)
+      .map(normalizePreset)
+      .filter(Boolean);
+  } catch (err) {
+    console.warn('Failed to load saved presets:', err);
+  }
+};
+
+const persistSavedPresets = () => {
+  try {
+    const payload = { schema: PRESET_SCHEMA, presets: savedPresets };
+    localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('Failed to save presets:', err);
+  }
+};
+
+const loadCuratedPresets = async () => {
+  curatedPresets = [];
+  try {
+    const res = await fetch('presets/defaults.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    curatedPresets = extractPresetList(data)
+      .map(normalizePreset)
+      .filter(Boolean);
+  } catch (err) {
+    console.warn('Failed to load curated presets:', err);
+  }
+};
+
+const slugifyPresetName = name => {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'preset';
+};
+
+const initPresets = async () => {
+  await loadCuratedPresets();
+  loadSavedPresets();
+  refreshPresetSelect();
+};
+
+if (presetSelect) {
+  presetSelect.addEventListener('change', e => {
+    const preset = getPresetByValue(e.target.value);
+    if (preset) applyPresetConfig(preset.config);
+  });
+}
+
+if (presetSave) {
+  presetSave.addEventListener('click', () => {
+    const name = window.prompt('Preset name:', 'Custom preset');
+    if (!name) return;
+    const preset = normalizePreset({ schema: PRESET_SCHEMA, name, config: cfg() });
+    if (!preset) return;
+
+    const existingIndex = savedPresets.findIndex(
+      saved => saved.name.toLowerCase() === preset.name.toLowerCase()
+    );
+    if (existingIndex >= 0) {
+      const ok = window.confirm(`Overwrite saved preset "${savedPresets[existingIndex].name}"?`);
+      if (!ok) return;
+      savedPresets[existingIndex] = preset;
+    } else {
+      savedPresets.push(preset);
+    }
+    persistSavedPresets();
+    refreshPresetSelect();
+    if (presetSelect) {
+      const idx = existingIndex >= 0 ? existingIndex : savedPresets.length - 1;
+      presetSelect.value = `saved:${idx}`;
+    }
+  });
+}
+
+if (presetExport) {
+  presetExport.addEventListener('click', () => {
+    const selectedPreset = getPresetByValue(presetSelect ? presetSelect.value : '');
+    const name = selectedPreset ? selectedPreset.name : 'Custom preset';
+    const payload = { schema: PRESET_SCHEMA, name, config: cfg() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slugifyPresetName(name)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+if (presetImport && presetImportFile) {
+  presetImport.addEventListener('click', () => presetImportFile.click());
+  presetImportFile.addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(ev.target.result);
+      } catch (err) {
+        alert('Invalid preset JSON.');
+        return;
+      }
+      const preset = normalizePreset(extractPresetList(parsed)[0]);
+      if (!preset) {
+        alert('Preset file missing name/config.');
+        return;
+      }
+      applyPresetConfig(preset.config);
+      if (presetSelect) presetSelect.value = '';
+    };
+    reader.onerror = () => alert('Could not read preset file.');
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+}
+
+initPresets();
 
 /* ---------- main click & regenerate ---------- */
 $('regenerate').onclick=()=>lastPoly&&render(lastPoly,cfg());
