@@ -22,11 +22,14 @@ Controls panel crowds the viewport on mobile.
 ---
 
 ## BG-002 — Building presets (save/load/share)
+Status: Done
 **Acceptance**
-- “Presets” dropdown with 6–10 curated presets (tower types).
+- “Presets” dropdown with 6–10 curated presets (tower types). the presets are strictly based on different levels and parameters applied to the siderbar menu controls. 
+-  Presets include 'Art Deco', 'Brutalist', 'Standard office', 'Condominium'
+-  Presets must be extremely detailed, contain subtle and correct color patterns
 - “Save preset” writes current cfg() to localStorage.
 - “Export preset” downloads JSON; “Import preset” loads JSON and sets UI controls.
-- Preset schema versioned (e.g., `"schema": 1`).
+-  Preset schema versioned (e.g., `"schema": 1`).
 
 **Files**
 - index.html (UI)
