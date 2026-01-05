@@ -10,7 +10,7 @@
 <style>
  html,body,#map{height:100%;margin:0;padding:0;font:14px/1.3 "Helvetica Neue",Arial}
  #controls{position:absolute;top:10px;right:10px;z-index:2;background:#ffffffee;
-           border-radius:6px;padding:10px 12px;box-shadow:0 0 6px #0003;max-width:380px; max-height: calc(100vh - 20px); overflow-y: auto;}
+           border-radius:6px;padding:10px 12px 28px;box-shadow:0 0 6px #0003;max-width:380px; max-height: calc(100vh - 20px); overflow-y: auto;}
  #controls table{width:100%;border-collapse:collapse;margin:0}
  #controls td{padding:2px 0}
  #controls input[type="number"],#controls input[type="color"],#controls select{width:100%;box-sizing: border-box;}
@@ -155,7 +155,9 @@
   </div>
   <button id="downloadGeo" style="margin-bottom:8px;background:#5c9e31">⬇️ Download GeoJSON</button>
 <table>
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Tower Core</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Floors</td><td><input id="floors" type="number" min="1" max="50" value="10"></td></tr>
 <tr><td>Floor Ht (m)</td><td><input id="floorHeight" type="number" value="3.5" step="0.1" min="2.0"></td></tr>
@@ -171,7 +173,9 @@
 <tr><td>Step factor</td><td><input id="stepFactor" type="number" step="0.01" value="-0.05"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Façade & Windows</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Facade α</td><td><input id="facadeAlpha" type="number" min="0" max="1" step="0.05" value="1"></td></tr>
 <tr><td>Facade colour</td><td><input id="wallColor" type="color" value="#d1ccc0"></td></tr>
@@ -191,6 +195,7 @@
     <option value="none">none</option>
     <option value="lattice">Lattice</option>
     <option value="truss">Trussed frame</option>
+    <option value="frame">Perimeter frame</option>
     <option value="custom">Custom</option>
   </select>
 </td></tr>
@@ -199,29 +204,32 @@
 <tr><td>Conn. Density</td><td><input id="exoDensity" type="number" min="1" max="20" value="4"></td></tr>
 <tr><td>Colour</td><td><input id="exoColor" type="color" value="#666666"></td></tr>
 
-<!-- ▸  Mega‑Truss  -->
-<tr><td colspan="2"><strong>Mega‑Truss Expression</strong></td></tr>
-<tr><td>Height (floors)</td><td><input id="trussSpan"  type="number" min="0" max="10" value="0"> </td></tr>
-<tr><td>Levels (list)</td><td><input id="trussLevels" type="text"   value="" placeholder="e.g. 8,20"></td></tr>
-<tr><td>Style</td><td>
-  <select id="trussStyle">
-    <option value="warren">Warren</option>
-    <option value="pratt">Pratt</option>
-    <option value="custom">Custom</option>
-  </select>
-</td></tr>
-<tr><td>Member Size (m)</td><td><input id="trussSize" type="number" min="0.1" step="0.05" value="0.5"></td></tr>
-<tr><td>Colour</td><td><input id="trussColor" type="color" value="#444444"></td></tr>
+<!-- ▸  Helical Facade Weave  -->
+<tr><td colspan="2"><strong>Helical Facade Weave</strong></td></tr>
+<tr><td>Enable Weave</td><td><input id="weaveEnable" type="checkbox"></td></tr>
+<tr><td>Ribbon Count</td><td><input id="weaveCount" type="number" min="1" max="12" value="3"></td></tr>
+<tr><td>Ribbon Width (m)</td><td><input id="weaveWidth" type="number" min="0.05" max="1" step="0.05" value="0.25"></td></tr>
+<tr><td>Ribbon Span</td><td><input id="weaveSpan" type="range" min="0.1" max="1" step="0.05" value="0.35"></td></tr>
+<tr><td>Twist Turns</td><td><input id="weaveTwist" type="number" min="0" max="8" step="0.25" value="2"></td></tr>
+<tr><td>Wave Offset (m)</td><td><input id="weaveWave" type="number" min="0" max="10" step="0.25" value="1.5"></td></tr>
+<tr><td>Wave Cycles</td><td><input id="weaveCycles" type="number" min="0" max="10" step="0.5" value="2"></td></tr>
+<tr><td>Inset (m)</td><td><input id="weaveInset" type="number" min="-2" max="5" step="0.1" value="0.3"></td></tr>
+<tr><td>Opacity</td><td><input id="weaveAlpha" type="number" min="0" max="1" step="0.05" value="0.75"></td></tr>
+<tr><td>Colour</td><td><input id="weaveColor" type="color" value="#7a6f63"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Separators</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Sep Ht (m)</td><td><input id="sepH" type="number" value="0.3" step="0.05" min="0"></td></tr>
 <tr><td>Sep W (m)</td><td><input id="sepW" type="number" value="0.3" step="0.05" min="0"></td></tr>
 <tr><td>Sep colour</td><td><input id="sepColor" type="color" value="#505050"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Balconies</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
   <tr><td>Balcony Type</td><td>                 <!-- 🟦 NEW -->
     <select id="balconyType">
@@ -240,7 +248,9 @@
 <tr><td>Railing Colour</td><td><input id="railingColor" type="color" value="#606060"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Podium</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Podium floors</td><td><input id="podiumFloors" type="number" value="3" min="0"></td></tr>
 <tr><td>Outset (m)</td><td><input id="podiumOut" type="number" value="2.5" step="0.1" min="0"></td></tr>
@@ -251,7 +261,9 @@
 <tr><td>Podium Win. Ratio</td><td><input id="podiumWindowRatio" type="number" min="0.0" max="0.95" step="0.05" value="0.75"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Roof & Cornice</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Main Roof Slab Ht (m)</td><td><input id="roofSlabHeight" type="number" value="0.4" step="0.05" min="0.1"></td></tr>
 <tr><td>Roof colour</td><td><input id="roofColor" type="color" value="#3D3D3D"></td></tr>
@@ -267,7 +279,9 @@
 <tr><td>Main Cornice Colour</td><td><input id="corniceColor" type="color" value="#8B7355"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Vertical Elements</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Enable Ribs</td><td><input id="enableRibs" type="checkbox"></td></tr>
 <tr><td>Rib Count/Segment</td><td><input id="ribCount" type="number" min="0" max="10" value="2"></td></tr>
@@ -276,7 +290,9 @@
 <tr><td>Rib Colour</td><td><input id="ribColor" type="color" value="#908070"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Internal Structure (Visual)</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Enable Floor Slabs</td><td><input id="enableSlabs" type="checkbox" checked></td></tr>
 <tr><td>Slab Thick (m)</td><td><input id="slabThick" type="number" min="0.1" max="1" step="0.05" value="0.3"></td></tr>
@@ -291,7 +307,9 @@
 <tr><td>Core Colour</td><td><input id="centralCoreColor" type="color" value="#595959"></td></tr>
 </tbody>
 
+<tbody class="collapsible-header-row">
 <tr><th colspan="2"><h3 class="collapsible-header"><span class="toggle-icon">▾</span>Shape Details</h3></th></tr>
+</tbody>
 <tbody class="collapsible-content">
 <tr><td>Overall Roundness (m)</td><td><input id="overallRoundness" type="number" min="0" max="5" step="0.05" value="0"></td></tr>
 </tbody>
@@ -328,6 +346,9 @@ geocoder.on('result', e => {
 
 /* at the very top of <script type="module"> */
 const TEXTURE_ROOT = new URL('js/textures/', document.baseURI);
+const TEXTURE_PIXEL_RATIO = 2;
+const PATTERN_LAYER_OFFSET = 0.02;
+const PATTERN_LAYER_OPACITY = 0.6;
 
 const PAT = Object.fromEntries(
   LOCAL_TEXTURES.map(rawName => {
@@ -397,8 +418,8 @@ map.on('load',()=>{
     map.loadImage(url, (err, img) => {
       if (err) { console.warn(`texture ${name} failed`, err); return; }
 
-      /*  ↓ tell Mapbox “treat every 4 × 4 device pixels as ONE sprite pixel”  */
-      if (!map.hasImage(name)) map.addImage(name, img, { pixelRatio: 4 });
+      /*  ↓ keep texture scale consistent without over-shrinking patterns */
+      if (!map.hasImage(name)) map.addImage(name, img, { pixelRatio: TEXTURE_PIXEL_RATIO });
     });
   }
 
@@ -626,11 +647,16 @@ function cfg(){return{
   exoDensity: +$('exoDensity').value,
   exoColor  : $('exoColor').value,
 
-  trussSpan  : +$('trussSpan').value,
-  trussLvls  : $('trussLevels').value.split(',').map(s=>+s.trim()).filter(n=>!isNaN(n)),
-  trussStyle : $('trussStyle').value,
-  trussSize  : +$('trussSize').value,
-  trussColor : $('trussColor').value,
+  weaveEnable: $('weaveEnable').checked,
+  weaveCount : +$('weaveCount').value,
+  weaveWidth : +$('weaveWidth').value,
+  weaveSpan  : +$('weaveSpan').value,
+  weaveTwist : +$('weaveTwist').value,
+  weaveWave  : +$('weaveWave').value,
+  weaveCycles: +$('weaveCycles').value,
+  weaveInset : +$('weaveInset').value,
+  weaveAlpha : +$('weaveAlpha').value,
+  weaveColor : $('weaveColor').value,
   balType : $('balconyType').value,
 
 };}
@@ -715,10 +741,16 @@ const presetFieldMap = {
   exoOffset: 'exoOffset',
   exoDensity: 'exoDensity',
   exoColor: 'exoColor',
-  trussSpan: 'trussSpan',
-  trussStyle: 'trussStyle',
-  trussSize: 'trussSize',
-  trussColor: 'trussColor',
+  weaveEnable: 'weaveEnable',
+  weaveCount: 'weaveCount',
+  weaveWidth: 'weaveWidth',
+  weaveSpan: 'weaveSpan',
+  weaveTwist: 'weaveTwist',
+  weaveWave: 'weaveWave',
+  weaveCycles: 'weaveCycles',
+  weaveInset: 'weaveInset',
+  weaveAlpha: 'weaveAlpha',
+  weaveColor: 'weaveColor',
   balType: 'balconyType'
 };
 
@@ -792,15 +824,6 @@ const applyPresetConfig = config => {
     }
     el.value = config[key];
   });
-
-  if (config.trussLvls !== undefined) {
-    const trussEl = $('trussLevels');
-    if (trussEl) {
-      trussEl.value = Array.isArray(config.trussLvls)
-        ? config.trussLvls.join(',')
-        : String(config.trussLvls);
-    }
-  }
 
   if (lastPoly) render(lastPoly, cfg());
 };
@@ -996,8 +1019,8 @@ function render(poly,o){
   ['rooftopStructures', o.penthouseCol,      1,               o.wallTex],
 
   ['verticalRibs',      o.ribColor,          1,               'none'],
+  ['weave',             o.weaveColor,        o.weaveAlpha,    'none'],
   ['exoskeleton',       o.exoColor,          1,               'none'],
-  ['megaTruss',         o.trussColor,        1,               'none'],
 ];
 
   L.forEach(([k, c, a, p]) => {
@@ -1033,9 +1056,9 @@ function render(poly,o){
     if (p !== 'none' && map.hasImage(p)) {
       const patPaint = {
         'fill-extrusion-pattern' : p,
-        'fill-extrusion-height'  : ['get', 'h'],
-        'fill-extrusion-base'    : ['get', 'b'],
-        'fill-extrusion-opacity' : a,
+        'fill-extrusion-height'  : ['+', ['get', 'h'], PATTERN_LAYER_OFFSET],
+        'fill-extrusion-base'    : ['+', ['get', 'b'], PATTERN_LAYER_OFFSET],
+        'fill-extrusion-opacity' : a * PATTERN_LAYER_OPACITY,
 
         /* keep the fancy bits consistent */
         'fill-extrusion-edge-radius' : 0.15,
@@ -1148,6 +1171,45 @@ function buildMerged(footprints, o) {
   return B;
 }
 
+function getOutlineLine(poly) {
+  if (!poly || !poly.geometry) return null;
+  const geom = poly.geometry;
+  if (geom.type === 'Polygon') return turf.lineString(geom.coordinates[0]);
+  if (geom.type === 'MultiPolygon') return turf.lineString(geom.coordinates[0][0]);
+  const line = safe(() => turf.polygonToLine(poly), "weave polygon to line");
+  if (!line || !line.geometry) return null;
+  if (line.geometry.type === 'LineString') return line;
+  if (line.geometry.type === 'MultiLineString') {
+    let best = null;
+    let bestLen = 0;
+    line.geometry.coordinates.forEach(coords => {
+      const candidate = turf.lineString(coords);
+      const len = turf.length(candidate, { units: 'meters' });
+      if (len > bestLen) {
+        bestLen = len;
+        best = candidate;
+      }
+    });
+    return best;
+  }
+  return null;
+}
+
+function sliceLineWrap(line, perLen, start, end) {
+  if (!line || !Number.isFinite(perLen) || perLen <= 0) return [];
+  const wrap = d => ((d % perLen) + perLen) % perLen;
+  const s = wrap(start);
+  const e = wrap(end);
+  if (s === e) return [line];
+  if (s < e) {
+    const seg = safe(() => turf.lineSliceAlong(line, s, e, { units: 'meters' }), "weave slice");
+    return seg ? [seg] : [];
+  }
+  const segA = safe(() => turf.lineSliceAlong(line, s, perLen, { units: 'meters' }), "weave slice A");
+  const segB = safe(() => turf.lineSliceAlong(line, 0, e, { units: 'meters' }), "weave slice B");
+  return [segA, segB].filter(Boolean);
+}
+
 
 /* ---------- build geometry ---------- */
 function build(footprintPoly,o){
@@ -1155,7 +1217,7 @@ function build(footprintPoly,o){
   const out={core:[],windows:[],borders:[],seps:[],balconies:[],roof:[],podium:[],
              mullions:[],railings:[],cornices:[],parapets:[],rooftopStructures:[],
              floorSlabs: [], verticalRibs: [], pillars: [], centralCore: [],exoskeleton: [],
-             megaTruss  : [], };
+             weave: [], };
 
   let currentPodiumHeight = 0;
   if (o.podF > 0) {
@@ -1203,33 +1265,70 @@ function build(footprintPoly,o){
   if (o.exoType !== 'none' && o.exoSize > 0) {
     const frameShell = safeBuf(footprintPoly, o.exoOffset, "exo offset");
     if (frameShell && frameShell.geometry) {
+      const isFrame = o.exoType === 'frame';
+      const isTruss = o.exoType === 'truss';
 
       const segs = [];
       safe(()=>turf.segmentEach(frameShell, s=>segs.push(s.geometry)), "exo seg collect");
+      const perimeterLine = safe(() => turf.polygonToLine(frameShell), "exo perimeter line");
 
       const density = Math.max(1, o.exoDensity);
-      segs.forEach(seg=>{
-        const len = turf.length(seg,{units:'meters'});
-        for (let i=0;i<=density;i++){
-          const p = turf.along(seg, (len/density)*i,{units:'meters'}).geometry.coordinates;
-          // vertical post
-          const post = turf.buffer(turf.point(p), o.exoSize/2,{units:'meters',steps:4});
-          post && out.exoskeleton.push(turf.feature(post.geometry,{b:0,h:totalPodiumHeight+o.floors*o.F}));
-        }
-      });
+      const maxHeight = totalPodiumHeight + o.floors * o.F;
+      const bandInner = safeBuf(frameShell, -o.exoSize, "exo band inner");
+      const exoBand = (bandInner && bandInner.geometry)
+        ? safeDiff(frameShell, bandInner, "exo band diff")
+        : null;
+      const exoBandSegments = (!exoBand || !exoBand.geometry)
+        ? segs
+          .map(seg => safeBuf(seg, o.exoSize / 2, "exo band seg", { units: 'meters', steps: 4 }))
+          .filter(seg => seg && seg.geometry)
+        : null;
+      const perimeterBand = perimeterLine
+        ? safeBuf(perimeterLine, o.exoSize / 2, "exo perimeter band", { units: 'meters', steps: 4 })
+        : null;
+      const frameBand = (isFrame && perimeterBand && perimeterBand.geometry) ? perimeterBand : exoBand;
+
+      if (isFrame) {
+        const postSet = new Set();
+        segs.forEach(seg => {
+          postSet.add(seg.coordinates[0].join(','));
+          postSet.add(seg.coordinates[1].join(','));
+        });
+        postSet.forEach(coord => {
+          const [x, y] = coord.split(',').map(Number);
+          const post = turf.buffer(turf.point([x, y]), o.exoSize/2,{units:'meters',steps:4});
+          post && out.exoskeleton.push(turf.feature(post.geometry,{b:0,h:maxHeight}));
+        });
+      } else {
+        segs.forEach(seg=>{
+          const len = turf.length(seg,{units:'meters'});
+          for (let i=0;i<=density;i++){
+            const p = turf.along(seg, (len/density)*i,{units:'meters'}).geometry.coordinates;
+            // vertical post
+            const post = turf.buffer(turf.point(p), o.exoSize/2,{units:'meters',steps:4});
+            post && out.exoskeleton.push(turf.feature(post.geometry,{b:0,h:maxHeight}));
+          }
+        });
+      }
 
       if (o.exoType !== 'lattice'){   // add horizontals
         for (let lvl=0; lvl<=o.floors; lvl+=Math.ceil(o.floors/density)){
           const b = totalPodiumHeight+lvl*o.F;
           const h = b+o.exoSize;
-          out.exoskeleton.push(turf.feature(frameShell.geometry,{b,h}));
+          if (frameBand && frameBand.geometry) {
+            out.exoskeleton.push(turf.feature(frameBand.geometry,{b,h}));
+          } else if (exoBandSegments && exoBandSegments.length) {
+            exoBandSegments.forEach(seg => {
+              out.exoskeleton.push(turf.feature(seg.geometry,{b,h}));
+            });
+          }
         }
       }
 
-      if (o.exoType === 'truss'){     // add diagonals (simple)
+      if (isTruss){     // add diagonals (simple)
         segs.forEach(seg=>{
           const diag = turf.buffer(seg, o.exoSize/2,{units:'meters',steps:4});
-          diag && out.exoskeleton.push(turf.feature(diag.geometry,{b:0,h:totalPodiumHeight+o.floors*o.F}));
+          diag && out.exoskeleton.push(turf.feature(diag.geometry,{b:0,h:maxHeight}));
         });
       }
     }
@@ -1242,35 +1341,38 @@ function build(footprintPoly,o){
 
     out.core.push(turf.feature(shell.geometry,{b:base,h:top}));
 
-    /* ===== Mega‑truss on selected levels ===== */
-    if (o.trussSpan>0 && o.trussLvls.includes(i) && o.trussSize>0){
-      const spanFloors = Math.min(o.trussSpan, o.floors-i);
-      const topLevel   = i + spanFloors;
-      const trussBase  = base;
-      const trussTop   = totalPodiumHeight + topLevel*F;
+    /* ===== Helical facade weave ===== */
+    if (o.weaveEnable && o.weaveCount > 0 && o.weaveWidth > 0 && o.weaveSpan > 0) {
+      const insetShell = o.weaveInset !== 0
+        ? safeBuf(shell, o.weaveInset, "weave inset")
+        : safeClone(shell);
+      const outline = getOutlineLine(insetShell || shell);
+      if (outline) {
+        const perLen = turf.length(outline, { units: 'meters' });
+        const spanRatio = Math.max(0, Math.min(1, o.weaveSpan));
+        const spanLen = perLen * spanRatio;
+        if (perLen > 0 && spanLen > 0) {
+          const ribbonCount = Math.max(1, Math.floor(o.weaveCount));
+          const levelT = o.floors > 1 ? i / (o.floors - 1) : 0;
+          const twistShift = levelT * o.weaveTwist * perLen;
+          const wavePhase = levelT * Math.PI * 2 * o.weaveCycles;
 
-      // outline for clipping
-      const trussShell = safeBuf(shell, o.trussSize/2,"truss shell");
-
-      // style‑specific diagonals
-      const makeDiag = (flip=false)=>{
-        safe(()=>turf.segmentEach(shell, seg=>{
-          const [a,b]=flip?seg.geometry.coordinates.reverse():seg.geometry.coordinates;
-          const diag = turf.lineString([a,b]);
-          const buf  = safeBuf(diag, o.trussSize/2,{units:'meters',steps:4});
-          buf && out.megaTruss.push(turf.feature(buf.geometry,{b:trussBase,h:trussTop}));
-        }),"truss diag");
-      };
-
-      if (o.trussStyle==='warren') makeDiag(false), makeDiag(true);
-      else if (o.trussStyle==='pratt') makeDiag(false);
-      else /* custom */ makeDiag(true);
-
-      // top & bottom chords
-      out.megaTruss.push(
-        turf.feature(trussShell.geometry,{b:trussBase ,h:trussBase+o.trussSize}),
-        turf.feature(trussShell.geometry,{b:trussTop-o.trussSize,h:trussTop})
-      );
+          for (let r = 0; r < ribbonCount; r++) {
+            const ribbonPhase = (r / ribbonCount) * Math.PI * 2;
+            const waveShift = o.weaveWave * Math.sin(wavePhase + ribbonPhase);
+            const center = (r / ribbonCount) * perLen + twistShift + waveShift;
+            const start = center - spanLen / 2;
+            const end = center + spanLen / 2;
+            const slices = sliceLineWrap(outline, perLen, start, end);
+            slices.forEach(seg => {
+              const band = safeBuf(seg, o.weaveWidth / 2, "weave band", { units: 'meters', steps: 4 });
+              if (band && band.geometry) {
+                out.weave.push(turf.feature(band.geometry, { b: base, h: top }));
+              }
+            });
+          }
+        }
+      }
     }
 
     if(o.enableSlabs && o.slabThick > 0){
@@ -1517,8 +1619,9 @@ function randomizeParameters() {
 
         if (input.type === 'number' || input.type === 'range') {
             let isInt = !input.step || parseFloat(input.step) % 1 === 0;
-            if (['floors', 'stepEvery', 'balEvery', 'podiumFloors', 'penthouseFloors', 
-                 'mullionVertCount', 'mullionHorzCount', 'ribCount', 'pillarRows', 'pillarCols'].includes(input.id)) {
+            if (['floors', 'stepEvery', 'balEvery', 'podiumFloors', 'penthouseFloors',
+                 'mullionVertCount', 'mullionHorzCount', 'ribCount', 'pillarRows', 'pillarCols',
+                 'weaveCount'].includes(input.id)) {
                 isInt = true;
             }
             if (input.id === 'floors') setRandomNumeric(input, 5, 40, 1, true);
@@ -1616,9 +1719,19 @@ function handleGeoUpload(e) {
 /* ---------- UI Collapsibles ---------- */
 document.querySelectorAll('.collapsible-header').forEach(header => {
     header.addEventListener('click', () => {
-        const content = header.closest('tr').nextElementSibling;
         const icon = header.querySelector('.toggle-icon');
-        if (content && content.classList.contains('collapsible-content')) {
+        const headerBody = header.closest('tbody');
+        let content = null;
+        if (headerBody && headerBody.nextElementSibling &&
+            headerBody.nextElementSibling.classList.contains('collapsible-content')) {
+            content = headerBody.nextElementSibling;
+        }
+        if (!content) {
+            const row = header.closest('tr');
+            const next = row ? row.nextElementSibling : null;
+            if (next && next.classList.contains('collapsible-content')) content = next;
+        }
+        if (content) {
             content.classList.toggle('collapsed');
             if (icon) {
               icon.textContent = content.classList.contains('collapsed') ? '▸' : '▾';
