@@ -1,0 +1,38 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/ar",
+      "destination": "/ar.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/ar",
+      "headers": [
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), geolocation=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self), xr-spatial-tracking=(self)"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
+}

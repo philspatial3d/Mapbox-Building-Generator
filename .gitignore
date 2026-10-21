@@ -1,0 +1,12 @@
+storage/database/*
+!storage/database/.gitkeep
+storage/users/*
+!storage/users/.gitkeep
+.DS_Store
+output/
+artifacts/
+Downloads Inbox */
+.playwright-cli/
+
+# Hosting-specific Mapbox public browser token
+/mapbox-config.js

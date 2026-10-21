@@ -1,0 +1,4724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mapbox Building Generator - AR Viewer</title>
+<style>
+  :root {
+    --bg: #e5eaf0;
+    --panel: rgba(245, 248, 252, 0.92);
+    --panel-strong: rgba(238, 243, 247, 0.97);
+    --line: #8fa0b1;
+    --line-strong: #3c4d5e;
+    --text: #1a232d;
+    --muted: #536474;
+    --accent: #245f8e;
+    --accent-strong: #245f8e;
+    --accent-green: #2f7158;
+    --accent-warm: #9a5c2d;
+    --danger: #9b4642;
+    --shadow: 0 8px 0 rgba(60, 77, 94, 0.12), 0 18px 34px rgba(21, 30, 39, 0.16);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', 'Avenir Next', sans-serif;
+  }
+
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    background:
+      repeating-linear-gradient(0deg, rgba(60, 77, 94, 0.07) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, rgba(60, 77, 94, 0.07) 0 1px, transparent 1px 34px),
+      linear-gradient(120deg, rgba(36, 95, 142, 0.12), transparent 42%),
+      linear-gradient(320deg, rgba(154, 92, 45, 0.1), transparent 38%);
+  }
+
+  body::after {
+    background:
+      radial-gradient(circle at center, transparent 42%, rgba(21, 30, 39, 0.18) 100%),
+      linear-gradient(180deg, rgba(245, 248, 252, 0.08), rgba(21, 30, 39, 0.12));
+  }
+
+  #cameraFeed,
+  #xrCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #cameraFeed {
+    object-fit: cover;
+    background: #05080c;
+    z-index: 0;
+    filter: saturate(1.01) contrast(1.02) brightness(0.88);
+  }
+
+  #xrCanvas {
+    display: block;
+    touch-action: none;
+    z-index: 1;
+  }
+
+  #focusFrame {
+    position: fixed;
+    inset: 13vh 7vw 18vh;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  #focusFrame::before,
+  #focusFrame::after,
+  #focusFrame span::before,
+  #focusFrame span::after {
+    content: '';
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-color: rgba(60, 77, 94, 0.48);
+    border-style: solid;
+  }
+
+  #focusFrame::before {
+    top: 0;
+    left: 0;
+    border-width: 3px 0 0 3px;
+  }
+
+  #focusFrame::after {
+    top: 0;
+    right: 0;
+    border-width: 3px 3px 0 0;
+  }
+
+  #focusFrame span::before {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 3px 3px;
+  }
+
+  #focusFrame span::after {
+    bottom: 0;
+    right: 0;
+    border-width: 0 3px 3px 0;
+  }
+
+  body.bind-mode #focusFrame::before,
+  body.bind-mode #focusFrame::after,
+  body.bind-mode #focusFrame span::before,
+  body.bind-mode #focusFrame span::after {
+    border-color: rgba(154, 92, 45, 0.88);
+    box-shadow: 0 0 18px rgba(154, 92, 45, 0.18);
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding:
+      max(env(safe-area-inset-top), 16px)
+      max(env(safe-area-inset-right), 16px)
+      max(env(safe-area-inset-bottom), 16px)
+      max(env(safe-area-inset-left), 16px);
+  }
+
+  #panel {
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--line-strong);
+    border-radius: 0;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  #panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(60, 77, 94, 0.05) 0 1px, transparent 1px 26px),
+      repeating-linear-gradient(90deg, rgba(60, 77, 94, 0.05) 0 1px, transparent 1px 26px),
+      linear-gradient(140deg, rgba(255, 255, 255, 0.44), transparent 42%),
+      linear-gradient(320deg, rgba(36, 95, 142, 0.08), transparent 48%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 0;
+    border: 1px solid var(--line);
+    background: rgba(245, 248, 252, 0.92);
+    padding: 7px 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-green));
+  }
+
+  .metric .k {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  #panel {
+    align-self: end;
+    justify-self: center;
+    width: min(1120px, calc(100vw - 32px));
+    background: linear-gradient(180deg, rgba(245, 248, 252, 0.95), rgba(238, 243, 247, 0.94));
+    padding: 18px;
+  }
+
+  #panelHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .panelTitle h1 {
+    margin: 10px 0 6px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: clamp(1.45rem, 2vw, 2.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .sub {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 60ch;
+  }
+
+  #panelToggle {
+    min-width: 110px;
+    padding: 10px 14px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0 0;
+  }
+
+  .metric {
+    border-radius: 0;
+    border: 2px solid var(--line);
+    background: rgba(238, 243, 247, 0.92);
+    padding: 13px 14px;
+  }
+
+  .metric .v {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .controls {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .primaryControls,
+  .secondaryControls,
+  .bindTools {
+    display: grid;
+    gap: 10px;
+  }
+
+  .primaryControls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .secondaryControls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bindTools {
+    display: none;
+  }
+
+  body.bind-mode .bindTools {
+    display: block;
+  }
+
+  .bindStudio {
+    display: grid;
+    gap: 12px;
+  }
+
+  .offsetChip,
+  .repositionPanel {
+    border: 2px solid var(--line);
+    background: rgba(238, 243, 247, 0.92);
+  }
+
+  .offsetChip {
+    min-height: 76px;
+    padding: 10px 12px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+
+  .offsetChip .k,
+  .dialLabel,
+  .dialCenterStamp,
+  .repositionMeta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .offsetChip .v {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .repositionPanel {
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .repositionGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 72px);
+    gap: 8px;
+  }
+
+  .repositionButton {
+    height: 100%;
+    min-height: 0;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .moveToward { grid-column: 2; grid-row: 1; }
+  .moveLeft { grid-column: 1; grid-row: 2; }
+  .moveRight { grid-column: 3; grid-row: 2; }
+  .moveAway { grid-column: 2; grid-row: 3; }
+
+  .repositionCenter {
+    border: 2px solid var(--line-strong);
+    background: rgba(245, 248, 252, 0.98);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 10px;
+    grid-column: 2;
+    grid-row: 2;
+    gap: 3px;
+  }
+
+  .repositionCenter strong {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.4rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .repositionMeta {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .heightButtons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .resetButton {
+    background: rgba(245, 248, 252, 0.98);
+  }
+
+  button {
+    width: auto;
+    max-width: 100%;
+    border: 2px solid var(--line-strong);
+    background: rgba(245, 248, 252, 0.96);
+    color: var(--text);
+    border-radius: 0;
+    padding: 13px 14px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 0 rgba(60, 77, 94, 0.12);
+    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  }
+
+  button:hover,
+  button:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 6px 0 rgba(60, 77, 94, 0.12);
+    outline: none;
+  }
+
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  button.primary:hover,
+  button.primary:focus-visible {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  body.bind-mode #toggleBindMode {
+    background: var(--accent-warm);
+    border-color: var(--accent-warm);
+    color: #fff;
+  }
+
+  body.bind-mode #toggleBindMode:hover,
+  body.bind-mode #toggleBindMode:focus-visible {
+    background: var(--accent-warm);
+    border-color: var(--accent-warm);
+    color: #fff;
+  }
+
+  #status,
+  #error {
+    margin-top: 14px;
+    border-radius: 0;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  #status {
+    border: 2px solid var(--line);
+    background: rgba(238, 243, 247, 0.92);
+    color: var(--text);
+  }
+
+  #error {
+    display: none;
+    border: 2px solid rgba(155, 70, 66, 0.44);
+    background: rgba(155, 70, 66, 0.12);
+    color: #612a28;
+  }
+
+  @media (max-width: 960px) {
+    .row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .primaryControls {
+      grid-template-columns: 1fr;
+    }
+    .secondaryControls,
+    .heightButtons {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    #focusFrame {
+      inset: 17vh 6vw 22vh;
+    }
+
+    #overlay {
+      padding:
+        max(env(safe-area-inset-top), 12px)
+        max(env(safe-area-inset-right), 12px)
+        max(env(safe-area-inset-bottom), 12px)
+        max(env(safe-area-inset-left), 12px);
+    }
+
+    #panel {
+      width: 100%;
+    }
+
+    .row,
+    .secondaryControls,
+    .heightButtons {
+      grid-template-columns: 1fr;
+    }
+
+    #panel {
+      padding: 16px;
+      max-height: min(62vh, 560px);
+      overflow: auto;
+    }
+
+    body.panel-collapsed #panel {
+      max-height: 102px;
+      overflow: hidden;
+    }
+
+    .repositionGrid {
+      grid-template-rows: repeat(3, 64px);
+    }
+
+    body.panel-collapsed #panel .sub,
+    body.panel-collapsed #panel .row,
+    body.panel-collapsed #panel .controls,
+    body.panel-collapsed #panel #status,
+    body.panel-collapsed #panel #error {
+      display: none;
+    }
+  }
+
+  /* Production AR surface: camera-first, compact, and deliberately neutral. */
+  body::before,
+  body::after,
+  #panel::before {
+    display: none;
+  }
+
+  :root {
+    --ar-ink: #eef4f7;
+    --ar-muted: #aebbc4;
+    --ar-panel: rgba(15, 21, 26, 0.9);
+    --ar-panel-strong: rgba(21, 29, 35, 0.96);
+    --ar-line: rgba(198, 213, 222, 0.3);
+    --ar-line-strong: rgba(232, 241, 246, 0.72);
+    --ar-accent: #55a6ce;
+    --ar-good: #79b99c;
+    --ar-warm: #d49a66;
+  }
+
+  #cameraFeed {
+    filter: saturate(1.04) contrast(1.015) brightness(0.96);
+  }
+
+  #focusFrame {
+    inset: 10vh 5vw 14vh;
+  }
+
+  #focusFrame::before,
+  #focusFrame::after,
+  #focusFrame span::before,
+  #focusFrame span::after {
+    width: 28px;
+    height: 28px;
+    border-color: rgba(229, 240, 246, 0.44);
+    border-width: 0;
+  }
+
+  #focusFrame::before { border-top-width: 1px; border-left-width: 1px; }
+  #focusFrame::after { border-top-width: 1px; border-right-width: 1px; }
+  #focusFrame span::before { border-bottom-width: 1px; border-left-width: 1px; }
+  #focusFrame span::after { border-bottom-width: 1px; border-right-width: 1px; }
+
+  #overlay {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding:
+      max(env(safe-area-inset-top), 12px)
+      max(env(safe-area-inset-right), 12px)
+      max(env(safe-area-inset-bottom), 12px)
+      max(env(safe-area-inset-left), 12px);
+  }
+
+  #panel {
+    width: min(1040px, calc(100vw - 24px));
+    max-height: min(48vh, 480px);
+    padding: 12px;
+    overflow: auto;
+    color: var(--ar-ink);
+    background: var(--ar-panel);
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 6px;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(18px) saturate(1.08);
+  }
+
+  #panelHeader {
+    align-items: center;
+    gap: 12px;
+  }
+
+  .panelTitle {
+    min-width: 0;
+  }
+
+  .panelTitle h1 {
+    margin: 3px 0 2px;
+    color: var(--ar-ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .eyebrow {
+    padding: 0;
+    border: 0;
+    color: var(--ar-muted);
+    background: transparent;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .eyebrow::before {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ar-good);
+  }
+
+  .sub {
+    color: var(--ar-muted);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  #panelToggle {
+    min-width: 64px;
+    flex: 0 0 auto;
+  }
+
+  .headerActions {
+    display: flex;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  #quickLock {
+    min-width: 64px;
+  }
+
+  .row {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 10px;
+    border-top: 1px solid var(--ar-line);
+    border-bottom: 1px solid var(--ar-line);
+  }
+
+  .metric {
+    min-height: 50px;
+    padding: 8px 10px;
+    border: 0;
+    border-right: 1px solid var(--ar-line);
+    background: transparent;
+  }
+
+  .metric:last-child {
+    border-right: 0;
+  }
+
+  .metric .k {
+    margin-bottom: 3px;
+    color: var(--ar-muted);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .metric .v {
+    color: var(--ar-ink);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .controls {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .primaryControls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .secondaryControls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .viewerSetting {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    color: var(--ar-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  select {
+    width: 100%;
+    min-height: 34px;
+    padding: 0 9px;
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 3px;
+    color: var(--ar-ink);
+    background: var(--ar-panel-strong);
+    font: 600 11px/1 'IBM Plex Sans', sans-serif;
+  }
+
+  button {
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 3px;
+    color: var(--ar-ink);
+    background: rgba(31, 42, 50, 0.92);
+    box-shadow: none;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  button:hover,
+  button:focus-visible {
+    transform: none;
+    border-color: #ffffff;
+    color: #ffffff;
+    background: rgba(45, 59, 69, 0.98);
+    box-shadow: none;
+  }
+
+  button.primary,
+  button.primary:hover,
+  button.primary:focus-visible {
+    border-color: #75b7d6;
+    color: #071018;
+    background: #75b7d6;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+  }
+
+  #status,
+  #error {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-width: 1px;
+    border-radius: 3px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  #status {
+    border-color: var(--ar-line);
+    color: var(--ar-muted);
+    background: rgba(8, 12, 15, 0.42);
+  }
+
+  #error {
+    border-color: rgba(214, 117, 108, 0.65);
+    color: #ffd8d3;
+    background: rgba(111, 43, 38, 0.48);
+  }
+
+  .offsetChip,
+  .repositionPanel,
+  .repositionCenter {
+    border-width: 1px;
+    border-color: var(--ar-line);
+    color: var(--ar-ink);
+    background: rgba(8, 12, 15, 0.34);
+  }
+
+  .dialLabel,
+  .dialCenterStamp,
+  .repositionMeta {
+    color: var(--ar-muted);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .repositionCenter strong {
+    color: var(--ar-ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .repositionGrid {
+    grid-template-rows: repeat(3, 42px);
+  }
+
+  body.panel-collapsed #panel {
+    width: min(520px, calc(100vw - 24px));
+    max-height: 54px;
+    overflow: hidden;
+  }
+
+  body.panel-collapsed #panel .sub,
+  body.panel-collapsed #panel .row,
+  body.panel-collapsed #panel .controls,
+  body.panel-collapsed #panel #status,
+  body.panel-collapsed #panel #error {
+    display: none;
+  }
+
+  #contextChip {
+    position: fixed;
+    top: max(env(safe-area-inset-top), 12px);
+    right: max(env(safe-area-inset-right), 12px);
+    z-index: 4;
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: 6px;
+    min-height: 40px;
+    padding: 6px 12px;
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 20px;
+    color: var(--ar-ink);
+    background: var(--ar-panel);
+    backdrop-filter: blur(14px);
+    text-align: left;
+  }
+  #backToMap {
+    position: fixed;
+    top: max(env(safe-area-inset-top), 12px);
+    left: max(env(safe-area-inset-left), 12px);
+    z-index: 4;
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px 0 10px;
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 20px;
+    color: var(--ar-ink);
+    background: var(--ar-panel);
+    backdrop-filter: blur(14px);
+    font: 700 12px/1 'IBM Plex Sans', sans-serif;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #backToMap:active { transform: scale(0.97); }
+  #contextChip .chipLabel {
+    grid-row: span 2;
+    align-self: center;
+    color: var(--ar-muted);
+    font: 600 8px/1 'IBM Plex Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  #contextChip .chipMode { font: 700 12px/1.1 'IBM Plex Sans', sans-serif; }
+  #contextChip .chipMeta { grid-column: 2; color: var(--ar-muted); font: 500 10px/1.1 'IBM Plex Sans', sans-serif; }
+  #contextChip.is-loading .chipMeta { color: var(--ar-accent); }
+  .contextTip {
+    margin: 4px 0 8px;
+    color: var(--ar-muted);
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 820px) {
+    #panel {
+      max-height: min(58vh, 560px);
+    }
+    .row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .metric:nth-child(3) { border-right: 0; }
+    .metric:nth-child(-n + 3) { border-bottom: 1px solid var(--ar-line); }
+    .primaryControls,
+    .secondaryControls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 520px) {
+    #overlay {
+      padding: 8px max(env(safe-area-inset-right), 8px) max(env(safe-area-inset-bottom), 8px) max(env(safe-area-inset-left), 8px);
+    }
+    #panel {
+      width: 100%;
+      padding: 10px;
+      max-height: min(63vh, 560px);
+    }
+    .panelTitle h1 { font-size: 13px; }
+    .sub { display: none; }
+    /* Phones: keep at least half the camera view clear; metrics in a dense 3 x 2 grid. */
+    #panel { max-height: min(50vh, 520px); }
+    .row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .metric { min-height: 40px; padding: 6px 8px; }
+    .metric .v { font-size: 10px; }
+    .metric:nth-child(3n) { border-right: 0; }
+    .metric:nth-child(-n + 3) { border-bottom: 1px solid var(--ar-line); }
+    button, select { min-height: 40px; }
+    #contextChip { top: max(env(safe-area-inset-top), 8px); right: max(env(safe-area-inset-right), 8px); }
+    #backToMap { top: max(env(safe-area-inset-top), 8px); left: max(env(safe-area-inset-left), 8px); }
+    .primaryControls,
+    .secondaryControls,
+    .heightButtons {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    body.panel-collapsed #panel {
+      width: 100%;
+      max-height: 50px;
+    }
+  }
+
+  /* ---------- alignment tools + compact phone layout ----------
+     One card: a d-pad for moves and a row of height/heading buttons. While it is open
+     on phones the other controls step aside so nothing needs scrolling. */
+  .bindTools .repositionPanel {
+    padding: 10px;
+    border: 1px solid var(--ar-line);
+    border-radius: 4px;
+    background: rgba(8, 12, 15, 0.34);
+  }
+  .bindHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--ar-ink);
+    font: 700 12px/1.2 'IBM Plex Sans', sans-serif;
+  }
+  .bindHeadActions { display: flex; gap: 6px; }
+  .bindHead button,
+  .resetButton {
+    width: auto;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid var(--ar-line-strong);
+    border-radius: 3px;
+    color: var(--ar-ink);
+    background: rgba(31, 42, 50, 0.92);
+    font: 600 11px/1 'IBM Plex Sans', sans-serif;
+  }
+  .bindHead button.primary { color: #071018; background: #75b7d6; border-color: #75b7d6; }
+  .adjustGroups {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .bindTools .dialLabel {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 6px;
+    color: var(--ar-muted);
+    font: 600 9px/1.2 'IBM Plex Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .bindTools .repositionGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 46px);
+    gap: 6px;
+  }
+  .bindTools .moveAway { grid-area: 1 / 2; }
+  .bindTools .moveLeft { grid-area: 2 / 1; }
+  .bindTools .moveRight { grid-area: 2 / 3; }
+  .bindTools .moveToward { grid-area: 3 / 2; }
+  .bindTools .repositionCenter {
+    grid-area: 2 / 2;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 0;
+    border: 1px dashed var(--ar-line);
+    border-radius: 3px;
+    color: var(--ar-muted);
+    background: transparent;
+    font: 600 10px/1 'IBM Plex Mono', monospace;
+  }
+  .bindTools .repositionButton {
+    min-width: 0;
+    min-height: 46px;
+    padding: 4px 2px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    font: 700 15px/1 'IBM Plex Sans', sans-serif;
+  }
+  .bindTools .repositionButton small {
+    color: var(--ar-muted);
+    font: 600 9px/1 'IBM Plex Sans', sans-serif;
+  }
+  .adjustRow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .adjustRow.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bindTools .contextTip { margin: 0; }
+  #quickLock.is-locked { color: #071018; background: var(--ar-good); border-color: var(--ar-good); }
+  .panelTitle h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #status, #error { overflow-wrap: anywhere; }
+
+  @media (max-width: 520px) {
+    .adjustGroups { grid-template-columns: 1fr; gap: 10px; }
+    body.bind-mode #panel .row,
+    body.bind-mode #panel .primaryControls,
+    body.bind-mode #panel .secondaryControls,
+    body.bind-mode #panel #status { display: none; }
+    body.bind-mode #panel { max-height: min(62vh, 560px); }
+    .panelTitle h1 { font-size: 12px; }
+    .eyebrow { display: none; }
+  }
+</style>
+</head>
+<body>
+<video id="cameraFeed" autoplay playsinline muted></video>
+<canvas id="xrCanvas"></canvas>
+<div id="focusFrame" aria-hidden="true"><span></span></div>
+<div id="overlay">
+  <a id="backToMap" href="app.html" aria-label="Back to the map editor">
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Map</span>
+  </a>
+  <button id="contextChip" type="button" aria-label="Change how nearby buildings are shown">
+    <span class="chipLabel">Context</span><span class="chipMode">Massing</span><span class="chipMeta">loading</span>
+  </button>
+  <div id="panel">
+    <div id="panelHeader">
+      <div class="panelTitle">
+        <span class="eyebrow">Building AR</span>
+        <h1>Parcel-locked architectural view</h1>
+      </div>
+      <div class="headerActions">
+        <button id="quickLock" class="primary" type="button" title="Freeze the building exactly where it is now">Lock</button>
+        <button id="panelToggle" type="button">Minimize</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="metric"><span class="k">Distance</span><span class="v" id="distanceMeters">-</span></div>
+      <div class="metric"><span class="k">Tracking</span><span class="v" id="anchorState">Waiting</span></div>
+      <div class="metric"><span class="k">Accuracy</span><span class="v" id="gpsAccuracy">-</span></div>
+      <div class="metric"><span class="k">Lighting</span><span class="v" id="lightingState">Studio</span></div>
+      <div class="metric"><span class="k">Context</span><span class="v" id="occlusionState">Loading</span></div>
+      <div class="metric"><span class="k">Performance</span><span class="v" id="performanceState">Auto</span></div>
+    </div>
+
+    <div class="controls">
+      <div class="primaryControls">
+        <button id="enableSensors">Enable Sensors</button>
+        <button id="startAr" class="primary">Start AR Session</button>
+        <button id="recenter">Reset Viewpoint</button>
+        <button id="calibrateGround" type="button" disabled>Set Ground</button>
+      </div>
+      <div class="secondaryControls">
+        <button id="toggleFixedPosition" class="primary">Re-aim (GPS + compass)</button>
+        <button id="toggleBindMode">Reposition Model</button>
+        <label class="viewerSetting" for="qualityMode">Quality
+          <select id="qualityMode">
+            <option value="auto" selected>Auto</option>
+            <option value="high">High fidelity</option>
+            <option value="performance">Performance</option>
+          </select>
+        </label>
+        <label class="viewerSetting" for="viewerLevel">Viewer
+          <select id="viewerLevel">
+            <option value="0" selected>Street level</option>
+            <option value="3">Balcony / porch +3 m</option>
+            <option value="6">2nd floor / deck +6 m</option>
+            <option value="9">Roof +9 m</option>
+            <option value="15">High floor +15 m</option>
+            <option value="30">Tower +30 m</option>
+          </select>
+        </label>
+        <label class="viewerSetting" for="contextMode">Context
+          <select id="contextMode">
+            <option value="massing" selected>Massing (solid)</option>
+            <option value="ghost">Ghosted massing</option>
+            <option value="outlines">Outlines (align to street)</option>
+            <option value="occlusion">Occlusion only</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+        <label class="viewerSetting" for="detailMode">Model
+          <select id="detailMode">
+            <option value="exterior" selected>Exterior</option>
+            <option value="complete">Exterior + interior</option>
+          </select>
+        </label>
+      </div>
+      <div class="bindTools">
+        <div class="repositionPanel">
+          <div class="bindHead">
+            <span>Adjust alignment</span>
+            <span class="bindHeadActions">
+              <button id="resetBind" class="resetButton" type="button">Reset</button>
+              <button id="bindDone" class="primary" type="button">Done</button>
+            </span>
+          </div>
+          <div class="adjustGroups">
+            <div class="adjustGroup">
+              <div class="dialLabel"><span>Move 1 m</span><span>camera relative</span></div>
+              <div class="repositionGrid">
+                <button id="pushBack" class="repositionButton moveAway" type="button" aria-label="Move away">▲<small>Away</small></button>
+                <button id="moveLeft" class="repositionButton moveLeft" type="button" aria-label="Move left">◀<small>Left</small></button>
+                <div class="repositionCenter" aria-hidden="true">1 m</div>
+                <button id="moveRight" class="repositionButton moveRight" type="button" aria-label="Move right">▶<small>Right</small></button>
+                <button id="pullForward" class="repositionButton moveToward" type="button" aria-label="Move toward you">▼<small>Toward</small></button>
+              </div>
+            </div>
+            <div class="adjustGroup">
+              <div class="dialLabel"><span>Height · heading</span><span id="headingTrimValue">0.0°</span></div>
+              <div class="adjustRow">
+                <button id="raiseUp" class="repositionButton" type="button" aria-label="Raise">↑<small>Up</small></button>
+                <button id="dropDown" class="repositionButton" type="button" aria-label="Lower">↓<small>Down</small></button>
+                <button id="rotateLeft" class="repositionButton" type="button" aria-label="Rotate left">⟲<small>Rotate</small></button>
+                <button id="rotateRight" class="repositionButton" type="button" aria-label="Rotate right">⟳<small>Rotate</small></button>
+              </div>
+              <div class="dialLabel"><span>Lens match</span><span id="lensTrimValue">0.0°</span></div>
+              <div class="adjustRow two">
+                <button id="lensNarrower" class="repositionButton" type="button">Lens −</button>
+                <button id="lensWider" class="repositionButton" type="button">Lens +</button>
+              </div>
+              <p class="contextTip">Pan the phone: if the model slides against the street, adjust Lens. With Context set to Outlines, nudge until the outlines sit on the real buildings; the model moves with them.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="status">Waiting for payload…</div>
+    <div id="error"></div>
+  </div>
+</div>
+<script src="./mapbox-config.js"></script>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.185.1';
+import { mergeGeometries } from 'https://esm.sh/three@0.185.1/examples/jsm/utils/BufferGeometryUtils.js';
+import { XREstimatedLight } from 'https://esm.sh/three@0.185.1/examples/jsm/webxr/XREstimatedLight.js';
+
+const $ = id => document.getElementById(id);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const toRad = deg => (deg * Math.PI) / 180;
+const AR_PAYLOAD_DB_NAME = 'mbg_ar_payload_db';
+const AR_PAYLOAD_DB_VERSION = 1;
+const AR_PAYLOAD_STORE = 'payloads';
+/* Back to map: when we arrived from app.html in this tab, history.back() returns to it
+   (often straight from the bfcache). Otherwise the href loads app.html, which restores
+   its saved session. Camera and sensors stop first so iOS releases the camera at once. */
+(() => {
+  const back = document.getElementById('backToMap');
+  if (!back) return;
+  back.addEventListener('click', e => {
+    try {
+      const s = typeof state !== 'undefined' ? state : null;
+      if (s && s.cameraStream) s.cameraStream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    let fromApp = false;
+    try {
+      const ref = document.referrer ? new URL(document.referrer) : null;
+      fromApp = Boolean(ref && ref.origin === location.origin && /\/app\.html$/.test(ref.pathname));
+    } catch (_) {}
+    if (fromApp && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+})();
+const MAPBOX_TOKEN = window.MBG_MAPBOX_TOKEN || '';
+const VIEWER_EYE_HEIGHT_M = 1.6;
+const TERRAIN_SAMPLE_ZOOM = 16;
+const DEFAULT_CAMERA_VERTICAL_FOV_DEG = 76;
+/* A real hand can't turn > 20° between two sensor events (~16 ms); a bigger step is
+   the sensor re-referencing its yaw frame, so the world pose is kept instead. */
+const ORIENTATION_RESET_JUMP_DEG = 20;
+/* Compass samples are only trusted when the phone is still and looking near the horizon. */
+const HEADING_SAMPLE_MAX_RATE_DPS = 22;
+const HEADING_SAMPLE_MAX_ELEVATION_DEG = 40;
+/* Rest hold: below this speed, sub-threshold pose changes are sensor noise, not motion. */
+const POSE_REST_SPEED_DPS = 0.9;
+const POSE_REST_HOLD_DEG = 0.22;
+/* Position: once locked, GPS can only move the anchor after a sustained, clear walk. */
+const WALK_FOLLOW_MIN_M = 20;
+const WALK_FOLLOW_ACCURACY_FACTOR = 3;
+const WALK_FOLLOW_SAMPLES = 5;
+const ANCHOR_ELEVATION_RESAMPLE_M = 12;
+const CONTEXT_REBUILD_MOVE_M = 3;
+const REPOSITION_PLANAR_STEP_M = 1;
+const REPOSITION_VERTICAL_STEP_M = 0.5;
+const DEFAULT_MODEL_VERTICAL_OFFSET_M = 0;
+const GROUND_TRACK_NEAR_M = 180;
+const GROUND_TRACK_FAR_M = 1800;
+const GROUND_TRACK_LOCAL_DELTA_FACTOR = 0.15;
+const GROUND_TRACK_LOCAL_DELTA_CLAMP_M = 2.2;
+const GROUND_PROOF_BASE_LIFT_M = 0.08;
+const GROUND_PROOF_SWEEP_FLOAT_M = 0.035;
+const GEO_SAMPLE_WINDOW = 12;
+const GEO_SETTLE_MIN_SAMPLES = 4;
+const GEO_SETTLE_MAX_MS = 7000;
+const GEO_INSTANT_LOCK_ACCURACY_M = 7;
+const CAMERA_LIGHT_SAMPLE_INTERVAL_MS = 650;
+const LOD_FINE_DISTANCE_M = 220;
+const LOD_MEDIUM_DISTANCE_M = 700;
+/* Gyro-locked tracking: the compass only seeds heading; yaw then comes from the gyro. */
+const HEADING_ACQUIRE_MS = 1400;
+const HEADING_ACQUIRE_MIN_SAMPLES = 10;
+const HEADING_OUTLIER_DEG = 9;
+const HEADING_SAMPLE_WINDOW_MS = 2600;
+const HEADING_RELOCK_EASE_MS = 700;
+const POSE_FILTER_MIN_CUTOFF_HZ = 2.2;
+const POSE_FILTER_SPEED_GAIN = 0.3;
+const VIDEO_LATENCY_MS = 55;
+const DEFAULT_LENS_LONG_FOV_DEG = /iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 66.5 : 69;
+const HEADING_TRIM_STEP_DEG = 0.5;
+const LENS_TRIM_STEP_DEG = 0.5;
+const LENS_STORAGE_KEY = 'mbg_ar_lens_trim_v1';
+const CONTEXT_TILE_ZOOM = 15;
+const CONTEXT_VIEWER_CLEARANCE_M = 9;
+
+const payloadKey = new URLSearchParams(window.location.search).get('k') || '';
+const AR_DEBUG = new URLSearchParams(window.location.search).has('debug');
+/* ?sunTime=2026-09-28T18:30 previews the sun at a chosen time (demos, golden-hour checks) */
+const SUN_TIME_OVERRIDE = (() => {
+  const raw = new URLSearchParams(window.location.search).get('sunTime');
+  const date = raw ? new Date(raw) : null;
+  return date && Number.isFinite(date.getTime()) ? date : null;
+})();
+let payload = null;
+const terrainTileCache = new Map();
+/* Context and terrain tiles persist in Cache Storage, so returning to the same site (after a
+   trip back to the map, a reload, or a later visit) builds the surroundings from disk. */
+const TILE_CACHE_NAME = 'mbg-ar-tiles-v1';
+const TILE_CACHE_MAX_AGE_MS = 14 * 24 * 3600 * 1000;
+let tileCachePromise = null;
+function openTileCache() {
+  if (!tileCachePromise) {
+    tileCachePromise = (typeof caches !== 'undefined' && window.isSecureContext)
+      ? caches.open(TILE_CACHE_NAME).catch(() => null)
+      : Promise.resolve(null);
+  }
+  return tileCachePromise;
+}
+async function fetchTileCached(url, init) {
+  const cache = await openTileCache();
+  if (cache) {
+    try {
+      const hit = await cache.match(url);
+      const at = hit ? Number(hit.headers.get('x-mbg-cached-at')) : 0;
+      if (hit && Date.now() - at < TILE_CACHE_MAX_AGE_MS) return hit;
+    } catch (_) { /* fall through to network */ }
+  }
+  const res = await fetch(url, init);
+  if (cache && res.ok) {
+    try {
+      const body = await res.clone().blob();
+      await cache.put(url, new Response(body, {
+        headers: { 'content-type': res.headers.get('content-type') || 'application/octet-stream', 'x-mbg-cached-at': String(Date.now()) }
+      }));
+    } catch (_) { /* quota or opaque response: the network copy still works */ }
+  }
+  return res;
+}
+const terrainSampleCanvas = document.createElement('canvas');
+const terrainSampleCtx = terrainSampleCanvas.getContext('2d', { willReadFrequently: true });
+const lightSampleCanvas = document.createElement('canvas');
+lightSampleCanvas.width = 24;
+lightSampleCanvas.height = 24;
+const lightSampleCtx = lightSampleCanvas.getContext('2d', { willReadFrequently: true });
+
+const state = {
+  renderer: null,
+  scene: null,
+  camera: null,
+  northRoot: null,
+  geoRoot: null,
+  contentRoot: null,
+  modelRoot: null,
+  contextRoot: null,
+  contactShadow: null,
+  modelMetrics: { radius: 12, height: 30, minY: 0, maxY: 30 },
+  userLoc: null,
+  anchorLoc: null,
+  geoSamples: [],
+  geoFirstSampleAtMs: NaN,
+  anchorSettled: false,
+  anchorEyeElevationM: null,
+  siteGroundElevationM: null,
+  lastPlacementDistanceM: NaN,
+  geoPermissionState: 'unknown',
+  deviceOrientation: null,
+  smoothedCameraQuat: null,
+  targetCameraQuat: null,
+  orientationCandidateQuat: new THREE.Quaternion(),
+  lastOrientationAtMs: NaN,
+  lastAbsoluteOrientationAtMs: -Infinity,
+  lastPoseFrameAtMs: performance.now(),
+  compassAccuracyDeg: NaN,
+  motionRateDps: 0,
+  lastMotionAtMs: -Infinity,
+  motionTrackingReady: false,
+  headingDeg: null,
+  headingSource: 'unavailable',
+  geoWatchId: null,
+  cameraStream: null,
+  cameraReady: false,
+  geolocationReady: false,
+  orientationReady: false,
+  orientationGestureRequired: false,
+  orientationListenersAttached: false,
+  orientationUnlockScheduled: false,
+  autoStartAttempted: false,
+  sensorsEnabled: false,
+  sessionActive: false,
+  fixedPosition: true,
+  bindMode: false,
+  bindHoldTimeoutId: null,
+  bindHoldIntervalId: null,
+  manualOffsetM: { east: 0, north: 0, up: DEFAULT_MODEL_VERTICAL_OFFSET_M },
+  calibrationKey: '',
+  previewOffsetM: { east: 0, north: 0, up: 0 },
+  previewActive: true,
+  alignmentRoot: null,
+  alignmentBaseMaterials: [],
+  alignmentSweepMaterials: [],
+  alignmentSweepMeshes: [],
+  alignmentFlowTexture: null,
+  alignmentProofVisible: 0,
+  groundAcknowledged: false,
+  groundAcknowledgedAtS: NaN,
+  xrHeadingOffsetRad: 0,
+  xrSession: null,
+  xrAnchor: null,
+  xrAnchorRoot: null,
+  xrAnchorPending: false,
+  xrAnchorSupported: false,
+  xrHitTestSource: null,
+  latestHitPose: null,
+  depthMesh: null,
+  depthOcclusionActive: false,
+  contextOccluderCount: 0,
+  estimatedLight: null,
+  environmentTexture: null,
+  lightingMode: 'studio',
+  hemiLight: null,
+  sunLight: null,
+  fillLight: null,
+  rimLight: null,
+  sunDirection: new THREE.Vector3(0.45, 0.75, 0.28),
+  lastCameraLightSampleMs: 0,
+  qualityMode: 'auto',
+  detailMode: 'exterior',
+  renderScale: Math.min(window.devicePixelRatio || 1, 1.65),
+  frameTimeEmaMs: 16.7,
+  frameCount: 0,
+  lastFrameAtMs: performance.now(),
+  materialCache: new Map(),
+  textureCache: new Map(),
+  relOrientation: null,
+  relOrientationSeen: false,
+  headingSamples: [],
+  yawOffsetDeg: null,
+  yawOffsetFromDeg: null,
+  yawOffsetEaseStartMs: 0,
+  headingLocked: false,
+  headingAcquireStartMs: NaN,
+  headingDisagreementDeg: 0,
+  headingTrimDeg: 0,
+  lensTrimDeg: 0,
+  viewerLevelM: 0,
+  poseHistory: [],
+  poseFilterQuat: null,
+  poseFilterRaw: null,
+  poseFilterSpeed: 0,
+  lastPoseSampleMs: NaN,
+  wakeLock: null,
+  occluderFeatures: [],
+  occluderMesh: null,
+  viewerTilesKey: '',
+  contextMode: 'massing',
+  contextGroup: null,
+  contextBuildingCount: 0,
+  contextExtentM: 0,
+  contextTilesTotal: 0,
+  contextTilesDone: 0,
+  contextPlanGen: 0,
+  contextTilesAdded: null,
+  contextShownOnce: false,
+  contextFadeStartMs: NaN,
+  siteFootprintRings: null,
+  interiorRoot: null,
+  skyEnvKey: '',
+  skyEnvLastMs: 0,
+  cameraPalette: null
+};
+
+const orientationEuler = new THREE.Euler();
+const orientationQ0 = new THREE.Quaternion();
+const orientationQ1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+const orientationZee = new THREE.Vector3(0, 0, 1);
+
+const LAYER_FALLBACKS = {
+  podium: '#a7b5c7',
+  podiumGlass: '#78a8bc',
+  podiumFrames: '#5e6264',
+  podiumDoors: '#6f9eaf',
+  podiumCanopies: '#716a60',
+  podiumLobby: '#b9aa91',
+  podiumCap: '#8f8170',
+  core: '#c2ccd7',
+  windows: '#6e9fc8',
+  borders: '#d9dfe6',
+  windowSills: '#c7ced5',
+  mullions: '#5f6770',
+  seps: '#6f7f90',
+  balconies: '#9aa9bb',
+  railings: '#495362',
+  cornices: '#b8c4d1',
+  roof: '#3f5064',
+  roofTerraces: '#526477',
+  roofScreens: '#687581',
+  roofEquipment: '#3e4952',
+  roofPlanting: '#58745d',
+  parapets: '#556475',
+  rooftopStructures: '#8694a5',
+  spires: '#56667d',
+  verticalRibs: '#677c92',
+  exoskeleton: '#5f6770',
+  facadePanels: '#ced7e1',
+  facadeJoints: '#8e9aaa',
+  piers: '#9a8f82',
+  accentPanels: '#8a5a44',
+  floorSlabs: '#c8ced3',
+  pillars: '#858b91',
+  interiorWalls: '#77736e',
+  elevatorShafts: '#4d5b66',
+  elevators: '#5e9ec5',
+  stairs: '#98704b',
+  stairRailings: '#3f454a'
+};
+
+const GLASS_LAYERS = new Set(['windows', 'podiumGlass', 'podiumDoors', 'elevators']);
+const METAL_LAYERS = new Set([
+  'podiumFrames', 'podiumCanopies', 'mullions', 'railings', 'cornices', 'roofScreens',
+  'roofEquipment', 'parapets', 'spires', 'verticalRibs', 'exoskeleton', 'facadeJoints', 'stairRailings'
+]);
+const INTERNAL_LAYERS = new Set([
+  'floorSlabs', 'pillars', 'interiorWalls', 'elevatorShafts', 'elevators', 'stairs', 'stairRailings'
+]);
+const FINE_DETAIL_LAYERS = new Set([
+  'mullions', 'windowSills', 'facadeJoints', 'railings', 'stairRailings', 'pillars', 'roofEquipment'
+]);
+const MEDIUM_DETAIL_LAYERS = new Set([
+  'borders', 'seps', 'verticalRibs', 'exoskeleton', 'facadePanels', 'podiumFrames',
+  'podiumDoors', 'podiumCanopies', 'roofScreens', 'roofPlanting', 'stairs', 'elevators', 'accentPanels'
+]);
+
+function setStatus(msg) {
+  const el = $('status');
+  if (el) el.textContent = msg;
+}
+
+function setError(msg) {
+  const el = $('error');
+  if (!el) return;
+  el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg || '';
+}
+
+function isCompactViewport() {
+  return window.matchMedia('(max-width: 680px)').matches;
+}
+
+function setPanelCollapsed(collapsed) {
+  document.body.classList.toggle('panel-collapsed', Boolean(collapsed));
+  const toggle = $('panelToggle');
+  if (toggle) toggle.textContent = document.body.classList.contains('panel-collapsed') ? 'Expand' : 'Minimize';
+}
+
+function syncUiState() {
+  document.body.classList.toggle('bind-mode', Boolean(state.bindMode));
+  const fixedBtn = $('toggleFixedPosition');
+  if (fixedBtn) {
+    fixedBtn.textContent = 'Re-aim (GPS + compass)';
+    fixedBtn.setAttribute('aria-pressed', 'true');
+  }
+  const lockBtn = $('quickLock');
+  if (lockBtn) {
+    lockBtn.textContent = state.positionFrozen ? 'Locked' : 'Lock';
+    lockBtn.classList.toggle('is-locked', Boolean(state.positionFrozen));
+  }
+  const bindBtn = $('toggleBindMode');
+  if (bindBtn) bindBtn.textContent = state.bindMode ? 'Done Repositioning' : 'Reposition Model';
+  if ($('headingTrimValue')) $('headingTrimValue').textContent = `${state.headingTrimDeg >= 0 ? '+' : ''}${state.headingTrimDeg.toFixed(1)}°`;
+  if ($('lensTrimValue')) $('lensTrimValue').textContent = `${state.lensTrimDeg >= 0 ? '+' : ''}${state.lensTrimDeg.toFixed(1)}°`;
+  const groundBtn = $('calibrateGround');
+  if (groundBtn) groundBtn.disabled = !state.sessionActive || !state.latestHitPose || state.lastPlacementDistanceM > 60;
+}
+
+function getCalibrationStorageKey() {
+  const site = payload && payload.site;
+  if (!site || !Number.isFinite(Number(site.lng)) || !Number.isFinite(Number(site.lat))) return '';
+  return `mbg_ar_calibration_${Number(site.lng).toFixed(5)}_${Number(site.lat).toFixed(5)}`;
+}
+
+function loadSavedCalibration() {
+  state.calibrationKey = getCalibrationStorageKey();
+  try {
+    const lens = Number(localStorage.getItem(LENS_STORAGE_KEY));
+    if (Number.isFinite(lens)) state.lensTrimDeg = clamp(lens, -20, 20);
+  } catch (err) { /* storage unavailable */ }
+  if (!state.calibrationKey) return;
+  try {
+    const stored = JSON.parse(localStorage.getItem(state.calibrationKey) || 'null');
+    if (!stored || typeof stored !== 'object') return;
+    ['east', 'north', 'up'].forEach(axis => {
+      const value = Number(stored[axis]);
+      if (Number.isFinite(value)) state.manualOffsetM[axis] = clamp(value, -100, 100);
+    });
+    if (Number.isFinite(Number(stored.headingTrimDeg))) state.headingTrimDeg = clamp(Number(stored.headingTrimDeg), -45, 45);
+    if (Number.isFinite(Number(stored.viewerLevelM))) state.viewerLevelM = clamp(Number(stored.viewerLevelM), 0, 120);
+  } catch (err) {
+    console.warn('Saved AR calibration could not be read.', err);
+  }
+}
+
+function saveCalibration() {
+  if (!state.calibrationKey) state.calibrationKey = getCalibrationStorageKey();
+  if (!state.calibrationKey) return;
+  try {
+    localStorage.setItem(state.calibrationKey, JSON.stringify({
+      east: state.manualOffsetM.east,
+      north: state.manualOffsetM.north,
+      up: state.manualOffsetM.up,
+      headingTrimDeg: state.headingTrimDeg,
+      viewerLevelM: state.viewerLevelM,
+      updatedAt: new Date().toISOString()
+    }));
+  } catch (err) {
+    console.warn('AR calibration could not be saved.', err);
+  }
+}
+
+function clearBindHold() {
+  if (state.bindHoldTimeoutId !== null) {
+    window.clearTimeout(state.bindHoldTimeoutId);
+    state.bindHoldTimeoutId = null;
+  }
+  if (state.bindHoldIntervalId !== null) {
+    window.clearInterval(state.bindHoldIntervalId);
+    state.bindHoldIntervalId = null;
+  }
+}
+
+function beginBindHold(stepFn) {
+  clearBindHold();
+  stepFn();
+  state.bindHoldTimeoutId = window.setTimeout(() => {
+    state.bindHoldIntervalId = window.setInterval(stepFn, 90);
+  }, 220);
+}
+
+function bindDialControl(buttonId, stepFn) {
+  const button = $(buttonId);
+  if (!button) return;
+
+  const start = event => {
+    if (event && typeof event.button === 'number' && event.button !== 0) return;
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    beginBindHold(stepFn);
+  };
+  const stop = () => clearBindHold();
+  const keyStep = event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    stepFn();
+  };
+
+  button.addEventListener('pointerdown', start);
+  button.addEventListener('pointerup', stop);
+  button.addEventListener('pointercancel', stop);
+  button.addEventListener('pointerleave', stop);
+  button.addEventListener('keydown', keyStep);
+}
+
+function smoothstep(edge0, edge1, x) {
+  if (!(edge1 > edge0)) return x >= edge1 ? 1 : 0;
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - (2 * t));
+}
+
+function updateSensorState() {
+  state.sensorsEnabled = Boolean(
+    state.cameraReady &&
+    state.geolocationReady &&
+    (state.orientationReady || !state.orientationGestureRequired)
+  );
+}
+
+function scheduleDeferredOrientationUnlock() {
+  if (!state.orientationGestureRequired || state.orientationUnlockScheduled) return;
+  state.orientationUnlockScheduled = true;
+  const unlock = async () => {
+    state.orientationUnlockScheduled = false;
+    if (!state.orientationGestureRequired || state.orientationReady) return;
+    try {
+      await enableOrientation({ userInitiated: true });
+      setError('');
+      updateSensorState();
+      setStatus('Motion access granted. Camera, location, and orientation are now live.');
+    } catch (err) {
+      setError(String(err && err.message ? err.message : err));
+    }
+  };
+  window.addEventListener('pointerdown', unlock, { once: true, passive: true });
+  window.addEventListener('touchend', unlock, { once: true, passive: true });
+}
+
+function getGeoPermissionHelp() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    return 'Location access is denied. Re-enable it for this browser in iPhone Settings > Privacy & Security > Location Services, then reload this page.';
+  }
+  return 'Location access is denied. Re-enable location for this site in your browser site settings, then reload and tap Enable Sensors again.';
+}
+
+async function getGeolocationPermissionState() {
+  if (!navigator.permissions || !navigator.permissions.query) return 'unknown';
+  try {
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    const sync = () => {
+      state.geoPermissionState = status.state || 'unknown';
+    };
+    sync();
+    return state.geoPermissionState;
+  } catch (err) {
+    return 'unknown';
+  }
+}
+
+function openArPayloadDb() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error('IndexedDB unavailable.'));
+      return;
+    }
+    const req = window.indexedDB.open(AR_PAYLOAD_DB_NAME, AR_PAYLOAD_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(AR_PAYLOAD_STORE)) {
+        const store = db.createObjectStore(AR_PAYLOAD_STORE, { keyPath: 'id' });
+        store.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('Failed to open AR payload database.'));
+  });
+}
+
+async function loadArPayloadByKey(key) {
+  if (!key) return null;
+
+  if (window.indexedDB) {
+    try {
+      const db = await openArPayloadDb();
+      try {
+        const row = await new Promise((resolve, reject) => {
+          const tx = db.transaction(AR_PAYLOAD_STORE, 'readonly');
+          const req = tx.objectStore(AR_PAYLOAD_STORE).get(key);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => reject(req.error || new Error('Failed to read AR payload.'));
+        });
+        if (row && row.payload) return row.payload;
+      } finally {
+        db.close();
+      }
+    } catch (err) {
+      console.warn('IndexedDB AR payload read failed; trying localStorage fallback.', err);
+    }
+  }
+
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.warn('localStorage AR payload parse failed.', err);
+    return null;
+  }
+}
+
+function localMetersProjector(centerLng, centerLat) {
+  const latRad = (centerLat * Math.PI) / 180;
+  const mxPerDegLng = 111320 * Math.cos(latRad);
+  const mxPerDegLat = 110540;
+  return (lng, lat) => ({
+    x: (lng - centerLng) * mxPerDegLng,
+    y: (lat - centerLat) * mxPerDegLat
+  });
+}
+
+function geoDeltaMeters(from, to) {
+  const avgLat = ((from.lat + to.lat) * 0.5 * Math.PI) / 180;
+  const metersPerDegLng = 111320 * Math.cos(avgLat);
+  const metersPerDegLat = 110540;
+  const east = (to.lng - from.lng) * metersPerDegLng;
+  const north = (to.lat - from.lat) * metersPerDegLat;
+  return {
+    east,
+    north,
+    distanceMeters: Math.hypot(east, north)
+  };
+}
+
+function ringSignedArea(ring = []) {
+  let area = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    area += (a.x * b.y) - (b.x * a.y);
+  }
+  return area / 2;
+}
+
+function ensureClockwise(ring = []) {
+  return ringSignedArea(ring) > 0 ? ring.slice().reverse() : ring;
+}
+
+function ensureCounterClockwise(ring = []) {
+  return ringSignedArea(ring) < 0 ? ring.slice().reverse() : ring;
+}
+
+function toVector2Ring(rawRing, project) {
+  if (!Array.isArray(rawRing) || rawRing.length < 4) return [];
+  const ring = rawRing.map(([lng, lat]) => {
+    const p = project(lng, lat);
+    return new THREE.Vector2(p.x, p.y);
+  });
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (first && last && first.distanceTo(last) < 1e-6) ring.pop();
+  return ring;
+}
+
+function polygonToGeometry(polyCoords, project, depth, base) {
+  if (!Array.isArray(polyCoords) || !polyCoords.length || !(depth > 0)) return null;
+  const outer = ensureCounterClockwise(toVector2Ring(polyCoords[0], project));
+  if (outer.length < 3) return null;
+  const shape = new THREE.Shape(outer);
+  for (let i = 1; i < polyCoords.length; i++) {
+    const hole = ensureClockwise(toVector2Ring(polyCoords[i], project));
+    if (hole.length < 3) continue;
+    shape.holes.push(new THREE.Path(hole));
+  }
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: false,
+    steps: 1,
+    curveSegments: 1
+  });
+  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, base, 0);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function shapeToGroundGeometry(shape, base, lift = 0) {
+  const geo = new THREE.ShapeGeometry(shape);
+  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, base + lift, 0);
+  return geo;
+}
+
+function rawRingSignature(rawRing = []) {
+  if (!Array.isArray(rawRing) || !rawRing.length) return '';
+  const usable = rawRing.slice();
+  const first = usable[0];
+  const last = usable[usable.length - 1];
+  if (
+    Array.isArray(first) &&
+    Array.isArray(last) &&
+    first.length >= 2 &&
+    last.length >= 2 &&
+    Math.abs(Number(first[0]) - Number(last[0])) < 1e-9 &&
+    Math.abs(Number(first[1]) - Number(last[1])) < 1e-9
+  ) {
+    usable.pop();
+  }
+  return usable
+    .map(coord => `${Number(coord[0]).toFixed(7)},${Number(coord[1]).toFixed(7)}`)
+    .join('|');
+}
+
+function rawPolygonSignature(polyCoords = []) {
+  return polyCoords.map(rawRingSignature).join('||');
+}
+
+function extractGroundFootprints(data) {
+  const site = data && data.site ? data.site : null;
+  const centerLng = Number(site && site.lng);
+  const centerLat = Number(site && site.lat);
+  if (!Number.isFinite(centerLng) || !Number.isFinite(centerLat)) return [];
+
+  const project = localMetersProjector(centerLng, centerLat);
+  const candidates = [];
+  let minBase = Infinity;
+
+  Object.entries((data && data.geometry) || {}).forEach(([layerKey, fc]) => {
+    const features = fc && Array.isArray(fc.features) ? fc.features : [];
+    features.forEach(feat => {
+      if (!feat || !feat.geometry) return;
+      const base = Number(feat.properties && feat.properties.b);
+      const top = Number(feat.properties && feat.properties.h);
+      if (!Number.isFinite(base) || !Number.isFinite(top) || !(top > base)) return;
+      minBase = Math.min(minBase, base);
+      if (feat.geometry.type === 'Polygon') {
+        candidates.push({ layerKey, base, coords: feat.geometry.coordinates });
+      } else if (feat.geometry.type === 'MultiPolygon' && Array.isArray(feat.geometry.coordinates)) {
+        feat.geometry.coordinates.forEach(polyCoords => {
+          candidates.push({ layerKey, base, coords: polyCoords });
+        });
+      }
+    });
+  });
+
+  if (!candidates.length || !Number.isFinite(minBase)) return [];
+  const baseThreshold = minBase + 0.25;
+  const nearGround = candidates.filter(item => item.base <= baseThreshold);
+  const preferredLayers = ['podium', 'core', 'facadePanels', 'borders', 'windows', 'roof', 'parapets'];
+  let selected = [];
+  preferredLayers.some(layerKey => {
+    const hits = nearGround.filter(item => item.layerKey === layerKey);
+    if (!hits.length) return false;
+    selected = hits;
+    return true;
+  });
+  if (!selected.length) selected = nearGround;
+
+  const seen = new Set();
+  return selected.map(item => {
+    const signature = rawPolygonSignature(item.coords);
+    if (seen.has(signature)) return null;
+    seen.add(signature);
+    const outer = ensureCounterClockwise(toVector2Ring(item.coords[0], project));
+    if (outer.length < 3) return null;
+    const holes = item.coords
+      .slice(1)
+      .map(ring => ensureClockwise(toVector2Ring(ring, project)))
+      .filter(ring => ring.length >= 3);
+    return { outer, holes, base: item.base };
+  }).filter(Boolean);
+}
+
+function createAlignmentFlowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  bg.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  bg.addColorStop(0.5, 'rgba(255, 255, 255, 0.06)');
+  bg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 4);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  for (let i = -1; i < 6; i++) {
+    const y = i * 54;
+    const band = ctx.createLinearGradient(0, y, 0, y + 40);
+    band.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    band.addColorStop(0.26, 'rgba(143, 215, 255, 0.18)');
+    band.addColorStop(0.58, 'rgba(255, 225, 149, 0.52)');
+    band.addColorStop(0.82, 'rgba(143, 215, 255, 0.16)');
+    band.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = band;
+    ctx.fillRect(-40, y, canvas.width + 80, 40);
+  }
+  ctx.restore();
+
+  const falloff = ctx.createRadialGradient(
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.width * 0.08,
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.width * 0.55
+  );
+  falloff.addColorStop(0, 'rgba(255, 248, 214, 0.45)');
+  falloff.addColorStop(0.55, 'rgba(153, 224, 255, 0.16)');
+  falloff.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = falloff;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1.35, 1.35);
+  return texture;
+}
+
+function buildAlignmentProofGroup(data) {
+  const footprints = extractGroundFootprints(data);
+  if (!footprints.length) return null;
+
+  const group = new THREE.Group();
+  const baseMaterials = [];
+  const sweepMaterials = [];
+  const sweepMeshes = [];
+  const flowTexture = createAlignmentFlowTexture();
+
+  footprints.forEach((footprint, footprintIndex) => {
+    const shape = new THREE.Shape(footprint.outer);
+    footprint.holes.forEach(hole => shape.holes.push(new THREE.Path(hole)));
+
+    const baseGeo = shapeToGroundGeometry(shape, footprint.base, GROUND_PROOF_BASE_LIFT_M * 0.35);
+    const baseMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color('#6fcfff'),
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2
+    });
+    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    baseMesh.renderOrder = 1;
+    group.add(baseMesh);
+    baseMaterials.push(baseMat);
+
+    const sweepGeo = shapeToGroundGeometry(shape, footprint.base, GROUND_PROOF_BASE_LIFT_M);
+    const sweepMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color('#ffffff'),
+      map: flowTexture,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      polygonOffset: true,
+      polygonOffsetFactor: -3,
+      polygonOffsetUnits: -3
+    });
+    const sweepMesh = new THREE.Mesh(sweepGeo, sweepMat);
+    sweepMesh.renderOrder = 2;
+    sweepMesh.userData.baseY = footprint.base + GROUND_PROOF_BASE_LIFT_M;
+    group.add(sweepMesh);
+    sweepMaterials.push(sweepMat);
+    sweepMeshes.push(sweepMesh);
+  });
+
+  group.visible = false;
+  group.userData.baseMaterials = baseMaterials;
+  group.userData.sweepMaterials = sweepMaterials;
+  group.userData.sweepMeshes = sweepMeshes;
+  group.userData.lightMaterial = null;
+  group.userData.flowTexture = flowTexture;
+  return group;
+}
+
+function groundAcknowledged() {
+  return Number.isFinite(state.siteGroundElevationM) && Number.isFinite(state.anchorEyeElevationM);
+}
+
+function updateAlignmentProof(nowS) {
+  if (!state.alignmentRoot) return;
+
+  const ready = groundAcknowledged();
+  if (ready !== state.groundAcknowledged) {
+    state.groundAcknowledged = ready;
+    state.groundAcknowledgedAtS = ready ? nowS : NaN;
+  }
+
+  const targetVisibility = ready ? 1 : 0;
+  state.alignmentProofVisible = THREE.MathUtils.lerp(
+    state.alignmentProofVisible,
+    targetVisibility,
+    ready ? 0.08 : 0.16
+  );
+  state.alignmentRoot.visible = state.alignmentProofVisible > 0.01;
+
+  if (!state.alignmentRoot.visible) return;
+
+  if (state.alignmentFlowTexture) {
+    state.alignmentFlowTexture.offset.x = (nowS * 0.035) % 1;
+    state.alignmentFlowTexture.offset.y = (-nowS * 0.18) % 1;
+  }
+
+  const intro = ready && Number.isFinite(state.groundAcknowledgedAtS)
+    ? Math.exp(-Math.max(0, nowS - state.groundAcknowledgedAtS) * 1.25)
+    : 0;
+
+  state.alignmentBaseMaterials.forEach((mat, index) => {
+    const shimmer = 0.09 + (0.028 * Math.sin((nowS * 1.35) + (index * 0.55)));
+    mat.opacity = state.alignmentProofVisible * (shimmer + (0.08 * intro));
+  });
+
+  state.alignmentSweepMaterials.forEach((mat, index) => {
+    const shimmer = 0.21 + (0.06 * Math.sin((nowS * 2.1) + (index * 0.72)));
+    mat.opacity = state.alignmentProofVisible * (shimmer + (0.16 * intro));
+  });
+
+  state.alignmentSweepMeshes.forEach((mesh, index) => {
+    mesh.position.y = mesh.userData.baseY + (GROUND_PROOF_SWEEP_FLOAT_M * (0.35 + (0.65 * intro)))
+      + (0.012 * Math.sin((nowS * 2.4) + (index * 0.78)));
+  });
+}
+
+function getLayerStyle(data, layerKey) {
+  const style = data && data.styles && data.styles[layerKey];
+  return style && typeof style === 'object' ? style : {};
+}
+
+function textureKindFor(pattern, layerKey) {
+  const value = String(pattern || '').toLowerCase();
+  if (/brick/.test(value)) return 'brick';
+  if (/ribbed|sheet-metal|brushed|gunmetal|carbon|metal/.test(value) || METAL_LAYERS.has(layerKey)) return 'metal';
+  if (/glass|mesh|frost/.test(value) || GLASS_LAYERS.has(layerKey)) return 'glass';
+  if (/ceramic|panel/.test(value) || layerKey === 'facadePanels') return 'panel';
+  if (/concrete|stucco|limestone|gravel|bitumen|membrane/.test(value)) return 'mineral';
+  if (layerKey === 'roofPlanting') return 'planting';
+  return value && value !== 'none' ? 'mineral' : 'none';
+}
+
+/* ---------- procedural surface textures (colour variation + relief) ---------- */
+const TEXTURE_SIZE = 512;
+/* metres covered by one texture tile, per surface kind (side UVs are in metres) */
+const TEXTURE_TILE_M = { brick: 0.6, metal: 1.2, glass: 3.0, panel: 3.0, mineral: 2.4, planting: 2.0 };
+
+function hash2(x, y) {
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+function valueNoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function fbm(x, y, octaves = 4) {
+  let sum = 0, amp = 0.5, f = 1;
+  for (let i = 0; i < octaves; i++) { sum += valueNoise(x * f, y * f) * amp; amp *= 0.5; f *= 2; }
+  return sum;
+}
+
+/* height(x, y) in [0,1] and tone(x, y) in [0.8,1.05] for each kind (tileable over 0..1) */
+function surfaceField(kind, u, v) {
+  const n = fbm(u * 24, v * 24, 4);
+  if (kind === 'brick') {
+    const rows = 8, cols = 4;
+    const row = Math.floor(v * rows);
+    const uu = u * cols + (row % 2 ? 0.5 : 0);
+    const fu = uu - Math.floor(uu), fv = v * rows - row;
+    const mortar = Math.min(fu, 1 - fu) * 4.4 < 0.1 || Math.min(fv, 1 - fv) < 0.07;
+    const brickTone = 0.86 + hash2(Math.floor(uu), row) * 0.16;
+    return { h: mortar ? 0.15 : 0.85 + n * 0.1, tone: mortar ? 0.8 : brickTone - n * 0.05 };
+  }
+  if (kind === 'panel') {
+    const fu = (u * 2) % 1, fv = (v * 2) % 1;
+    const joint = Math.min(fu, 1 - fu) < 0.012 || Math.min(fv, 1 - fv) < 0.012;
+    return { h: joint ? 0.1 : 0.8, tone: joint ? 0.82 : 0.96 + (hash2(Math.floor(u * 2), Math.floor(v * 2)) - 0.5) * 0.05 + (n - 0.5) * 0.03 };
+  }
+  if (kind === 'metal') {
+    const brushed = fbm(u * 2, v * 120, 2);
+    return { h: 0.5 + (brushed - 0.5) * 0.25, tone: 0.93 + brushed * 0.08 };
+  }
+  if (kind === 'glass') {
+    const fu = (u * 2) % 1, fv = (v * 2) % 1;
+    const frame = Math.min(fu, 1 - fu) < 0.01 || Math.min(fv, 1 - fv) < 0.01;
+    return { h: frame ? 0.3 : 0.6, tone: frame ? 0.8 : 1 };
+  }
+  if (kind === 'planting') {
+    const leaf = fbm(u * 60, v * 60, 3);
+    return { h: leaf, tone: 0.75 + leaf * 0.35 };
+  }
+  /* mineral: concrete / render / stone with formwork lifts and weathering */
+  const lift = Math.min((v * 4) % 1, 1 - ((v * 4) % 1)) < 0.006;
+  const streak = fbm(u * 40, v * 3, 3);
+  return { h: lift ? 0.3 : 0.55 + (n - 0.5) * 0.3, tone: (lift ? 0.9 : 0.94) + (n - 0.5) * 0.08 - Math.max(0, streak - 0.6) * 0.1 };
+}
+
+function createProceduralTextureSet(kind) {
+  if (kind === 'none') return { map: null, normalMap: null, roughnessMap: null };
+  if (state.textureCache.has(kind)) return state.textureCache.get(kind);
+  const N = TEXTURE_SIZE;
+  const heights = new Float32Array(N * N);
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = colorCanvas.height = N;
+  const cctx = colorCanvas.getContext('2d');
+  const colorData = cctx.createImageData(N, N);
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const f = surfaceField(kind, x / N, y / N);
+      heights[y * N + x] = f.h;
+      const t = clamp(f.tone, 0, 1) * 255;
+      const i = (y * N + x) * 4;
+      colorData.data[i] = colorData.data[i + 1] = colorData.data[i + 2] = t;
+      colorData.data[i + 3] = 255;
+    }
+  }
+  cctx.putImageData(colorData, 0, 0);
+  /* normal map from the height field (wrapping Sobel) */
+  const normalCanvas = document.createElement('canvas');
+  normalCanvas.width = normalCanvas.height = N;
+  const nctx = normalCanvas.getContext('2d');
+  const normalData = nctx.createImageData(N, N);
+  const strength = kind === 'brick' ? 3.2 : (kind === 'panel' ? 2.4 : (kind === 'metal' ? 1.2 : 1.6));
+  const H = (x, y) => heights[((y + N) % N) * N + ((x + N) % N)];
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const dx = (H(x + 1, y) - H(x - 1, y)) * strength;
+      const dy = (H(x, y + 1) - H(x, y - 1)) * strength;
+      const len = Math.hypot(dx, dy, 1);
+      const i = (y * N + x) * 4;
+      normalData.data[i] = (-dx / len * 0.5 + 0.5) * 255;
+      normalData.data[i + 1] = (dy / len * 0.5 + 0.5) * 255;
+      normalData.data[i + 2] = (1 / len * 0.5 + 0.5) * 255;
+      normalData.data[i + 3] = 255;
+    }
+  }
+  nctx.putImageData(normalData, 0, 0);
+  const repeat = 1 / (TEXTURE_TILE_M[kind] || 2);
+  const anisotropy = state.renderer ? Math.min(8, state.renderer.capabilities.getMaxAnisotropy()) : 4;
+  const make = (canvas, colorSpace) => {
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = colorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(repeat, repeat);
+    tex.anisotropy = anisotropy;
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    return tex;
+  };
+  const set = { map: make(colorCanvas, THREE.SRGBColorSpace), normalMap: make(normalCanvas, THREE.NoColorSpace), roughnessMap: null };
+  state.textureCache.set(kind, set);
+  return set;
+}
+
+/* Soft ground-contact occlusion: facades darken gently over the first metres above
+   grade, which anchors the model in the photo instead of letting it float. */
+function addContactOcclusion(material) {
+  material.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying float vMbgHeight;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMbgHeight = position.y;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vMbgHeight;')
+      .replace('#include <aomap_fragment>', '#include <aomap_fragment>\nfloat mbgGroundAO = mix(0.62, 1.0, smoothstep(0.0, 4.5, vMbgHeight));\nreflectedLight.indirectDiffuse *= mbgGroundAO;\nreflectedLight.directDiffuse *= mix(0.85, 1.0, smoothstep(0.0, 2.5, vMbgHeight));');
+  };
+  material.customProgramCacheKey = () => 'mbg-contact-ao';
+}
+
+function layerAppearance(data, layerKey, props = {}) {
+  const cfg = data.config || {};
+  const style = getLayerStyle(data, layerKey);
+  const color = typeof props.c === 'string' && props.c
+    ? props.c
+    : (style.fillColor || LAYER_FALLBACKS[layerKey] || cfg.wallColor || '#c2ccd7');
+  let opacity = Number(props.a);
+  if (!Number.isFinite(opacity)) opacity = Number(style.fillOpacity);
+  if (!Number.isFinite(opacity)) {
+    if (layerKey === 'core') opacity = Number(cfg.facadeAlpha);
+    else if (GLASS_LAYERS.has(layerKey)) opacity = Number(cfg.windowAlpha);
+  }
+  if (!Number.isFinite(opacity)) opacity = 1;
+  const pattern = typeof props.p === 'string' && props.p
+    ? props.p
+    : (style.pattern || (layerKey === 'core' ? cfg.wallTex : 'none'));
+  return {
+    color,
+    opacity: clamp(opacity, 0.04, 1),
+    pattern: pattern || 'none',
+    part: String(props.part || props.roomType || '')
+  };
+}
+
+function getPbrMaterial(data, layerKey, appearance) {
+  const glass = GLASS_LAYERS.has(layerKey);
+  const metal = METAL_LAYERS.has(layerKey);
+  const internal = INTERNAL_LAYERS.has(layerKey);
+  const kind = textureKindFor(appearance.pattern, layerKey);
+  const key = [layerKey, appearance.part, appearance.color, appearance.opacity.toFixed(3), kind, state.detailMode].join('|');
+  if (state.materialCache.has(key)) return state.materialCache.get(key);
+  const textureSet = createProceduralTextureSet(glass ? 'none' : kind);
+  const isPlanting = layerKey === 'roofPlanting';
+  const isMineral = kind === 'mineral' || kind === 'brick' || kind === 'panel';
+  let material;
+  if (glass) {
+    /* Architectural glass: dark body, strong Fresnel reflection of the sky/sun.
+       No transmission pass (it would refract the scene, not the camera feed). */
+    /* coated vision glass behaves like a tinted partial mirror: it mostly shows the sky */
+    const body = new THREE.Color(appearance.color).lerp(new THREE.Color('#5f7b8e'), 0.35);
+    const seeThrough = state.detailMode === 'complete';
+    material = new THREE.MeshPhysicalMaterial({
+      color: body,
+      metalness: seeThrough ? 0.08 : 0.45,
+      roughness: 0.06,
+      ior: 1.52,
+      specularIntensity: 1,
+      envMapIntensity: seeThrough ? 0.6 : 1.35,
+      transparent: true,
+      opacity: seeThrough ? 0.2 : clamp(Math.max(appearance.opacity, 0.84), 0.84, 0.94),
+      depthWrite: !seeThrough,
+      side: THREE.FrontSide
+    });
+  } else {
+    /* Exterior surfaces are opaque in AR: translucent walls read as ghosts over a photo. */
+    const opacity = internal ? appearance.opacity : 1;
+    material = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(appearance.color),
+      map: textureSet.map,
+      normalMap: textureSet.normalMap,
+      normalScale: new THREE.Vector2(isMineral ? 0.55 : 0.35, isMineral ? 0.55 : 0.35),
+      roughness: metal ? 0.42 : (isPlanting ? 0.95 : (isMineral ? 0.86 : 0.72)),
+      metalness: metal ? 0.55 : 0.0,
+      envMapIntensity: metal ? 0.7 : 0.26,
+      transparent: opacity < 0.995,
+      opacity,
+      side: THREE.DoubleSide,
+      shadowSide: THREE.FrontSide,
+      depthWrite: opacity >= 0.82
+    });
+    if (!internal) addContactOcclusion(material);
+  }
+  material.userData.baseOpacity = material.opacity;
+  material.userData.layer = layerKey;
+  state.materialCache.set(key, material);
+  return material;
+}
+
+function buildModelGroup(data) {
+  const site = data.site || null;
+  const centerLng = Number(site && site.lng);
+  const centerLat = Number(site && site.lat);
+  if (!Number.isFinite(centerLng) || !Number.isFinite(centerLat)) return null;
+
+  const project = localMetersProjector(centerLng, centerLat);
+  const group = new THREE.Group();
+  const buckets = new Map();
+
+  Object.entries(data.geometry || {}).forEach(([layerKey, fc]) => {
+    const features = fc && Array.isArray(fc.features) ? fc.features : [];
+    features.forEach(feat => {
+      if (!feat || !feat.geometry) return;
+      const props = feat.properties || {};
+      const base = Number(props.b);
+      const top = Number(props.h);
+      const depth = top - base;
+      if (!Number.isFinite(base) || !Number.isFinite(top) || !(depth > 0.0001)) return;
+      const appearance = layerAppearance(data, layerKey, props);
+      const bucketKey = [layerKey, appearance.part, appearance.color, appearance.opacity.toFixed(3), appearance.pattern].join('|');
+      if (!buckets.has(bucketKey)) buckets.set(bucketKey, { layerKey, appearance, geometries: [] });
+      const bucket = buckets.get(bucketKey);
+      const addPolygon = coords => {
+        const geometry = polygonToGeometry(coords, project, depth, base);
+        if (geometry) bucket.geometries.push(geometry);
+      };
+      if (feat.geometry.type === 'Polygon') addPolygon(feat.geometry.coordinates);
+      else if (feat.geometry.type === 'MultiPolygon' && Array.isArray(feat.geometry.coordinates)) {
+        feat.geometry.coordinates.forEach(addPolygon);
+      }
+    });
+  });
+
+  buckets.forEach(bucket => {
+    if (!bucket.geometries.length) return;
+    const geometry = bucket.geometries.length === 1
+      ? bucket.geometries[0]
+      : mergeGeometries(bucket.geometries, false);
+    if (!geometry) return;
+    if (bucket.geometries.length > 1) bucket.geometries.forEach(item => item.dispose());
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+    const material = getPbrMaterial(data, bucket.layerKey, bucket.appearance);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = `${bucket.layerKey}${bucket.appearance.part ? `:${bucket.appearance.part}` : ''}`;
+    mesh.castShadow = !GLASS_LAYERS.has(bucket.layerKey) && bucket.layerKey !== 'roofPlanting';
+    mesh.receiveShadow = true;
+    mesh.frustumCulled = true;
+    mesh.renderOrder = GLASS_LAYERS.has(bucket.layerKey) ? 20 : 1;
+    mesh.userData.layer = bucket.layerKey;
+    mesh.userData.internal = INTERNAL_LAYERS.has(bucket.layerKey);
+    mesh.userData.lod = FINE_DETAIL_LAYERS.has(bucket.layerKey)
+      ? 'fine'
+      : (MEDIUM_DETAIL_LAYERS.has(bucket.layerKey) ? 'medium' : 'primary');
+    group.add(mesh);
+  });
+
+  group.updateMatrixWorld(true);
+  group.userData.materials = [...new Set([...state.materialCache.values()])];
+  return group.children.length ? group : null;
+}
+
+/* ---------- urban context: mapped buildings as visible masses and occluders ----------
+   Mapbox Streets footprints are fetched around the site as soon as the model loads,
+   then along the sight line and around the viewer once location is known. They are
+   built in the same transform as the model, so buildings in front hide it, buildings
+   behind frame it, and lining the masses up with the real street aligns the model.
+   Buildings containing or hugging the viewer (the house you stand in or on) are
+   excluded, and so is the target parcel itself. */
+const CONTEXT_MODES = {
+  massing: 'Massing',
+  ghost: 'Ghosted',
+  outlines: 'Outlines',
+  occlusion: 'Occlusion',
+  off: 'Off'
+};
+const CONTEXT_MODE_ORDER = ['massing', 'ghost', 'outlines', 'occlusion', 'off'];
+const CONTEXT_MODE_STORAGE_KEY = 'mbg_ar_context_mode_v1';
+const CONTEXT_MAX_TILES = 36;
+const CONTEXT_FETCH_CONCURRENCY = 6;
+const CONTEXT_SAMPLE_STEP_M = 220;
+const CONTEXT_SHADOW_RADIUS_M = 240;
+const CONTEXT_OUTLINE_BASE_RADIUS_M = 650;
+const CONTEXT_HAZE_START_M = 600;
+const CONTEXT_HAZE_FULL_M = 3800;
+const CONTEXT_FADE_MS = 900;
+const CONTEXT_MAX_BUILDINGS = { high: 14000, auto: 10000, performance: 5000 };
+const CONTEXT_WALL_COLOR = new THREE.Color('#d7d3cb');
+const CONTEXT_ROOF_COLOR = new THREE.Color('#e6e3dd');
+const CONTEXT_HAZE_COLOR = new THREE.Color('#c4cdd5');
+const contextTileCache = new Map();
+let contextLibsPromise = null;
+
+function ringContainsXY(ring, x, y) {
+  let hit = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i], b = ring[j];
+    if ((a.y > y) !== (b.y > y) && x < ((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x) hit = !hit;
+  }
+  return hit;
+}
+function ringDistanceXY(ring, x, y) {
+  let best = Infinity;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const t = clamp(((x - a.x) * dx + (y - a.y) * dy) / Math.max(1e-9, dx * dx + dy * dy), 0, 1);
+    best = Math.min(best, Math.hypot(x - (a.x + t * dx), y - (a.y + t * dy)));
+  }
+  return best;
+}
+/* Closest distance from any ring vertex (or the centroid) to segment p->q. */
+function ringSegmentDistanceXY(f, px, py, qx, qy) {
+  const dx = qx - px, dy = qy - py;
+  const lenSq = Math.max(1e-9, dx * dx + dy * dy);
+  const dist = (x, y) => {
+    const t = clamp(((x - px) * dx + (y - py) * dy) / lenSq, 0, 1);
+    return Math.hypot(x - (px + t * dx), y - (py + t * dy));
+  };
+  let best = dist(f.cx, f.cy);
+  f.ring.forEach(p => { best = Math.min(best, dist(p.x, p.y)); });
+  return best;
+}
+
+/* Target parcel footprints (site-local), so the parcel's own mapped building never
+   sits on top of the generated one. */
+function siteFootprintRings() {
+  if (!state.siteFootprintRings) {
+    state.siteFootprintRings = payload ? extractGroundFootprints(payload).map(fp => fp.outer) : [];
+  }
+  return state.siteFootprintRings;
+}
+function overlapsSiteFootprint(ring, cx, cy) {
+  const rings = siteFootprintRings();
+  if (!rings.length) {
+    const siteRadius = Number(payload && payload.site && payload.site.footprintRadiusM) || 12;
+    return Math.hypot(cx, cy) < siteRadius * 0.9;
+  }
+  if (rings.some(fp => ringContainsXY(fp, cx, cy))) return true;
+  const inside = ring.filter(p => rings.some(fp => ringContainsXY(fp, p.x, p.y))).length;
+  return inside >= Math.max(2, ring.length * 0.3);
+}
+
+function addOccluderFeature(rawRing, base, top, source, keyOverride = '', seams = null) {
+  if (!payload || !payload.site) return;
+  const project = localMetersProjector(Number(payload.site.lng), Number(payload.site.lat));
+  const ring = toVector2Ring(rawRing, project);
+  if (ring.length < 3 || !(top > base)) return;
+  const cx = ring.reduce((s, p) => s + p.x, 0) / ring.length;
+  const cy = ring.reduce((s, p) => s + p.y, 0) / ring.length;
+  const key = keyOverride || `${Math.round(cx)}|${Math.round(cy)}`;
+  if (!state.occluderKeys) state.occluderKeys = new Set();
+  if (state.occluderKeys.has(key)) return;
+  if (overlapsSiteFootprint(ring, cx, cy)) return;
+  state.occluderKeys.add(key);
+  state.occluderFeatures.push({ ring: ensureCounterClockwise(ring), base, top, cx, cy, lng: rawRing[0][0], lat: rawRing[0][1], baseOffset: 0, source, seams });
+}
+
+/* Tile edges in the site-local frame (x depends only on lng, y only on lat). */
+function tileSeamsLocal(z, x, y) {
+  const n = 2 ** z;
+  const lngAt = tx => (tx / n) * 360 - 180;
+  const latAt = ty => THREE.MathUtils.radToDeg(Math.atan(Math.sinh(Math.PI * (1 - (2 * ty) / n))));
+  const project = localMetersProjector(Number(payload.site.lng), Number(payload.site.lat));
+  const lat0 = Number(payload.site.lat);
+  const lng0 = Number(payload.site.lng);
+  return [
+    { axis: 'x', v: project(lngAt(x), lat0).x }, { axis: 'x', v: project(lngAt(x + 1), lat0).x },
+    { axis: 'y', v: project(lng0, latAt(y)).y }, { axis: 'y', v: project(lng0, latAt(y + 1)).y }
+  ];
+}
+function onSeam(f, a, c) {
+  if (!f.seams) return false;
+  return f.seams.some(s => (s.axis === 'x'
+    ? Math.abs(a.x - s.v) < 0.06 && Math.abs(c.x - s.v) < 0.06
+    : Math.abs(a.y - s.v) < 0.06 && Math.abs(c.y - s.v) < 0.06));
+}
+
+function loadPayloadOccluders() {
+  const features = payload && payload.context && Array.isArray(payload.context.features) ? payload.context.features : [];
+  features.forEach(feature => {
+    if (!feature || !feature.geometry) return;
+    const props = feature.properties || {};
+    const base = Number(props.b) || 0;
+    const top = Number(props.h);
+    if (!Number.isFinite(top) || top <= base) return;
+    const polys = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates]
+      : (feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates : []);
+    polys.forEach(poly => poly && poly[0] && addOccluderFeature(poly[0], base, top, 'payload'));
+  });
+}
+
+/* The payload carries a small, unclipped context sample; once real tiles arrive
+   they supersede it (tile pieces are clipped, payload ones would double up). */
+function dropPayloadOccluders() {
+  state.occluderFeatures = state.occluderFeatures.filter(f => f.source !== 'payload');
+  state.occluderKeys = new Set();
+}
+
+function viewerLocalXY() {
+  const ref = getReferenceLocation();
+  if (!ref || !payload || !payload.site) return null;
+  const d = geoDeltaMeters(payload.site, ref);
+  return { x: d.east, y: d.north };
+}
+
+/* Viewer position in the content (site-local) frame, including manual nudges and
+   the desktop preview offset, which is where the camera really is relative to the
+   context masses. */
+function contentViewerXY() {
+  if (!payload || !payload.site) return null;
+  if (state.sessionActive) return viewerLocalXY();
+  const ref = getReferenceLocation();
+  if (!ref && !state.previewActive) return null;
+  const d = ref ? geoDeltaMeters(ref, payload.site) : { east: 0, north: 0 };
+  const preview = state.previewActive ? state.previewOffsetM : { east: 0, north: 0 };
+  return {
+    x: -(d.east + state.manualOffsetM.east + preview.east),
+    y: -(d.north + state.manualOffsetM.north + preview.north),
+    preview: Boolean(state.previewActive)
+  };
+}
+
+function contextHaze(distanceM) {
+  return clamp((distanceM - CONTEXT_HAZE_START_M) / (CONTEXT_HAZE_FULL_M - CONTEXT_HAZE_START_M), 0, 0.7);
+}
+
+/* Append one extruded footprint (walls + roof, no floor) to flat buffers. Rings are
+   CCW in (east, north); three.js uses x = east, z = -north. */
+function appendContextMass(buf, lines, f, haze, withBaseOutline) {
+  let ring = f.ring;
+  if (haze > 0.12 && ring.length > 14) {
+    const step = Math.ceil(ring.length / 12);
+    ring = ring.filter((_, i) => i % step === 0);
+  }
+  const n = ring.length;
+  if (n < 3) return;
+  const b = f.base + f.baseOffset;
+  const t = f.top + f.baseOffset;
+  const wall = CONTEXT_WALL_COLOR.clone().lerp(CONTEXT_HAZE_COLOR, haze);
+  const roof = CONTEXT_ROOF_COLOR.clone().lerp(CONTEXT_HAZE_COLOR, haze);
+  const push = (x, y, z, nx, ny, nz, c) => {
+    buf.pos.push(x, y, z);
+    buf.nor.push(nx, ny, nz);
+    buf.col.push(c.r, c.g, c.b);
+  };
+  for (let i = 0; i < n; i++) {
+    const a = ring[i];
+    const c = ring[(i + 1) % n];
+    const dx = c.x - a.x;
+    const dy = c.y - a.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.05) continue;
+    const nx = dy / len;
+    const nz = dx / len;
+    push(a.x, b, -a.y, nx, 0, nz, wall); push(c.x, b, -c.y, nx, 0, nz, wall); push(c.x, t, -c.y, nx, 0, nz, wall);
+    push(a.x, b, -a.y, nx, 0, nz, wall); push(c.x, t, -c.y, nx, 0, nz, wall); push(a.x, t, -a.y, nx, 0, nz, wall);
+  }
+  const contour = ring.map(p => new THREE.Vector2(p.x, p.y));
+  let tris = [];
+  try { tris = THREE.ShapeUtils.triangulateShape(contour, []); } catch (err) { tris = []; }
+  tris.forEach(([i, j, k]) => {
+    const p = contour[i], q = contour[j], r = contour[k];
+    const ccw = (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x) > 0;
+    const [u, v] = ccw ? [q, r] : [r, q];
+    push(p.x, t, -p.y, 0, 1, 0, roof); push(u.x, t, -u.y, 0, 1, 0, roof); push(v.x, t, -v.y, 0, 1, 0, roof);
+  });
+  if (!lines) return;
+  /* Outline: roof edge, corner verticals and (near the viewer) the base line on the
+     street. Pushed 12 cm out from the mass so it never z-fights the faces. */
+  const out = (p, lift) => {
+    const ox = p.x - f.cx, oy = p.y - f.cy;
+    const ol = Math.hypot(ox, oy) || 1;
+    return [p.x + (ox / ol) * 0.12, lift, -(p.y + (oy / ol) * 0.12)];
+  };
+  for (let i = 0; i < n; i++) {
+    const prev = ring[(i - 1 + n) % n], a = ring[i], c = ring[(i + 1) % n];
+    /* edges where a building was cut at a tile boundary are not real facades */
+    if (!onSeam(f, a, c)) {
+      lines.push(...out(a, t + 0.1), ...out(c, t + 0.1));
+      if (withBaseOutline) lines.push(...out(a, b + 0.06), ...out(c, b + 0.06));
+    }
+    if (onSeam(f, prev, a) || onSeam(f, a, c)) continue;
+    const ax = a.x - prev.x, ay = a.y - prev.y, bx = c.x - a.x, by = c.y - a.y;
+    const turn = Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by));
+    if (turn > 0.44) lines.push(...out(a, b), ...out(a, t + 0.1));
+  }
+}
+
+function contextGeometry(buf) {
+  if (!buf.pos.length) return null;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(buf.pos, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(buf.nor, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(buf.col, 3));
+  geo.computeBoundingSphere();
+  return geo;
+}
+
+function disposeContextGroup() {
+  if (!state.contextGroup) return;
+  state.contextGroup.traverse(obj => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) obj.material.dispose();
+  });
+  if (state.contextGroup.parent) state.contextGroup.parent.remove(state.contextGroup);
+  state.contextGroup = null;
+  state.occluderMesh = null;
+}
+
+/* Build the context group for the current viewer and mode. Masses near the site
+   cast and receive shadows; far masses fade into the haze colour; the most
+   important buildings (tall, near) are kept first when the budget is reached. */
+function rebuildOccluders() {
+  if (!state.contentRoot) return;
+  disposeContextGroup();
+  const mode = CONTEXT_MODES[state.contextMode] ? state.contextMode : 'massing';
+  state.contextBuildingCount = 0;
+  state.contextExtentM = 0;
+  state.contextOccluderCount = 0;
+  if (mode === 'off') { updateMetrics(state.lastPlacementDistanceM); return; }
+
+  const viewer = contentViewerXY();
+  const accuracy = state.userLoc && Number.isFinite(state.userLoc.accuracy) ? state.userLoc.accuracy : 10;
+  const clearance = Math.max(CONTEXT_VIEWER_CLEARANCE_M, Math.min(20, accuracy * 0.8));
+  const sightHalf = Math.max(8, (state.modelMetrics && state.modelMetrics.radius) || 12) + 4;
+  const budget = CONTEXT_MAX_BUILDINGS[state.qualityMode] || CONTEXT_MAX_BUILDINGS.auto;
+
+  const candidates = [];
+  state.occluderFeatures.forEach(f => {
+    if (viewer && (ringContainsXY(f.ring, viewer.x, viewer.y) || ringDistanceXY(f.ring, viewer.x, viewer.y) < clearance)) return;
+    /* desktop preview: keep the line of sight from the preview camera to the model open */
+    if (viewer && viewer.preview && ringSegmentDistanceXY(f, viewer.x, viewer.y, 0, 0) < sightHalf) return;
+    const dSite = Math.hypot(f.cx, f.cy);
+    const dView = viewer ? Math.hypot(f.cx - viewer.x, f.cy - viewer.y) : dSite;
+    const height = f.top - f.base;
+    if (dSite > 300 && ((dView > 900 && f.top < 8) || (dView > 1800 && f.top < 18) || (dView > 2800 && f.top < 30))) return;
+    const score = (height + 12) / Math.max(40, dView) + (dSite < CONTEXT_SHADOW_RADIUS_M ? 1 : 0);
+    candidates.push({ f, dSite, dView, score });
+  });
+  candidates.sort((a, b) => b.score - a.score);
+  const kept = candidates.slice(0, budget);
+
+  const near = { pos: [], nor: [], col: [] };
+  const far = { pos: [], nor: [], col: [] };
+  const lines = mode === 'occlusion' ? null : [];
+  kept.forEach(({ f, dSite, dView }) => {
+    const withBase = mode === 'outlines' && dView < CONTEXT_OUTLINE_BASE_RADIUS_M;
+    const lineSink = lines && (mode === 'outlines' || dView < 1400) ? lines : null;
+    appendContextMass(dSite <= CONTEXT_SHADOW_RADIUS_M ? near : far, lineSink, f, contextHaze(dView), withBase);
+    state.contextExtentM = Math.max(state.contextExtentM, dView);
+  });
+  state.contextBuildingCount = kept.length;
+  state.contextOccluderCount = kept.length;
+
+  const group = new THREE.Group();
+  group.name = 'Urban context';
+  const fading = !state.contextShownOnce;
+  const visibleMasses = mode === 'massing' || mode === 'ghost';
+  [['near', contextGeometry(near)], ['far', contextGeometry(far)]].forEach(([band, geo]) => {
+    if (!geo) return;
+    const isNear = band === 'near';
+    /* Depth-only pass: hides the model wherever a mapped building stands in front. */
+    const prepass = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true, depthTest: true }));
+    prepass.name = `Context occluders (${band})`;
+    prepass.renderOrder = -1000;
+    prepass.castShadow = isNear && !visibleMasses;
+    prepass.userData.contextRole = 'prepass';
+    group.add(prepass);
+    if (!state.occluderMesh) state.occluderMesh = prepass;
+    if (!visibleMasses) return;
+    const material = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.94,
+      metalness: 0,
+      envMapIntensity: 0.32,
+      transparent: mode === 'ghost' || fading,
+      opacity: mode === 'ghost' ? 0.4 : 1,
+      depthWrite: mode !== 'ghost'
+    });
+    material.userData.targetOpacity = mode === 'ghost' ? 0.4 : 1;
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.name = `Context massing (${band})`;
+    mesh.castShadow = isNear;
+    mesh.receiveShadow = isNear;
+    mesh.renderOrder = mode === 'ghost' ? 5 : 0;
+    mesh.userData.contextRole = 'mass';
+    group.add(mesh);
+  });
+  if (lines && lines.length) {
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lines, 3));
+    const target = mode === 'outlines' ? 0.9 : (mode === 'ghost' ? 0.55 : 0.26);
+    const lineMat = new THREE.LineBasicMaterial({
+      color: mode === 'outlines' ? 0xf2f7fa : 0x58616a,
+      transparent: true,
+      opacity: target,
+      depthWrite: false
+    });
+    lineMat.userData.targetOpacity = target;
+    const outline = new THREE.LineSegments(lineGeo, lineMat);
+    outline.name = 'Context outlines';
+    outline.renderOrder = 6;
+    outline.userData.contextRole = 'lines';
+    group.add(outline);
+  }
+  state.contextGroup = group;
+  state.contentRoot.add(group);
+  if (fading && kept.length) {
+    state.contextShownOnce = true;
+    state.contextFadeStartMs = performance.now();
+  }
+  updateContextFade(performance.now());
+  updateMetrics(state.lastPlacementDistanceM);
+}
+
+/* Masses fade in after the model appears (order: model, then its surroundings). */
+function updateContextFade(nowMs) {
+  if (!state.contextGroup || !Number.isFinite(state.contextFadeStartMs)) return;
+  const k = clamp((nowMs - state.contextFadeStartMs) / CONTEXT_FADE_MS, 0, 1);
+  const eased = k * k * (3 - 2 * k);
+  state.contextGroup.children.forEach(obj => {
+    const mat = obj.material;
+    if (!mat || obj.userData.contextRole === 'prepass') return;
+    mat.opacity = (mat.userData.targetOpacity ?? 1) * eased;
+    if (k >= 1 && obj.userData.contextRole === 'mass' && state.contextMode === 'massing' && mat.transparent) {
+      mat.transparent = false;
+      mat.needsUpdate = true;
+    }
+  });
+  if (k >= 1) state.contextFadeStartMs = NaN;
+}
+
+function setContextMode(mode, { save = true } = {}) {
+  state.contextMode = CONTEXT_MODES[mode] ? mode : 'massing';
+  if (save) {
+    try { localStorage.setItem(CONTEXT_MODE_STORAGE_KEY, state.contextMode); } catch (err) { /* storage unavailable */ }
+  }
+  if ($('contextMode')) $('contextMode').value = state.contextMode;
+  rebuildOccluders();
+  syncContextChip();
+}
+
+function syncContextChip() {
+  const chip = $('contextChip');
+  if (!chip) return;
+  const mode = CONTEXT_MODES[state.contextMode] || CONTEXT_MODES.massing;
+  const loading = state.contextTilesTotal && state.contextTilesDone < state.contextTilesTotal;
+  const count = state.contextBuildingCount ? ` · ${state.contextBuildingCount.toLocaleString()}` : '';
+  chip.querySelector('.chipMode').textContent = mode;
+  chip.querySelector('.chipMeta').textContent = state.contextMode === 'off'
+    ? 'tap to show'
+    : (loading ? `loading ${state.contextTilesDone}/${state.contextTilesTotal}` : `context${count}`);
+  chip.classList.toggle('is-loading', Boolean(loading));
+}
+
+const terrainImageCache = new Map();
+async function terrainImageFor(lng, lat) {
+  const { zoom, tileX, tileY } = lngLatToTerrainTile(lng, lat);
+  const key = `${zoom}/${tileX}/${tileY}`;
+  if (terrainImageCache.has(key)) return terrainImageCache.get(key);
+  const bitmap = await loadTerrainTile(tileX, tileY, zoom);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width; canvas.height = bitmap.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(bitmap, 0, 0);
+  const image = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+  terrainImageCache.set(key, image);
+  return image;
+}
+async function terrainAt(lng, lat) {
+  const { pixelX, pixelY } = lngLatToTerrainTile(lng, lat);
+  const image = await terrainImageFor(lng, lat);
+  const scale = image.width / 512;
+  const i = (Math.floor(pixelY * scale) * image.width + Math.floor(pixelX * scale)) * 4;
+  return -10000 + ((image.data[i] * 65536 + image.data[i + 1] * 256 + image.data[i + 2]) * 0.1);
+}
+
+async function applyOccluderTerrain() {
+  if (!Number.isFinite(state.siteGroundElevationM)) return;
+  const pending = state.occluderFeatures.filter(f => !f.terrainDone);
+  for (const f of pending) {
+    try {
+      const ground = await terrainAt(f.lng, f.lat);
+      /* only trust clear terrain differences; small ones are DEM noise */
+      const delta = ground - state.siteGroundElevationM;
+      f.baseOffset = Math.abs(delta) > 1.2 ? delta : 0;
+    } catch (err) { f.baseOffset = 0; }
+    f.terrainDone = true;
+  }
+}
+
+function tileXYFor(lng, lat, z) {
+  const n = 2 ** z;
+  const x = Math.floor(((lng + 180) / 360) * n);
+  const s = Math.sin(toRad(lat));
+  const y = Math.floor((0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n);
+  return { x, y };
+}
+
+function offsetLngLat(origin, east, north) {
+  return {
+    lng: origin.lng + east / (111320 * Math.cos(toRad(origin.lat))),
+    lat: origin.lat + north / 110540
+  };
+}
+
+/* Tiles to load, most important first: the site's surroundings (its radius grows
+   with viewing distance so a far view still shows the district), the viewer's
+   immediate block, then a corridor along the sight line. */
+function contextTilePlan(viewer) {
+  const z = CONTEXT_TILE_ZOOM;
+  const site = { lng: Number(payload.site.lng), lat: Number(payload.site.lat) };
+  const tiles = new Map();
+  const add = (loc, prio) => {
+    const { x, y } = tileXYFor(loc.lng, loc.lat, z);
+    const key = `${z}/${x}/${y}`;
+    if (!tiles.has(key) || tiles.get(key).prio > prio) tiles.set(key, { key, z, x, y, prio });
+  };
+  const dist = viewer ? geoDeltaMeters(viewer, site).distanceMeters : 0;
+  const siteRadius = clamp(dist * 0.22, 420, 950);
+  for (let n = -siteRadius; n <= siteRadius; n += CONTEXT_SAMPLE_STEP_M) {
+    for (let e = -siteRadius; e <= siteRadius; e += CONTEXT_SAMPLE_STEP_M) {
+      const r = Math.hypot(e, n);
+      if (r <= siteRadius) add(offsetLngLat(site, e, n), r);
+    }
+  }
+  if (viewer && dist > 30) {
+    for (let n = -260; n <= 260; n += CONTEXT_SAMPLE_STEP_M) {
+      for (let e = -260; e <= 260; e += CONTEXT_SAMPLE_STEP_M) add(offsetLngLat(viewer, e, n), 150 + Math.hypot(e, n));
+    }
+    const d = geoDeltaMeters(viewer, site);
+    const ux = d.east / dist, uy = d.north / dist;
+    const half = clamp(dist * 0.12, 120, 450);
+    for (let s = 0; s <= dist; s += CONTEXT_SAMPLE_STEP_M) {
+      [-half, 0, half].forEach(o => add(offsetLngLat(viewer, ux * s - uy * o, uy * s + ux * o), 200 + s * 0.35 + Math.abs(o) * 0.5));
+    }
+  }
+  return [...tiles.values()].sort((a, b) => a.prio - b.prio).slice(0, CONTEXT_MAX_TILES);
+}
+
+function contextTileLibs() {
+  if (!contextLibsPromise) {
+    contextLibsPromise = Promise.all([
+      import('https://esm.sh/@mapbox/vector-tile@2.0.3'),
+      import('https://esm.sh/pbf@4.0.1')
+    ]).catch(err => { contextLibsPromise = null; throw err; });
+  }
+  return contextLibsPromise;
+}
+
+/* Clip a tile-space ring to the tile square so pieces from neighbouring tiles
+   abut instead of overlapping in the tile buffer. */
+function clipRingToTile(points, extent) {
+  const clip = (input, inside, cut) => {
+    const output = [];
+    for (let i = 0; i < input.length; i++) {
+      const cur = input[i];
+      const prev = input[(i + input.length - 1) % input.length];
+      if (inside(cur)) {
+        if (!inside(prev)) output.push(cut(prev, cur));
+        output.push(cur);
+      } else if (inside(prev)) {
+        output.push(cut(prev, cur));
+      }
+    }
+    return output;
+  };
+  const atX = (a, b, x) => [x, a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0])];
+  const atY = (a, b, y) => [a[0] + ((b[0] - a[0]) * (y - a[1])) / (b[1] - a[1]), y];
+  let pts = points.map(p => [p.x, p.y]);
+  if (pts.length > 1 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) pts.pop();
+  pts = clip(pts, p => p[0] >= 0, (a, b) => atX(a, b, 0));
+  pts = clip(pts, p => p[0] <= extent, (a, b) => atX(a, b, extent));
+  pts = clip(pts, p => p[1] >= 0, (a, b) => atY(a, b, 0));
+  pts = clip(pts, p => p[1] <= extent, (a, b) => atY(a, b, extent));
+  return pts;
+}
+
+function loadContextTile(z, x, y) {
+  const key = `${z}/${x}/${y}`;
+  if (contextTileCache.has(key)) return contextTileCache.get(key);
+  const job = (async () => {
+    const [{ VectorTile }, { default: Pbf }] = await contextTileLibs();
+    const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
+    const res = await fetchTileCached(url);
+    if (!res.ok) throw new Error(`context tile ${key}: HTTP ${res.status}`);
+    const tile = new VectorTile(new Pbf(await res.arrayBuffer()));
+    const layer = tile.layers.building;
+    const buildings = [];
+    if (!layer) return buildings;
+    const n = 2 ** z;
+    for (let i = 0; i < layer.length; i++) {
+      const f = layer.feature(i);
+      if (f.type !== 3) continue;
+      const props = f.properties || {};
+      if (String(props.extrude) === 'false' || String(props.underground) === 'true') continue;
+      const top = Number(props.height);
+      if (!(top >= 2.5)) continue;
+      const base = Number(props.min_height) || 0;
+      const extent = f.extent || 4096;
+      f.loadGeometry().forEach(ring => {
+        /* outer rings only (vector tile outer rings are clockwise in tile space) */
+        let area = 0;
+        for (let k = 0; k < ring.length - 1; k++) area += ring[k].x * ring[k + 1].y - ring[k + 1].x * ring[k].y;
+        if (!(area > 0)) return;
+        const clipped = clipRingToTile(ring, extent);
+        if (clipped.length < 3) return;
+        const ll = clipped.map(([px, py]) => {
+          const lng = ((x + px / extent) / n) * 360 - 180;
+          const yy = Math.PI * (1 - (2 * (y + py / extent)) / n);
+          return [lng, THREE.MathUtils.radToDeg(Math.atan(Math.sinh(yy)))];
+        });
+        ll.push(ll[0]);
+        buildings.push({ ll, base, top });
+      });
+    }
+    return buildings;
+  })();
+  job.catch(() => contextTileCache.delete(key));
+  contextTileCache.set(key, job);
+  return job;
+}
+
+/* Load the context plan in priority batches; masses appear as each batch lands. */
+async function fetchViewerContextTiles() {
+  if (!payload || !payload.site) return;
+  const plan = contextTilePlan(getReferenceLocation());
+  const key = plan.map(t => t.key).join(',');
+  if (key === state.viewerTilesKey) return;
+  state.viewerTilesKey = key;
+  const gen = ++state.contextPlanGen;
+  if (!state.contextTilesAdded) state.contextTilesAdded = new Set();
+  const pending = plan.filter(t => !state.contextTilesAdded.has(t.key));
+  state.contextTilesTotal = plan.length;
+  state.contextTilesDone = plan.length - pending.length;
+  syncContextChip();
+  for (let i = 0; i < pending.length; i += CONTEXT_FETCH_CONCURRENCY) {
+    if (gen !== state.contextPlanGen) return;
+    const batch = pending.slice(i, i + CONTEXT_FETCH_CONCURRENCY);
+    const results = await Promise.allSettled(batch.map(t => loadContextTile(t.z, t.x, t.y)));
+    if (gen !== state.contextPlanGen) return;
+    let added = 0;
+    results.forEach((result, j) => {
+      const t = batch[j];
+      if (result.status !== 'fulfilled' || state.contextTilesAdded.has(t.key)) return;
+      if (!state.contextTilesAdded.size) dropPayloadOccluders();
+      state.contextTilesAdded.add(t.key);
+      const seams = tileSeamsLocal(t.z, t.x, t.y);
+      result.value.forEach((bld, k) => addOccluderFeature(bld.ll, bld.base, bld.top, 'tile', `${t.key}#${k}`, seams));
+      added++;
+    });
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length) console.warn('Some context tiles were unavailable; showing the rest.', failed[0].reason);
+    state.contextTilesDone += batch.length;
+    if (added) {
+      await applyOccluderTerrain();
+      rebuildOccluders();
+    }
+    syncContextChip();
+  }
+}
+
+/* ---------- interior: the app's typical unit plan, instanced on every matching floor ---------- */
+const FURNITURE_HEIGHT_M = {
+  bed: 0.52, pillow: 0.62, nightstand: 0.5, wardrobe: 2.1, sofa: 0.8, coffee_table: 0.42, armchair: 0.8,
+  table: 0.75, chair: 0.88, counter: 0.9, sink: 0.92, hob: 0.92, fridge: 1.85, wc: 0.42, wc_tank: 0.78,
+  basin: 0.86, bath_tub: 0.55, shower: 0.06, desk: 0.74, round_table: 0.74, shelving: 1.9
+};
+const FURNITURE_COLOR = {
+  bed: '#ece8e0', pillow: '#f6f4ef', nightstand: '#a98763', wardrobe: '#c7b397', sofa: '#7d858c', coffee_table: '#9b7652',
+  armchair: '#8c7f73', table: '#a47e57', chair: '#5f666c', counter: '#d6d0c6', sink: '#e9ecee', hob: '#2c2f31', fridge: '#dfe2e3',
+  wc: '#f4f4f2', wc_tank: '#f4f4f2', basin: '#f4f4f2', bath_tub: '#f4f4f2', shower: '#dfe6ea', desk: '#b69a72', round_table: '#a47e57', shelving: '#b8aa94'
+};
+
+function buildInteriorGroup() {
+  const interior = payload && payload.interior;
+  if (!interior || !Array.isArray(interior.floors) || !interior.floors.length || !state.modelRoot) return;
+  const project = localMetersProjector(Number(payload.site.lng), Number(payload.site.lat));
+  const floorH = Number(interior.floorHeight) || 3.2;
+  const buckets = new Map();
+  const add = (key, color, polyCoords, depth, base) => {
+    const geo = polygonToGeometry(polyCoords, project, depth, base);
+    if (!geo) return;
+    if (!buckets.has(key)) buckets.set(key, { color, geometries: [] });
+    buckets.get(key).geometries.push(geo);
+  };
+  const eachPolygon = (feature, fn) => {
+    const g = feature && feature.geometry;
+    if (!g) return;
+    if (g.type === 'Polygon') fn(g.coordinates);
+    else if (g.type === 'MultiPolygon') g.coordinates.forEach(fn);
+  };
+  (interior.rooms || []).forEach(room => eachPolygon(room, coords => {
+    const fill = room.properties && room.properties.fill ? room.properties.fill : '#e8e4dc';
+    add(`floor|${fill}`, fill, coords, 0.03, 0.02);
+  }));
+  (interior.walls || []).forEach(wall => eachPolygon(wall, coords => add('walls', '#d9d4ca', coords, 2.4, 0.02)));
+  (interior.furniture || []).forEach(item => eachPolygon(item, coords => {
+    const kind = item.properties && item.properties.kind;
+    const h = FURNITURE_HEIGHT_M[kind] || 0.75;
+    const base = kind === 'pillow' ? 0.52 : (kind === 'sink' || kind === 'hob' ? 0.9 : 0.03);
+    add(`furniture|${kind}`, FURNITURE_COLOR[kind] || '#cfc8bd', coords, Math.max(0.02, h - base), base);
+  }));
+  const group = new THREE.Group();
+  group.name = 'Interior unit plans';
+  const matrix = new THREE.Matrix4();
+  const origin = Array.isArray(interior.origin) ? project(interior.origin[0], interior.origin[1]) : { x: 0, y: 0 };
+  /* local shape coords (x, y) become world (x, -y) after polygonToGeometry's rotation */
+  const ox = origin.x, oz = -origin.y;
+  const floorSpecs = interior.floors.map(f => (typeof f === 'number' ? { base: f, scale: 1 } : f));
+  buckets.forEach((bucket, key) => {
+    const geometry = bucket.geometries.length === 1 ? bucket.geometries[0] : mergeGeometries(bucket.geometries, false);
+    if (bucket.geometries.length > 1) bucket.geometries.forEach(g => g.dispose());
+    if (!geometry) return;
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(bucket.color), roughness: key.startsWith('floor') ? 0.8 : 0.7, metalness: 0, envMapIntensity: 0.35 });
+    const mesh = new THREE.InstancedMesh(geometry, material, floorSpecs.length);
+    floorSpecs.forEach((spec, i) => {
+      const k = Number(spec.scale) || 1;
+      /* scale x/z about the taper origin, keep heights, lift to the floor base */
+      matrix.set(
+        k, 0, 0, ox * (1 - k),
+        0, 1, 0, Number(spec.base) || 0,
+        0, 0, k, oz * (1 - k),
+        0, 0, 0, 1
+      );
+      mesh.setMatrixAt(i, matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.userData.internal = true;
+    mesh.userData.lod = key.startsWith('furniture') ? 'fine' : 'medium';
+    mesh.userData.layer = 'interior';
+    group.add(mesh);
+  });
+  state.interiorRoot = group;
+  state.modelRoot.add(group);
+}
+
+function getModelMetrics(group) {
+  if (!group) return { radius: 12, height: 30, minY: 0, maxY: 30, centerY: 15 };
+  const box = new THREE.Box3().setFromObject(group);
+  if (!Number.isFinite(box.min.x) || !Number.isFinite(box.max.x)) {
+    return { radius: 12, height: 30, minY: 0, maxY: 30, centerY: 15 };
+  }
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  return {
+    radius: Math.max(4, Math.hypot(size.x * 0.5, size.z * 0.5)),
+    height: Math.max(6, size.y),
+    minY: box.min.y,
+    maxY: box.max.y,
+    centerY: (box.min.y + box.max.y) * 0.5
+  };
+}
+
+function formatDistance(m) {
+  if (!Number.isFinite(m)) return '-';
+  if (m < 1000) return `${m.toFixed(1)} m`;
+  return `${(m / 1000).toFixed(2)} km`;
+}
+
+function updateMetrics(distanceMeters = NaN) {
+  if ($('distanceMeters')) $('distanceMeters').textContent = formatDistance(distanceMeters);
+  if ($('gpsAccuracy')) $('gpsAccuracy').textContent = state.userLoc && Number.isFinite(state.userLoc.accuracy)
+    ? `${state.userLoc.accuracy.toFixed(1)} m`
+    : '-';
+  if ($('anchorState')) {
+    const heading = Number.isFinite(state.headingDeg) ? `${state.headingDeg.toFixed(0)}°` : 'no heading';
+    let text;
+    if (state.sessionActive) {
+      text = state.xrAnchor ? `XR anchor · ${heading}` : `XR tracking · ${heading}`;
+    } else if (!state.relOrientation) {
+      text = 'Waiting for motion';
+    } else if (!state.headingLocked) {
+      const pct = Math.round(clamp((performance.now() - state.headingAcquireStartMs) / HEADING_ACQUIRE_MS, 0, 1) * 100);
+      text = `Hold still · ${pct}%`;
+    } else {
+      const walked = state.positionFrozen && state.movedSinceLockM > Math.max(WALK_FOLLOW_MIN_M, 3 * ((state.userLoc && state.userLoc.accuracy) || 10));
+      text = `${state.positionFrozen ? 'Locked' : 'Gyro-locked'} · ${heading}${walked ? ` · moved ${Math.round(state.movedSinceLockM)} m, re-aim` : (Math.abs(state.headingDisagreementDeg) > 8 && !state.positionFrozen ? ' · re-aim?' : '')}`;
+    }
+    $('anchorState').textContent = text;
+  }
+  if ($('lightingState')) {
+    $('lightingState').textContent = state.lightingMode === 'xr-estimated'
+      ? 'XR environment'
+      : (state.lightingMode === 'camera-matched' ? 'Camera matched' : 'Sun + studio');
+  }
+  if ($('occlusionState')) {
+    const loading = state.contextTilesTotal && state.contextTilesDone < state.contextTilesTotal;
+    let text;
+    if (state.contextMode === 'off') text = 'Off';
+    else if (state.contextBuildingCount) text = `${state.contextBuildingCount.toLocaleString()} · ${formatDistance(state.contextExtentM)}`;
+    else text = loading ? 'Loading' : 'No map context';
+    if (loading && state.contextBuildingCount) text += ` · ${state.contextTilesDone}/${state.contextTilesTotal}`;
+    $('occlusionState').textContent = state.depthOcclusionActive ? `Depth + ${text}` : text;
+  }
+  syncContextChip();
+  if ($('performanceState')) {
+    const fps = 1000 / Math.max(1, state.frameTimeEmaMs);
+    $('performanceState').textContent = `${state.qualityMode} · ${Math.round(fps)} fps`;
+  }
+}
+
+function cloneLoc(loc) {
+  if (!loc) return null;
+  return {
+    lat: loc.lat,
+    lng: loc.lng,
+    accuracy: loc.accuracy,
+    altitude: loc.altitude,
+    altitudeAccuracy: loc.altitudeAccuracy
+  };
+}
+
+function hasReliableAltitude(loc) {
+  return Boolean(
+    loc &&
+    Number.isFinite(loc.altitude) &&
+    (!Number.isFinite(loc.altitudeAccuracy) || loc.altitudeAccuracy <= 20)
+  );
+}
+
+function weightedFilteredLocation(samples) {
+  if (!Array.isArray(samples) || !samples.length) return null;
+  const bestAccuracy = Math.min(...samples.map(sample => Number(sample.accuracy) || 9999));
+  const usable = samples.filter(sample => {
+    const accuracy = Number(sample.accuracy) || 9999;
+    return accuracy <= Math.max(35, bestAccuracy * 2.5);
+  });
+  let weightTotal = 0;
+  let lat = 0;
+  let lng = 0;
+  let altitude = 0;
+  let altitudeWeight = 0;
+  usable.forEach(sample => {
+    const accuracy = clamp(Number(sample.accuracy) || 80, 3, 120);
+    const weight = 1 / (accuracy * accuracy);
+    weightTotal += weight;
+    lat += sample.lat * weight;
+    lng += sample.lng * weight;
+    if (hasReliableAltitude(sample)) {
+      altitude += sample.altitude * weight;
+      altitudeWeight += weight;
+    }
+  });
+  if (!(weightTotal > 0)) return cloneLoc(samples[samples.length - 1]);
+  return {
+    lat: lat / weightTotal,
+    lng: lng / weightTotal,
+    accuracy: bestAccuracy,
+    altitude: altitudeWeight > 0 ? altitude / altitudeWeight : NaN,
+    altitudeAccuracy: usable.reduce((best, sample) => {
+      const value = Number(sample.altitudeAccuracy);
+      return Number.isFinite(value) ? Math.min(best, value) : best;
+    }, Infinity)
+  };
+}
+
+function ingestGeolocationPosition(position) {
+  const sample = {
+    lat: Number(position.coords.latitude),
+    lng: Number(position.coords.longitude),
+    accuracy: Number(position.coords.accuracy),
+    altitude: Number.isFinite(position.coords.altitude) ? position.coords.altitude : NaN,
+    altitudeAccuracy: Number.isFinite(position.coords.altitudeAccuracy) ? position.coords.altitudeAccuracy : NaN,
+    timestamp: Number(position.timestamp) || Date.now()
+  };
+  if (!Number.isFinite(sample.lat) || !Number.isFinite(sample.lng)) return null;
+  if (!Number.isFinite(state.geoFirstSampleAtMs)) state.geoFirstSampleAtMs = performance.now();
+  const currentBest = state.geoSamples.length
+    ? Math.min(...state.geoSamples.map(item => Number(item.accuracy) || 9999))
+    : Infinity;
+  if (state.geoSamples.length && sample.accuracy > Math.max(80, currentBest * 3.5)) return state.userLoc;
+  state.geoSamples.push(sample);
+  if (state.geoSamples.length > GEO_SAMPLE_WINDOW) state.geoSamples.shift();
+  return weightedFilteredLocation(state.geoSamples);
+}
+
+function setAnchorFromLocation(loc, reason = 'initial') {
+  if (!loc) return;
+  state.anchorLoc = cloneLoc(loc);
+  /* Eye height comes from the terrain model at the anchor, never raw GPS altitude
+     (±5-15 m), and is only re-sampled after the anchor has really moved; the old value
+     stays in use meanwhile so the building never drops while a lookup is pending. */
+  const elevationFrom = state.anchorElevationLoc;
+  if (!elevationFrom || geoDeltaMeters(elevationFrom, loc).distanceMeters > ANCHOR_ELEVATION_RESAMPLE_M) {
+    state.anchorElevationStale = true;
+    if (!Number.isFinite(state.anchorEyeElevationM) && hasReliableAltitude(loc)) state.anchorEyeElevationM = loc.altitude;
+  }
+  if (state.contentRoot) {
+    const last = state.contextRebuildLoc;
+    if (!last || reason === 'manual' || geoDeltaMeters(last, loc).distanceMeters > CONTEXT_REBUILD_MOVE_M) {
+      state.contextRebuildLoc = cloneLoc(loc);
+      rebuildOccluders();
+      void fetchViewerContextTiles();
+    }
+  }
+}
+
+function lngLatToTerrainTile(lng, lat, zoom = TERRAIN_SAMPLE_ZOOM) {
+  const scale = 2 ** zoom;
+  const x = ((lng + 180) / 360) * scale;
+  const sinLat = Math.sin(toRad(lat));
+  const y = (0.5 - (Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI))) * scale;
+  const tileX = Math.floor(x);
+  const tileY = Math.floor(y);
+  return {
+    zoom,
+    tileX,
+    tileY,
+    pixelX: clamp(Math.floor((x - tileX) * 512), 0, 511),
+    pixelY: clamp(Math.floor((y - tileY) * 512), 0, 511)
+  };
+}
+
+async function loadTerrainTile(tileX, tileY, zoom) {
+  const key = `${zoom}/${tileX}/${tileY}`;
+  if (terrainTileCache.has(key)) return terrainTileCache.get(key);
+  const url = `https://api.mapbox.com/v4/mapbox.terrain-rgb/${zoom}/${tileX}/${tileY}@2x.pngraw?access_token=${MAPBOX_TOKEN}`;
+  const res = await fetchTileCached(url, { mode: 'cors' });
+  if (!res.ok) throw new Error(`Terrain fetch failed (${res.status}).`);
+  const blob = await res.blob();
+  const bitmap = await createImageBitmap(blob);
+  terrainTileCache.set(key, bitmap);
+  return bitmap;
+}
+
+async function sampleTerrainElevationMeters(lng, lat) {
+  const { zoom, tileX, tileY, pixelX, pixelY } = lngLatToTerrainTile(lng, lat);
+  const bitmap = await loadTerrainTile(tileX, tileY, zoom);
+  terrainSampleCanvas.width = bitmap.width;
+  terrainSampleCanvas.height = bitmap.height;
+  terrainSampleCtx.clearRect(0, 0, bitmap.width, bitmap.height);
+  terrainSampleCtx.drawImage(bitmap, 0, 0);
+  const data = terrainSampleCtx.getImageData(pixelX, pixelY, 1, 1).data;
+  return -10000 + ((data[0] * 256 * 256 + data[1] * 256 + data[2]) * 0.1);
+}
+
+async function ensureSiteGroundElevation() {
+  if (!payload || !payload.site || Number.isFinite(state.siteGroundElevationM)) return state.siteGroundElevationM;
+  try {
+    state.siteGroundElevationM = await sampleTerrainElevationMeters(payload.site.lng, payload.site.lat);
+    updatePlacement();
+    void applyOccluderTerrain().then(rebuildOccluders);
+    return state.siteGroundElevationM;
+  } catch (err) {
+    console.warn('Site ground elevation lookup failed.', err);
+    return null;
+  }
+}
+
+async function resolveAnchorEyeElevation() {
+  if (!state.anchorLoc) return state.anchorEyeElevationM;
+  if (!state.anchorElevationStale && Number.isFinite(state.anchorEyeElevationM)) return state.anchorEyeElevationM;
+  if (state.anchorElevationPending) return state.anchorEyeElevationM;
+  state.anchorElevationPending = true;
+  const at = cloneLoc(state.anchorLoc);
+  try {
+    const terrainGroundM = await sampleTerrainElevationMeters(at.lng, at.lat);
+    state.anchorEyeElevationM = terrainGroundM + VIEWER_EYE_HEIGHT_M;
+    state.anchorElevationLoc = at;
+    state.anchorElevationStale = false;
+    state.anchorElevationPending = false;
+    updatePlacement();
+    return state.anchorEyeElevationM;
+  } catch (err) {
+    state.anchorElevationPending = false;
+    console.warn('Viewer ground elevation lookup failed.', err);
+    return null;
+  }
+}
+
+/* Rendered FOV must equal the FOV of the visible (cover-cropped) video, otherwise the
+   overlay slides against the scene whenever the phone turns. The stream's long side
+   spans the lens' long-side FOV; object-fit: cover then crops one axis. */
+function estimateCameraVerticalFovDeg() {
+  const video = $('cameraFeed');
+  const W = Math.max(1, window.innerWidth);
+  const H = Math.max(1, window.innerHeight);
+  let vw = Number(video && video.videoWidth) || 0;
+  let vh = Number(video && video.videoHeight) || 0;
+  if (!(vw > 0 && vh > 0)) {
+    /* no stream yet: assume a 4:3 sensor in the current orientation */
+    vw = W >= H ? 4 : 3;
+    vh = W >= H ? 3 : 4;
+  }
+  const longFov = clamp(DEFAULT_LENS_LONG_FOV_DEG + state.lensTrimDeg, 45, 100);
+  const tanLong = Math.tan(toRad(longFov / 2));
+  const tanH = vh >= vw ? tanLong : tanLong * (vh / vw);
+  const coverScale = Math.max(W / vw, H / vh);
+  const visibleFractionH = clamp(H / (vh * coverScale), 0.05, 1);
+  return clamp(THREE.MathUtils.radToDeg(2 * Math.atan(tanH * visibleFractionH)), 30, 100);
+}
+
+function syncCameraProjection() {
+  if (!state.camera) return;
+  state.camera.aspect = window.innerWidth / Math.max(window.innerHeight, 1);
+  state.camera.fov = estimateCameraVerticalFovDeg();
+  state.camera.updateProjectionMatrix();
+}
+
+function computeGroundTrackedVerticalOffset(distanceMeters) {
+  if (!Number.isFinite(state.siteGroundElevationM) || !Number.isFinite(state.anchorEyeElevationM)) return 0;
+  const viewerGroundM = state.anchorEyeElevationM - VIEWER_EYE_HEIGHT_M;
+  const terrainDeltaM = state.siteGroundElevationM - viewerGroundM;
+  const dist = Number.isFinite(distanceMeters) ? distanceMeters : state.lastPlacementDistanceM;
+  const terrainBlend = smoothstep(GROUND_TRACK_NEAR_M, GROUND_TRACK_FAR_M, Number.isFinite(dist) ? dist : GROUND_TRACK_FAR_M);
+  const localPlaneDeltaM = clamp(
+    terrainDeltaM * GROUND_TRACK_LOCAL_DELTA_FACTOR,
+    -GROUND_TRACK_LOCAL_DELTA_CLAMP_M,
+    GROUND_TRACK_LOCAL_DELTA_CLAMP_M
+  );
+  return THREE.MathUtils.lerp(localPlaneDeltaM, terrainDeltaM, terrainBlend);
+}
+
+function getReferenceLocation() {
+  return state.fixedPosition ? (state.anchorLoc || state.userLoc) : state.userLoc;
+}
+
+function setManualOffset(east = 0, north = 0, up = DEFAULT_MODEL_VERTICAL_OFFSET_M) {
+  state.manualOffsetM.east = east;
+  state.manualOffsetM.north = north;
+  state.manualOffsetM.up = up;
+  saveCalibration();
+  invalidateXrAnchor();
+  updatePlacement();
+}
+
+function applyManualOffset(deltaEast = 0, deltaNorth = 0, deltaUp = 0) {
+  state.manualOffsetM.east += deltaEast;
+  state.manualOffsetM.north += deltaNorth;
+  state.manualOffsetM.up += deltaUp;
+  saveCalibration();
+  invalidateXrAnchor();
+  updatePlacement();
+}
+
+function resetManualOffset() {
+  setManualOffset(0, 0, DEFAULT_MODEL_VERTICAL_OFFSET_M);
+}
+
+function ensureInitialPreviewOffset() {
+  if (state.userLoc || state.sessionActive || !state.modelRoot) {
+    state.previewActive = false;
+    state.previewOffsetM = { east: 0, north: 0, up: 0 };
+    return;
+  }
+  state.previewActive = true;
+  state.previewOffsetM = {
+    east: 0,
+    north: Math.max(24, state.modelMetrics.radius * 2.8),
+    up: -Math.max(0, state.modelMetrics.centerY - VIEWER_EYE_HEIGHT_M)
+  };
+}
+
+function getCameraRelativePlanarVectors() {
+  if (!state.camera || !state.northRoot) return null;
+  
+  const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(state.camera.quaternion);
+  
+  // Transform the world-space forward vector into the local space of northRoot
+  forward.applyQuaternion(state.northRoot.quaternion.clone().invert());
+  
+  forward.y = 0;
+  if (forward.lengthSq() < 1e-6) return null;
+  forward.normalize();
+  
+  const right = new THREE.Vector3(forward.z, 0, -forward.x).normalize();
+  return { forward, right };
+}
+
+function applyBindNudge(direction) {
+  const planar = getCameraRelativePlanarVectors();
+  if (direction === 'toward' && planar) {
+    applyManualOffset(-planar.forward.x * REPOSITION_PLANAR_STEP_M, planar.forward.z * REPOSITION_PLANAR_STEP_M, 0);
+  } else if (direction === 'away' && planar) {
+    applyManualOffset(planar.forward.x * REPOSITION_PLANAR_STEP_M, -planar.forward.z * REPOSITION_PLANAR_STEP_M, 0);
+  } else if (direction === 'left' && planar) {
+    applyManualOffset(-planar.right.x * REPOSITION_PLANAR_STEP_M, planar.right.z * REPOSITION_PLANAR_STEP_M, 0);
+  } else if (direction === 'right' && planar) {
+    applyManualOffset(planar.right.x * REPOSITION_PLANAR_STEP_M, -planar.right.z * REPOSITION_PLANAR_STEP_M, 0);
+  } else if (direction === 'up') {
+    applyManualOffset(0, 0, REPOSITION_VERTICAL_STEP_M);
+  } else if (direction === 'down') {
+    applyManualOffset(0, 0, -REPOSITION_VERTICAL_STEP_M);
+  }
+}
+
+function updatePlacement() {
+  if (!state.northRoot || !state.geoRoot || !state.modelRoot || !payload || !payload.site) return;
+  if (state.xrAnchor && state.xrAnchorRoot) {
+    updateMetrics(state.lastPlacementDistanceM);
+    return;
+  }
+  state.modelRoot.scale.setScalar(1);
+  /* camera-overlay mode applies heading trim in the camera yaw; XR applies it here */
+  state.northRoot.rotation.y = state.sessionActive ? (state.xrHeadingOffsetRad || 0) - toRad(state.headingTrimDeg) : 0;
+
+  let east = 0;
+  let north = 0;
+  let dist = NaN;
+  const referenceLoc = getReferenceLocation();
+  if (referenceLoc && Number.isFinite(payload.site.lng) && Number.isFinite(payload.site.lat)) {
+    const delta = geoDeltaMeters(referenceLoc, payload.site);
+    dist = delta.distanceMeters;
+    east = delta.east;
+    north = delta.north;
+    state.lastPlacementDistanceM = dist;
+    if (!state.sessionActive) {
+      const elevationReady = Number.isFinite(state.siteGroundElevationM) && Number.isFinite(state.anchorEyeElevationM);
+      setStatus(
+        `Building placed at the parcel. Target is ${formatDistance(dist)} away from your current position.` +
+        `${elevationReady ? ' Ground alignment is active.' : ' Waiting for ground alignment.'}`
+      );
+    }
+  }
+
+  const verticalOffset = computeGroundTrackedVerticalOffset(dist);
+  ensureInitialPreviewOffset();
+  const preview = state.previewActive ? state.previewOffsetM : { east: 0, north: 0, up: 0 };
+
+  state.geoRoot.position.set(
+    east + state.manualOffsetM.east + preview.east,
+    verticalOffset + state.manualOffsetM.up + preview.up - (state.previewActive ? 0 : state.viewerLevelM),
+    -(north + state.manualOffsetM.north + preview.north)
+  );
+  positionPrimaryLight();
+  updateMetrics(dist);
+}
+
+function extractHeading(event) {
+  if (!event) return null;
+  if (Number.isFinite(event.webkitCompassHeading)) return event.webkitCompassHeading;
+  if (Number.isFinite(event.alpha)) {
+    const magnetic = 360 - event.alpha;
+    return (magnetic + 360) % 360;
+  }
+  return null;
+}
+
+function smoothHeadingDegrees(current, next, amount = 0.16) {
+  if (!Number.isFinite(current)) return next;
+  const delta = ((next - current + 540) % 360) - 180;
+  return (current + delta * amount + 360) % 360;
+}
+
+function getScreenOrientationRad() {
+  if (screen.orientation && Number.isFinite(screen.orientation.angle)) {
+    return toRad(screen.orientation.angle);
+  }
+  if (Number.isFinite(window.orientation)) {
+    return toRad(window.orientation);
+  }
+  return 0;
+}
+
+function getOrientationAlphaDeg(event) {
+  if (!event) return 0;
+  if (Number.isFinite(event.webkitCompassHeading)) {
+    return (360 - event.webkitCompassHeading + 360) % 360;
+  }
+  return Number.isFinite(event.alpha) ? event.alpha : 0;
+}
+
+function composeCameraQuaternionFromDevice(alphaDeg, betaDeg, gammaDeg, screenOrientRad, target) {
+  const output = target || new THREE.Quaternion();
+  const alpha = toRad(alphaDeg || 0);
+  const beta = toRad(betaDeg || 0);
+  const gamma = toRad(gammaDeg || 0);
+
+  orientationEuler.set(beta, alpha, -gamma, 'YXZ');
+  output.setFromEuler(orientationEuler);
+  output.multiply(orientationQ1);
+  output.multiply(orientationQ0.setFromAxisAngle(orientationZee, -screenOrientRad));
+  return output;
+}
+
+const wrapDeg = deg => ((deg % 360) + 540) % 360 - 180;
+const relQuatA = new THREE.Quaternion();
+const relQuatB = new THREE.Quaternion();
+const rebaseEuler = new THREE.Euler();
+const forwardScratch = new THREE.Vector3();
+
+/* Device orientation as a quaternion (no north offset). Unlike alpha/beta/gamma this
+   is continuous through the upright pose, where alpha and gamma swing wildly. */
+function relativeDeviceQuat(o, target) {
+  return composeCameraQuaternionFromDevice(o.alpha, o.beta, o.gamma, o.screen, target);
+}
+function cameraElevationDeg(q) {
+  forwardScratch.set(0, 0, -1).applyQuaternion(q);
+  return THREE.MathUtils.radToDeg(Math.asin(clamp(forwardScratch.y, -1, 1)));
+}
+function headingSampleUsable(rel) {
+  if (!rel) return false;
+  if (state.motionTrackingReady && state.motionRateDps > HEADING_SAMPLE_MAX_RATE_DPS) return false;
+  const q = relativeDeviceQuat(rel, relQuatA);
+  return Boolean(q) && Math.abs(cameraElevationDeg(q)) <= HEADING_SAMPLE_MAX_ELEVATION_DEG;
+}
+
+/* Robust circular mean of heading offsets (median first, then inlier mean). */
+function robustOffsetDeg(samples) {
+  if (!samples.length) return null;
+  const sorted = samples.map(s => s.offset).slice().sort((a, b) => a - b);
+  const ref = samples.map(s => s.offset).reduce((best, v) => {
+    const cost = samples.reduce((acc, s) => acc + Math.abs(wrapDeg(s.offset - v)), 0);
+    return !best || cost < best.cost ? { v, cost } : best;
+  }, null).v;
+  const inliers = samples.filter(s => Math.abs(wrapDeg(s.offset - ref)) <= HEADING_OUTLIER_DEG);
+  if (!inliers.length) return ref;
+  let sx = 0, sy = 0;
+  inliers.forEach(s => {
+    const w = Number.isFinite(s.accuracy) ? 1 / Math.max(3, s.accuracy) : 1 / 12;
+    sx += Math.cos(toRad(s.offset)) * w;
+    sy += Math.sin(toRad(s.offset)) * w;
+  });
+  void sorted;
+  return THREE.MathUtils.radToDeg(Math.atan2(sy, sx));
+}
+
+function beginHeadingAcquire(nowMs = performance.now()) {
+  state.headingSamples = [];
+  state.headingAcquireStartMs = nowMs;
+  state.headingLocked = false;
+}
+
+/* Compass sample → offset between absolute heading and the gyro's relative yaw. */
+function pushHeadingSample(absoluteAlphaDeg, relativeAlphaDeg, accuracyDeg, nowMs) {
+  const offset = wrapDeg(absoluteAlphaDeg - relativeAlphaDeg);
+  state.headingSamples.push({ offset, accuracy: accuracyDeg, t: nowMs });
+  while (state.headingSamples.length && nowMs - state.headingSamples[0].t > HEADING_SAMPLE_WINDOW_MS) state.headingSamples.shift();
+  const estimate = robustOffsetDeg(state.headingSamples);
+  if (!Number.isFinite(estimate)) return;
+  if (state.headingLocked) {
+    /* Locked: the compass is ignored for pose. Track disagreement only as a hint. */
+    state.headingDisagreementDeg = wrapDeg(estimate - state.yawOffsetDeg);
+    return;
+  }
+  const elapsed = nowMs - (Number.isFinite(state.headingAcquireStartMs) ? state.headingAcquireStartMs : nowMs);
+  if (state.yawOffsetDeg === null) state.yawOffsetDeg = estimate; /* provisional so the view is usable at once */
+  if (elapsed >= HEADING_ACQUIRE_MS && state.headingSamples.length >= HEADING_ACQUIRE_MIN_SAMPLES) {
+    /* one deliberate, eased correction onto the robust estimate, then lock */
+    state.yawOffsetFromDeg = state.yawOffsetDeg;
+    state.yawOffsetDeg = estimate;
+    state.yawOffsetEaseStartMs = nowMs;
+    state.headingLocked = true;
+    state.headingDisagreementDeg = 0;
+    updateMetrics(state.lastPlacementDistanceM);
+  } else if (!state.headingLocked) {
+    state.yawOffsetDeg = estimate;
+  }
+}
+
+function currentYawOffsetDeg(nowMs) {
+  if (state.yawOffsetDeg === null) return 0;
+  if (state.yawOffsetFromDeg === null) return state.yawOffsetDeg;
+  const t = clamp((nowMs - state.yawOffsetEaseStartMs) / HEADING_RELOCK_EASE_MS, 0, 1);
+  if (t >= 1) { state.yawOffsetFromDeg = null; return state.yawOffsetDeg; }
+  const e = t * t * (3 - 2 * t);
+  return state.yawOffsetFromDeg + wrapDeg(state.yawOffsetDeg - state.yawOffsetFromDeg) * e;
+}
+
+function setCameraQuaternionFromDevice(alphaDeg, betaDeg, gammaDeg, screenOrientRad, nowMs = performance.now()) {
+  /* kept for callers that seed the camera once (initScene) */
+  if (!state.camera) return;
+  const q = composeCameraQuaternionFromDevice(alphaDeg, betaDeg, gammaDeg, screenOrientRad, new THREE.Quaternion());
+  if (!q) return;
+  state.targetCameraQuat = q.clone();
+  state.smoothedCameraQuat = q.clone();
+  state.camera.quaternion.copy(q);
+  state.lastOrientationAtMs = nowMs;
+}
+
+/* Raw world pose from the latest relative (gyro) orientation plus the locked yaw offset. */
+function rawDevicePose(nowMs) {
+  const rel = state.relOrientation;
+  if (!rel) return null;
+  const alpha = rel.alpha + currentYawOffsetDeg(nowMs) + state.headingTrimDeg;
+  return composeCameraQuaternionFromDevice(alpha, rel.beta, rel.gamma, rel.screen, new THREE.Quaternion());
+}
+
+/* Called every render frame in camera-overlay mode.
+   1. delay the sensor pose by the camera pipeline latency so the overlay moves with the video,
+   2. 1€-style adaptive smoothing: strong when still (kills micro-jitter), light when turning (no lag). */
+function updateOverlayCameraPose(nowMs) {
+  const raw = rawDevicePose(nowMs);
+  if (!raw || !state.camera) return;
+  state.poseHistory.push({ t: nowMs, q: raw });
+  while (state.poseHistory.length > 2 && state.poseHistory[1].t <= nowMs - VIDEO_LATENCY_MS) state.poseHistory.shift();
+  const delayed = state.poseHistory[0].q;
+  const dt = Number.isFinite(state.lastPoseSampleMs) ? clamp((nowMs - state.lastPoseSampleMs) / 1000, 1 / 240, 0.1) : 1 / 60;
+  state.lastPoseSampleMs = nowMs;
+  if (!state.poseFilterQuat) {
+    state.poseFilterQuat = delayed.clone();
+    state.poseFilterRaw = delayed.clone();
+  }
+  const speedDps = THREE.MathUtils.radToDeg(state.poseFilterRaw.angleTo(delayed)) / dt;
+  state.poseFilterRaw.copy(delayed);
+  const speedAlpha = 1 - Math.exp(-dt / 0.06);
+  state.poseFilterSpeed += (speedDps - state.poseFilterSpeed) * speedAlpha;
+  const restDeviationDeg = THREE.MathUtils.radToDeg(state.poseFilterQuat.angleTo(delayed));
+  if (!(state.poseFilterSpeed < POSE_REST_SPEED_DPS && restDeviationDeg < POSE_REST_HOLD_DEG)) {
+    const cutoff = POSE_FILTER_MIN_CUTOFF_HZ + POSE_FILTER_SPEED_GAIN * state.poseFilterSpeed;
+    const tau = 1 / (2 * Math.PI * cutoff);
+    const a = 1 / (1 + tau / dt);
+    state.poseFilterQuat.slerp(delayed, a);
+  }
+  state.camera.quaternion.copy(state.poseFilterQuat);
+  state.smoothedCameraQuat = state.poseFilterQuat;
+  state.targetCameraQuat = delayed;
+}
+
+function onDeviceMotion(event) {
+  const rotation = event && event.rotationRate;
+  if (!rotation) return;
+  const values = [rotation.alpha, rotation.beta, rotation.gamma]
+    .map(value => Number(value))
+    .filter(Number.isFinite);
+  if (!values.length) return;
+  const magnitude = Math.hypot(...values);
+  state.motionRateDps = THREE.MathUtils.lerp(state.motionRateDps, magnitude, 0.32);
+  state.lastMotionAtMs = performance.now();
+  state.motionTrackingReady = true;
+}
+
+/* Re-lock: re-estimate heading from ~1.4 s of compass while the user holds still,
+   then freeze it. Position lock is handled by the callers. */
+function captureStablePoseLock() {
+  state.fixedPosition = true;
+  state.positionFrozen = false;
+  beginHeadingAcquire();
+  state.lastOrientationAtMs = performance.now();
+}
+
+/* Lock: freeze the alignment the user sees right now. Heading stops listening to the
+   compass (finishing acquisition with the current estimate) and the position stops
+   listening to GPS. Only Re-aim, or a long sustained walk, moves it again. */
+function lockAlignmentNow() {
+  const nowMs = performance.now();
+  state.fixedPosition = true;
+  if (!state.headingLocked) {
+    const estimate = robustOffsetDeg(state.headingSamples);
+    if (Number.isFinite(estimate) && state.yawOffsetDeg !== null) {
+      state.yawOffsetFromDeg = currentYawOffsetDeg(nowMs);
+      state.yawOffsetDeg = estimate;
+      state.yawOffsetEaseStartMs = nowMs;
+    } else if (state.yawOffsetDeg === null) {
+      state.yawOffsetDeg = 0;
+    }
+    state.headingLocked = true;
+    state.headingDisagreementDeg = 0;
+  }
+  if (state.userLoc && (!state.anchorLoc || !state.anchorSettled)) {
+    if (state.anchorLoc) state.anchorTargetLoc = cloneLoc(state.userLoc);
+    else setAnchorFromLocation(state.userLoc, 'manual');
+  }
+  state.anchorSettled = Boolean(state.anchorLoc || state.userLoc);
+  state.positionFrozen = true;
+  state.walkSamples = 0;
+  invalidateXrAnchor();
+  updatePlacement();
+  syncUiState();
+  updateMetrics(state.lastPlacementDistanceM);
+  setStatus('Locked. Heading and position are frozen, so turning, tilting or GPS drift no longer move the building. Use Re-aim after walking somewhere new.');
+}
+
+function onDeviceOrientation(event) {
+  const nowMs = performance.now();
+  if (event.type === 'deviceorientationabsolute') {
+    state.lastAbsoluteOrientationAtMs = nowMs;
+    if (!Number.isFinite(event.alpha)) return;
+    const rel = state.relOrientation;
+    if (state.relOrientationSeen && rel && nowMs - rel.t < 150) {
+      if (headingSampleUsable(rel)) pushHeadingSample(event.alpha, rel.alpha, NaN, nowMs);
+    } else if (!state.relOrientationSeen) {
+      /* browser only provides an absolute stream: use it directly (still filtered per frame) */
+      state.relOrientation = { alpha: event.alpha, beta: event.beta || 0, gamma: event.gamma || 0, screen: getScreenOrientationRad(), t: nowMs };
+      state.yawOffsetDeg = 0;
+      state.headingLocked = true;
+    }
+    state.headingSource = 'absolute';
+    return;
+  }
+  if (!Number.isFinite(event.alpha) || !Number.isFinite(event.beta)) return;
+  const prev = state.relOrientation;
+  const next = { alpha: event.alpha, beta: event.beta, gamma: Number.isFinite(event.gamma) ? event.gamma : 0, screen: getScreenOrientationRad(), t: nowMs };
+  /* Compare orientations as quaternions, not alpha values: near the upright pose alpha
+     and gamma swing by tens of degrees for a tiny tilt while the real orientation barely
+     changes. A genuine step means the sensor re-referenced its yaw frame (iOS does this
+     after interruptions); fold the step into the north offset so the world pose, and
+     the building, stay exactly where they were. */
+  if (prev && state.yawOffsetDeg !== null) {
+    const qp = relativeDeviceQuat(prev, relQuatA);
+    const qn = relativeDeviceQuat(next, relQuatB);
+    const jumpDeg = THREE.MathUtils.radToDeg(qp.angleTo(qn));
+    const dtS = Math.max(0.001, (nowMs - prev.t) / 1000);
+    const gyroDeg = state.motionTrackingReady ? state.motionRateDps * dtS : 0;
+    if (jumpDeg > ORIENTATION_RESET_JUMP_DEG && jumpDeg > gyroDeg * 3 + 10) {
+      const step = qp.multiply(qn.invert());
+      const yawStepDeg = THREE.MathUtils.radToDeg(rebaseEuler.setFromQuaternion(step, 'YXZ').y);
+      state.yawOffsetDeg = wrapDeg(state.yawOffsetDeg + yawStepDeg);
+      if (state.yawOffsetFromDeg !== null) state.yawOffsetFromDeg = wrapDeg(state.yawOffsetFromDeg + yawStepDeg);
+      state.headingSamples = [];
+      state.orientationRebaseCount = (state.orientationRebaseCount || 0) + 1;
+    }
+  }
+  state.relOrientation = next;
+  state.relOrientationSeen = true;
+  state.deviceOrientation = { alphaDeg: next.alpha, betaDeg: next.beta, gammaDeg: next.gamma, screenOrientRad: next.screen };
+  if (Number.isFinite(event.webkitCompassHeading)) {
+    const accuracy = Number(event.webkitCompassAccuracy);
+    state.compassAccuracyDeg = Number.isFinite(accuracy) && accuracy >= 0 ? accuracy : NaN;
+    /* ignore samples iOS itself flags as poor (> 25°), and any taken while moving or
+       looking far up or down, where the compass heading is unreliable */
+    if (!(state.compassAccuracyDeg > 25) && headingSampleUsable(next)) {
+      pushHeadingSample(360 - event.webkitCompassHeading, next.alpha, state.compassAccuracyDeg, nowMs);
+    }
+    state.headingSource = 'compass';
+  }
+  if (state.yawOffsetDeg !== null) {
+    state.headingDeg = (360 - (next.alpha + state.yawOffsetDeg) + 720) % 360;
+  }
+  if (!Number.isFinite(state.headingAcquireStartMs)) beginHeadingAcquire(nowMs);
+  ensureInitialPreviewOffset();
+}
+
+async function enableOrientation({ userInitiated = false } = {}) {
+  if (typeof window.DeviceOrientationEvent === 'undefined') {
+    setStatus('Device orientation is unavailable on this device/browser.');
+    return;
+  }
+  if (state.orientationReady) return;
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (!userInitiated) {
+      state.orientationGestureRequired = true;
+      updateSensorState();
+      scheduleDeferredOrientationUnlock();
+      throw new Error('Motion permission needs one tap on the live view. Camera and location can still start automatically.');
+    }
+    const permissionRequests = [DeviceOrientationEvent.requestPermission()];
+    const requestsMotionPermission = typeof window.DeviceMotionEvent !== 'undefined'
+      && typeof DeviceMotionEvent.requestPermission === 'function';
+    if (requestsMotionPermission) permissionRequests.push(DeviceMotionEvent.requestPermission());
+    const permissions = await Promise.all(permissionRequests);
+    if (permissions[0] !== 'granted') throw new Error('Orientation permission denied.');
+    state.orientationGestureRequired = false;
+  }
+  if (!state.orientationListenersAttached) {
+    window.addEventListener('deviceorientationabsolute', onDeviceOrientation, true);
+    window.addEventListener('deviceorientation', onDeviceOrientation, true);
+    window.addEventListener('devicemotion', onDeviceMotion, true);
+    state.orientationListenersAttached = true;
+  }
+  state.orientationReady = true;
+  updateSensorState();
+}
+
+async function enableGeolocation() {
+  if (!navigator.geolocation) throw new Error('Geolocation not supported in this browser.');
+  const permissionState = await getGeolocationPermissionState();
+  if (permissionState === 'denied') {
+    state.geoPermissionState = 'denied';
+    throw new Error(getGeoPermissionHelp());
+  }
+
+  const assignPosition = pos => {
+    const filtered = ingestGeolocationPosition(pos);
+    if (!filtered) return;
+    state.userLoc = filtered;
+    const settlingElapsedMs = performance.now() - state.geoFirstSampleAtMs;
+    const canSettle = state.geoSamples.length >= GEO_SETTLE_MIN_SAMPLES
+      || settlingElapsedMs >= GEO_SETTLE_MAX_MS
+      || filtered.accuracy <= GEO_INSTANT_LOCK_ACCURACY_M;
+    if (!state.anchorLoc) {
+      setAnchorFromLocation(filtered, 'initial');
+    } else if (!state.anchorSettled && !state.positionFrozen) {
+      /* settling: glide toward the averaged fix instead of snapping on every update */
+      state.anchorTargetLoc = cloneLoc(filtered);
+    }
+    if (state.fixedPosition && canSettle) state.anchorSettled = true;
+    /* Walk-follow: once settled, GPS wander (easily 10-20 m in street canyons) never moves
+       the building. Only a clear, sustained walk glides the anchor, and a manual Lock
+       disables even that until Re-aim. */
+    if (state.fixedPosition && state.anchorSettled && state.anchorLoc && !state.sessionActive) {
+      const moved = geoDeltaMeters(state.anchorLoc, filtered).distanceMeters;
+      const threshold = Math.max(WALK_FOLLOW_MIN_M, WALK_FOLLOW_ACCURACY_FACTOR * (Number(filtered.accuracy) || 10));
+      state.movedSinceLockM = moved;
+      if (moved > threshold && !state.positionFrozen) {
+        state.walkSamples = (state.walkSamples || 0) + 1;
+        if (state.walkSamples >= WALK_FOLLOW_SAMPLES) state.anchorTargetLoc = cloneLoc(filtered);
+      } else {
+        state.walkSamples = 0;
+      }
+    }
+    state.previewActive = false;
+    state.previewOffsetM = { east: 0, north: 0, up: 0 };
+    state.geolocationReady = true;
+    updateSensorState();
+    void ensureSiteGroundElevation();
+    void resolveAnchorEyeElevation();
+    updatePlacement();
+  };
+  const handleGeoError = err => {
+    if (err && err.code === 1) {
+      state.geoPermissionState = 'denied';
+      setError(getGeoPermissionHelp());
+      setStatus('Location is required for parcel anchoring. Re-enable it in browser settings, reload this page, and tap Enable Sensors again.');
+      return;
+    }
+    setError(`Geolocation error: ${err && err.message ? err.message : 'unknown error'}`);
+  };
+
+  await new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        assignPosition(pos);
+        resolve();
+      },
+      err => {
+        handleGeoError(err);
+        reject(new Error(err && err.code === 1 ? getGeoPermissionHelp() : (err && err.message ? err.message : 'Geolocation unavailable.')));
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000
+      }
+    );
+  });
+
+  if (state.geoWatchId !== null) return;
+  state.geoWatchId = navigator.geolocation.watchPosition(
+    assignPosition,
+    handleGeoError,
+    {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 15000
+    }
+  );
+}
+
+async function enableSensors({ userInitiated = true } = {}) {
+  setError('');
+  try {
+    if (userInitiated) {
+      try {
+        await enableOrientation({ userInitiated: true });
+      } catch (orientationErr) {
+        if (!String(orientationErr && orientationErr.message ? orientationErr.message : orientationErr).includes('one tap')) {
+          throw orientationErr;
+        }
+      }
+    }
+    await ensureCameraFeed();
+    await enableGeolocation();
+    if (!userInitiated) {
+      try {
+        await enableOrientation({ userInitiated: false });
+      } catch (orientationErr) {
+        if (!String(orientationErr && orientationErr.message ? orientationErr.message : orientationErr).includes('one tap')) {
+          throw orientationErr;
+        }
+      }
+    }
+    updateSensorState();
+    void requestWakeLock();
+    if (isCompactViewport()) setPanelCollapsed(true);
+    setStatus(
+      state.orientationReady
+        ? 'Sensors and camera enabled. The camera view now carries the building overlay; start full AR if your browser supports WebXR.'
+        : 'Camera and location are live. Motion access will unlock on the next tap if this browser requires a gesture.'
+    );
+  } catch (err) {
+    updateSensorState();
+    setError(String(err && err.message ? err.message : err));
+  }
+}
+
+async function ensureCameraFeed() {
+  if (state.cameraStream) return state.cameraStream;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('Camera access is not supported in this browser.');
+  }
+  const stream = await navigator.mediaDevices.getUserMedia({
+    /* sensor-native 16:9 at 1080p: sharp feed and a predictable crop for the FOV model */
+    video: {
+      facingMode: { ideal: 'environment' },
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      frameRate: { ideal: 30 }
+    },
+    audio: false
+  });
+  const video = $('cameraFeed');
+  if (!video) throw new Error('Camera element missing.');
+  video.srcObject = stream;
+  try {
+    await video.play();
+  } catch (err) {
+    console.warn('Camera video play required an extra gesture.', err);
+  }
+  video.addEventListener('loadedmetadata', syncCameraProjection, { once: true });
+  state.cameraStream = stream;
+  state.cameraReady = true;
+  updateSensorState();
+  syncCameraProjection();
+  return stream;
+}
+
+function bindCanvasInteractions() {
+  const canvas = $('xrCanvas');
+  if (!canvas) return;
+
+  canvas.addEventListener('pointerdown', event => {
+    if (!state.bindMode) return;
+    event.preventDefault();
+    setStatus('Use the reposition buttons to move the model relative to the camera view.');
+  });
+}
+
+function calculateSunDirection(date, latDeg, lngDeg) {
+  const dayStart = new Date(date.getFullYear(), 0, 0);
+  const day = Math.floor((date - dayStart) / 86400000);
+  const hour = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+  const gamma = (2 * Math.PI / 365) * (day - 1 + (hour - 12) / 24);
+  const equationOfTime = 229.18 * (
+    0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma)
+  );
+  const declination = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma)
+    - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma)
+    - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+  const timezoneHours = -date.getTimezoneOffset() / 60;
+  const trueSolarMinutes = hour * 60 + equationOfTime + 4 * lngDeg - 60 * timezoneHours;
+  const hourAngle = toRad((trueSolarMinutes / 4) - 180);
+  const latitude = toRad(latDeg);
+  const sinElevation = Math.sin(latitude) * Math.sin(declination)
+    + Math.cos(latitude) * Math.cos(declination) * Math.cos(hourAngle);
+  const elevation = Math.asin(clamp(sinElevation, -1, 1));
+  const azimuth = Math.atan2(
+    Math.sin(hourAngle),
+    Math.cos(hourAngle) * Math.sin(latitude) - Math.tan(declination) * Math.cos(latitude)
+  ) + Math.PI;
+  const horizontal = Math.max(0.08, Math.cos(elevation));
+  return {
+    elevation,
+    direction: new THREE.Vector3(
+      Math.sin(azimuth) * horizontal,
+      Math.max(0.08, Math.sin(elevation)),
+      -Math.cos(azimuth) * horizontal
+    ).normalize()
+  };
+}
+
+/* Black-body colour (Tanner Helland approximation), used for sun temperature. */
+function kelvinToColor(kelvin) {
+  const t = clamp(kelvin, 1500, 12000) / 100;
+  let r, g, b;
+  if (t <= 66) { r = 255; g = 99.4708025861 * Math.log(t) - 161.1195681661; }
+  else { r = 329.698727446 * Math.pow(t - 60, -0.1332047592); g = 288.1221695283 * Math.pow(t - 60, -0.0755148492); }
+  if (t >= 66) b = 255; else if (t <= 19) b = 0; else b = 138.5177312231 * Math.log(t - 10) - 305.0447927307;
+  return new THREE.Color(clamp(r, 0, 255) / 255, clamp(g, 0, 255) / 255, clamp(b, 0, 255) / 255);
+}
+
+const SKY_VERTEX = `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const SKY_FRAGMENT = `
+  uniform vec3 zenith; uniform vec3 horizon; uniform vec3 ground; uniform vec3 sunColor; uniform vec3 sunDir; uniform float sunStrength; uniform float glow; uniform float skyGain;
+  varying vec3 vDir;
+  void main(){
+    vec3 d = normalize(vDir);
+    float h = d.y;
+    vec3 col = h > 0.0 ? mix(horizon, zenith, pow(clamp(h, 0.0, 1.0), 0.55)) : mix(horizon, ground, pow(clamp(-h, 0.0, 1.0), 0.4));
+    float s = max(dot(d, normalize(sunDir)), 0.0);
+    col += sunColor * (pow(s, 220.0) * sunStrength * 6.0 + pow(s, 12.0) * glow * 0.55 + pow(s, 3.0) * glow * 0.18);
+    gl_FragColor = vec4(col * skyGain, 1.0);
+  }`;
+
+/* Physically plausible outdoor environment for reflections and image-based light:
+   sky gradient from the real sun position, tinted by the camera's sky/ground colours. */
+function rebuildSkyEnvironment(force = false) {
+  if (!state.renderer || !state.scene) return;
+  const pal = state.cameraPalette;
+  const sunElev = state.sunElevationRad ?? toRad(35);
+  const lowSun = clamp((toRad(20) - sunElev) / toRad(24), 0, 1);
+  const zenith = new THREE.Color('#5d7fa6').lerp(new THREE.Color('#44587a'), lowSun * 0.4);
+  const horizon = new THREE.Color('#c9d3dc').lerp(new THREE.Color('#e3b28e'), lowSun * 0.28);
+  const ground = new THREE.Color('#5d5750');
+  if (pal) {
+    zenith.lerp(pal.sky, 0.45);
+    horizon.lerp(pal.horizon, 0.5);
+    ground.lerp(pal.ground, 0.6);
+  }
+  const key = [zenith, horizon, ground].map(c => c.getHexString()).join('') + Math.round(THREE.MathUtils.radToDeg(sunElev) / 2);
+  const nowMs = performance.now();
+  if (!force && (key === state.skyEnvKey || nowMs - state.skyEnvLastMs < 2500)) return;
+  state.skyEnvKey = key;
+  state.skyEnvLastMs = nowMs;
+  const skyScene = new THREE.Scene();
+  const material = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    depthWrite: false,
+    vertexShader: SKY_VERTEX,
+    fragmentShader: SKY_FRAGMENT,
+    uniforms: {
+      zenith: { value: zenith.convertSRGBToLinear() },
+      horizon: { value: horizon.convertSRGBToLinear() },
+      ground: { value: ground.convertSRGBToLinear() },
+      sunColor: { value: kelvinToColor(state.sunKelvin || 5200).convertSRGBToLinear() },
+      sunDir: { value: state.sunDirection.clone() },
+      sunStrength: { value: clamp(Math.sin(Math.max(sunElev, 0.02)) * 1.4, 0.15, 1) },
+      glow: { value: 0.35 + lowSun * 0.9 },
+      /* the sky is several times brighter than any lit wall: HDR gain for reflections */
+      skyGain: { value: 2.4 }
+    }
+  });
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(100, 48, 24), material);
+  skyScene.add(sphere);
+  const pmrem = new THREE.PMREMGenerator(state.renderer);
+  const target = pmrem.fromScene(skyScene, 0.02, 0.1, 200);
+  pmrem.dispose();
+  sphere.geometry.dispose();
+  material.dispose();
+  if (state.skyEnvTarget) state.skyEnvTarget.dispose();
+  state.skyEnvTarget = target;
+  state.environmentTexture = target.texture;
+  if (state.lightingMode !== 'xr-estimated') state.scene.environment = target.texture;
+}
+
+function positionPrimaryLight() {
+  if (!state.sunLight || !state.modelRoot) return;
+  const target = new THREE.Vector3(0, state.modelMetrics.centerY, 0);
+  if (state.contentRoot) state.contentRoot.localToWorld(target);
+  const reach = Math.max(120, state.modelMetrics.height * 2.4, state.modelMetrics.radius * 5);
+  state.sunLight.target.position.copy(target);
+  /* the scene is north-aligned in the overlay; in XR the north root carries the heading */
+  const dir = state.sunDirection.clone();
+  if (state.northRoot) dir.applyQuaternion(state.northRoot.quaternion);
+  state.sunLight.position.copy(target).addScaledVector(dir, reach);
+  state.sunLight.target.updateMatrixWorld();
+}
+
+/* Warm, calm key/fill balance. Intensities are deliberately modest: the building
+   should sit in the scene's light, not glow on top of it. */
+function applyLightingBalance() {
+  const sunElev = state.sunElevationRad ?? toRad(35);
+  const day = clamp((sunElev + toRad(4)) / toRad(40), 0.05, 1);
+  const lowSun = clamp((toRad(18) - sunElev) / toRad(22), 0, 1);
+  const pal = state.cameraPalette;
+  const sceneLuma = pal ? pal.luma : 0.5;
+  const overcast = pal ? clamp(1 - pal.contrast * 3.2, 0, 1) : 0.2;
+  const sunColor = kelvinToColor(state.sunKelvin || 5200);
+  if (pal && pal.warmth > 0.15) sunColor.lerp(new THREE.Color('#ffb070'), clamp(pal.warmth, 0, 0.6) * 0.5);
+  if (state.sunLight) {
+    state.sunLight.color.copy(sunColor);
+    /* a low sun is still a strong, warm key light — that is what makes golden hour read */
+    state.sunLight.intensity = (0.95 + 0.9 * day) * (1 - overcast * 0.5) * (0.8 + sceneLuma * 0.4) * (sunElev > -0.02 ? 1 : 0.35);
+  }
+  if (state.hemiLight) {
+    state.hemiLight.color.copy(pal ? pal.sky.clone().lerp(new THREE.Color('#b8c6d6'), 0.5) : new THREE.Color('#b8c6d6'));
+    state.hemiLight.groundColor.copy(pal ? pal.ground.clone().lerp(new THREE.Color('#6b5a4a'), 0.4) : new THREE.Color('#6b5a4a'));
+    state.hemiLight.intensity = 0.3 + overcast * 0.22;
+  }
+  if (state.fillLight) {
+    state.fillLight.color.copy(new THREE.Color('#9fb2c8').lerp(new THREE.Color('#c79a7a'), lowSun * 0.5));
+    state.fillLight.intensity = 0.08 + overcast * 0.08;
+  }
+  if (state.rimLight) {
+    state.rimLight.color.copy(sunColor);
+    state.rimLight.intensity = lowSun * 0.22;
+  }
+  /* image-based light is scaled per material (walls low, glass high), so glass keeps its sky */
+  if (state.scene) state.scene.environmentIntensity = clamp(0.85 + sceneLuma * 0.2 + overcast * 0.15, 0.85, 1.15);
+  if (state.renderer && state.lightingMode !== 'xr-estimated') {
+    /* camera-matched exposure: dim scenes → dimmer building, bright → never above ~1 */
+    state.renderer.toneMappingExposure = clamp(0.7 + sceneLuma * 0.36, 0.68, 0.96);
+  }
+  if (state.contactShadow && state.contactShadow.material) state.contactShadow.material.opacity = clamp(0.1 + day * 0.18 * (1 - overcast * 0.6), 0.08, 0.3);
+}
+
+function updateSolarLighting() {
+  if (!payload || !payload.site || !state.sunLight) return;
+  const solar = calculateSunDirection(SUN_TIME_OVERRIDE || new Date(), Number(payload.site.lat), Number(payload.site.lng));
+  state.sunDirection.copy(solar.direction);
+  state.sunElevationRad = solar.elevation;
+  const elevDeg = THREE.MathUtils.radToDeg(solar.elevation);
+  state.sunKelvin = THREE.MathUtils.lerp(2750, 5600, smoothstep(-1, 36, elevDeg));
+  applyLightingBalance();
+  rebuildSkyEnvironment();
+  positionPrimaryLight();
+}
+
+/* Sample the live camera: sky (top band), horizon (middle), ground (bottom). */
+function sampleCameraLighting(nowMs) {
+  if (state.sessionActive && state.lightingMode === 'xr-estimated') return;
+  if (nowMs - state.lastCameraLightSampleMs < CAMERA_LIGHT_SAMPLE_INTERVAL_MS) return;
+  const video = $('cameraFeed');
+  if (!video || video.readyState < 2 || !video.videoWidth || !lightSampleCtx) return;
+  state.lastCameraLightSampleMs = nowMs;
+  try {
+    const W = lightSampleCanvas.width, H = lightSampleCanvas.height;
+    lightSampleCtx.drawImage(video, 0, 0, W, H);
+    const pixels = lightSampleCtx.getImageData(0, 0, W, H).data;
+    const band = (y0, y1) => {
+      let r = 0, g = 0, b = 0, n = 0, lmin = 1, lmax = 0;
+      for (let y = Math.floor(y0 * H); y < Math.ceil(y1 * H); y++) {
+        for (let x = 0; x < W; x++) {
+          const i = (y * W + x) * 4;
+          r += pixels[i]; g += pixels[i + 1]; b += pixels[i + 2]; n++;
+          const l = (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255;
+          lmin = Math.min(lmin, l); lmax = Math.max(lmax, l);
+        }
+      }
+      return { c: new THREE.Color(r / n / 255, g / n / 255, b / n / 255), lmin, lmax };
+    };
+    const top = band(0, 0.3), mid = band(0.35, 0.65), bot = band(0.7, 1);
+    const luma = c => c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722;
+    const overall = (luma(top.c) + luma(mid.c) + luma(bot.c)) / 3;
+    const warm = clamp(((mid.c.r - mid.c.b) + (top.c.r - top.c.b)) * 1.6, -0.5, 1);
+    const next = {
+      sky: top.c, horizon: mid.c, ground: bot.c,
+      luma: overall,
+      warmth: warm,
+      contrast: Math.max(mid.lmax - mid.lmin, top.lmax - top.lmin) * 0.5
+    };
+    const prev = state.cameraPalette;
+    if (prev) {
+      ['sky', 'horizon', 'ground'].forEach(k => { next[k] = prev[k].clone().lerp(next[k], 0.35); });
+      next.luma = THREE.MathUtils.lerp(prev.luma, next.luma, 0.35);
+      next.warmth = THREE.MathUtils.lerp(prev.warmth, next.warmth, 0.35);
+      next.contrast = THREE.MathUtils.lerp(prev.contrast, next.contrast, 0.35);
+    }
+    state.cameraPalette = next;
+    state.lightingMode = 'camera-matched';
+    applyLightingBalance();
+    rebuildSkyEnvironment();
+  } catch (err) {
+    console.warn('Camera lighting sample failed.', err);
+  }
+}
+
+function setFallbackLightScale(scale) {
+  if (state.hemiLight) state.hemiLight.visible = scale > 0.01;
+  if (state.sunLight) state.sunLight.visible = scale > 0.01;
+  if (state.fillLight) state.fillLight.visible = scale > 0.01;
+  if (state.rimLight) state.rimLight.visible = scale > 0.01;
+}
+
+function temperEstimatedLighting() {
+  if (state.lightingMode !== 'xr-estimated' || !state.estimatedLight) return;
+  state.estimatedLight.traverse(object => {
+    if (object.isDirectionalLight) object.intensity = Math.min(object.intensity, 0.9);
+    else if (object.isLightProbe) object.intensity = Math.min(object.intensity, 0.55);
+  });
+  if (state.renderer) state.renderer.toneMappingExposure = Math.min(state.renderer.toneMappingExposure, 0.86);
+}
+
+function initEnvironmentLighting() {
+  state.hemiLight = new THREE.HemisphereLight(0xb8c6d6, 0x6b5a4a, 0.2);
+  state.scene.add(state.hemiLight);
+  state.sunLight = new THREE.DirectionalLight(0xffe2c4, 1.0);
+  state.sunLight.castShadow = true;
+  state.sunLight.shadow.bias = -0.00012;
+  state.sunLight.shadow.normalBias = 0.04;
+  state.sunLight.shadow.radius = 3;
+  state.scene.add(state.sunLight, state.sunLight.target);
+  state.fillLight = new THREE.DirectionalLight(0x9fb2c8, 0.1);
+  state.fillLight.position.set(-18, 16, -12);
+  state.scene.add(state.fillLight);
+  state.rimLight = new THREE.DirectionalLight(0xffb070, 0.0);
+  state.rimLight.position.set(12, 10, -24);
+  state.scene.add(state.rimLight);
+
+  state.estimatedLight = new XREstimatedLight(state.renderer, true);
+  state.estimatedLight.addEventListener('estimationstart', () => {
+    if (!state.scene || !state.estimatedLight) return;
+    state.scene.add(state.estimatedLight);
+    if (state.estimatedLight.environment) state.scene.environment = state.estimatedLight.environment;
+    setFallbackLightScale(0);
+    state.lightingMode = 'xr-estimated';
+    if (state.renderer) state.renderer.toneMappingExposure = 0.84;
+    updateMetrics(state.lastPlacementDistanceM);
+  });
+  state.estimatedLight.addEventListener('estimationend', () => {
+    if (state.estimatedLight && state.estimatedLight.parent) state.estimatedLight.parent.remove(state.estimatedLight);
+    if (state.scene) state.scene.environment = state.environmentTexture;
+    setFallbackLightScale(1);
+    state.lightingMode = state.cameraReady ? 'camera-matched' : 'studio';
+    updateSolarLighting();
+  });
+  updateSolarLighting();
+  rebuildSkyEnvironment(true);
+}
+
+function createContactShadow() {
+  const size = Math.max(24, state.modelMetrics.radius * 4.8);
+  const geometry = new THREE.PlaneGeometry(size, size);
+  geometry.rotateX(-Math.PI / 2);
+  const material = new THREE.ShadowMaterial({
+    color: 0x111820,
+    opacity: 0.2,
+    transparent: true,
+    depthWrite: false
+  });
+  const shadow = new THREE.Mesh(geometry, material);
+  shadow.name = 'Ground contact shadow';
+  shadow.position.y = state.modelMetrics.minY + 0.025;
+  shadow.receiveShadow = true;
+  shadow.renderOrder = 4;
+  return shadow;
+}
+
+function applyQualityMode() {
+  if (!state.renderer) return;
+  const dpr = window.devicePixelRatio || 1;
+  let ratio = state.renderScale;
+  if (state.qualityMode === 'high') ratio = Math.min(dpr, 2);
+  else if (state.qualityMode === 'performance') ratio = Math.min(dpr, 1);
+  else ratio = clamp(state.renderScale, Math.min(dpr, 0.85), Math.min(dpr, 1.75));
+  state.renderScale = ratio;
+  state.renderer.setPixelRatio(ratio);
+  state.renderer.setSize(window.innerWidth, window.innerHeight, false);
+  const shadowSize = state.qualityMode === 'high' ? 2048 : (state.qualityMode === 'performance' ? 512 : 1024);
+  if (state.sunLight && state.sunLight.shadow.mapSize.width !== shadowSize) {
+    state.sunLight.shadow.mapSize.set(shadowSize, shadowSize);
+    if (state.sunLight.shadow.map) state.sunLight.shadow.map.dispose();
+    state.sunLight.shadow.map = null;
+  }
+  if (state.sessionActive && state.renderer.xr && typeof state.renderer.xr.setFoveation === 'function') {
+    state.renderer.xr.setFoveation(state.qualityMode === 'high' ? 0.08 : (state.qualityMode === 'performance' ? 0.55 : 0.32));
+  }
+}
+
+function updateAdaptiveQuality(nowMs) {
+  const delta = clamp(nowMs - state.lastFrameAtMs, 4, 100);
+  state.lastFrameAtMs = nowMs;
+  state.frameTimeEmaMs = THREE.MathUtils.lerp(state.frameTimeEmaMs, delta, 0.04);
+  state.frameCount += 1;
+  if (state.qualityMode === 'auto' && state.frameCount % 120 === 0) {
+    const dpr = window.devicePixelRatio || 1;
+    const previous = state.renderScale;
+    if (state.frameTimeEmaMs > 23) state.renderScale = Math.max(Math.min(dpr, 0.85), state.renderScale - 0.16);
+    else if (state.frameTimeEmaMs < 16.4) state.renderScale = Math.min(Math.min(dpr, 1.75), state.renderScale + 0.1);
+    if (Math.abs(previous - state.renderScale) > 0.04) applyQualityMode();
+  }
+  if (state.frameCount % 30 === 0) updateMetrics(state.lastPlacementDistanceM);
+}
+
+function updateDetailVisibility() {
+  if (!state.modelRoot) return;
+  const distance = Number.isFinite(state.lastPlacementDistanceM)
+    ? state.lastPlacementDistanceM
+    : Math.max(20, state.modelMetrics.radius * 2.8);
+  state.modelRoot.traverse(object => {
+    if (!object.isMesh) return;
+    const internalVisible = !object.userData.internal
+      || (state.detailMode === 'complete' && distance <= LOD_FINE_DISTANCE_M * 1.25);
+    const lodVisible = object.userData.lod === 'fine'
+      ? distance <= LOD_FINE_DISTANCE_M && state.qualityMode !== 'performance'
+      : (object.userData.lod === 'medium' ? distance <= LOD_MEDIUM_DISTANCE_M : true);
+    object.visible = internalVisible && lodVisible;
+  });
+}
+
+function releaseXrAnchor({ deleteAnchor = true } = {}) {
+  if (state.contentRoot && state.xrAnchorRoot && state.contentRoot.parent === state.xrAnchorRoot) {
+    state.xrAnchorRoot.remove(state.contentRoot);
+    state.geoRoot.add(state.contentRoot);
+    state.contentRoot.position.set(0, 0, 0);
+    state.contentRoot.quaternion.identity();
+    state.contentRoot.scale.set(1, 1, 1);
+  }
+  if (state.xrAnchorRoot && state.xrAnchorRoot.parent) state.xrAnchorRoot.parent.remove(state.xrAnchorRoot);
+  if (deleteAnchor && state.xrAnchor && typeof state.xrAnchor.delete === 'function') {
+    try { state.xrAnchor.delete(); } catch (err) { console.warn('XR anchor release failed.', err); }
+  }
+  state.xrAnchor = null;
+  state.xrAnchorRoot = null;
+  state.xrAnchorPending = false;
+}
+
+function invalidateXrAnchor() {
+  if (!state.sessionActive || (!state.xrAnchor && !state.xrAnchorPending)) return;
+  releaseXrAnchor();
+  updatePlacement();
+}
+
+function maybeCreateXrAnchor(frame) {
+  if (!state.sessionActive || !state.fixedPosition || !state.anchorSettled || state.xrAnchor || state.xrAnchorPending || !frame || typeof frame.createAnchor !== 'function') return;
+  const referenceSpace = state.renderer.xr.getReferenceSpace();
+  if (!referenceSpace || !state.geoRoot || typeof window.XRRigidTransform === 'undefined') return;
+  state.xrAnchorPending = true;
+  state.northRoot.updateMatrixWorld(true);
+  const position = new THREE.Vector3();
+  const quaternion = new THREE.Quaternion();
+  state.geoRoot.getWorldPosition(position);
+  state.geoRoot.getWorldQuaternion(quaternion);
+  const transform = new XRRigidTransform(
+    { x: position.x, y: position.y, z: position.z },
+    { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w }
+  );
+  frame.createAnchor(transform, referenceSpace).then(anchor => {
+    if (!state.sessionActive || !anchor) {
+      if (anchor && typeof anchor.delete === 'function') anchor.delete();
+      state.xrAnchorPending = false;
+      return;
+    }
+    state.xrAnchor = anchor;
+    state.xrAnchorRoot = new THREE.Group();
+    state.xrAnchorRoot.name = 'Runtime tracked parcel anchor';
+    state.xrAnchorRoot.position.copy(position);
+    state.xrAnchorRoot.quaternion.copy(quaternion);
+    state.scene.add(state.xrAnchorRoot);
+    state.geoRoot.remove(state.contentRoot);
+    state.xrAnchorRoot.add(state.contentRoot);
+    state.xrAnchorSupported = true;
+    state.xrAnchorPending = false;
+    updateMetrics(state.lastPlacementDistanceM);
+  }).catch(err => {
+    state.xrAnchorPending = false;
+    console.warn('Runtime XR anchor was unavailable; local-floor tracking remains active.', err);
+  });
+}
+
+function updateXrAnchorPose(frame) {
+  if (!frame || !state.xrAnchor || !state.xrAnchorRoot) return;
+  const referenceSpace = state.renderer.xr.getReferenceSpace();
+  if (!referenceSpace) return;
+  const pose = frame.getPose(state.xrAnchor.anchorSpace, referenceSpace);
+  if (!pose) return;
+  state.xrAnchorRoot.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
+  state.xrAnchorRoot.quaternion.set(
+    pose.transform.orientation.x,
+    pose.transform.orientation.y,
+    pose.transform.orientation.z,
+    pose.transform.orientation.w
+  );
+}
+
+async function setupXrHitTesting(session) {
+  state.xrHitTestSource = null;
+  if (!session || typeof session.requestHitTestSource !== 'function') return;
+  try {
+    const viewerSpace = await session.requestReferenceSpace('viewer');
+    state.xrHitTestSource = await session.requestHitTestSource({
+      space: viewerSpace,
+      offsetRay: new XRRay({ x: 0, y: 0, z: 0 }, { x: 0, y: -0.32, z: -1 })
+    });
+  } catch (err) {
+    console.warn('XR ground hit testing is unavailable.', err);
+  }
+}
+
+function updateXrHitTest(frame) {
+  if (!frame || !state.xrHitTestSource || state.lastPlacementDistanceM > 60) return;
+  const referenceSpace = state.renderer.xr.getReferenceSpace();
+  if (!referenceSpace) return;
+  const results = frame.getHitTestResults(state.xrHitTestSource);
+  if (!results || !results.length) return;
+  const pose = results[0].getPose(referenceSpace);
+  if (!pose) return;
+  state.latestHitPose = pose.transform;
+  syncUiState();
+}
+
+function calibrateGroundFromHit() {
+  if (!state.latestHitPose || !state.contentRoot || state.lastPlacementDistanceM > 60) return;
+  const currentBase = new THREE.Vector3(0, state.modelMetrics.minY, 0);
+  state.contentRoot.localToWorld(currentBase);
+  const delta = state.latestHitPose.position.y - currentBase.y;
+  if (!Number.isFinite(delta) || Math.abs(delta) > 15) {
+    setError('Ground calibration was rejected because the detected surface is too far from the current building base.');
+    return;
+  }
+  applyManualOffset(0, 0, delta);
+  setError('');
+  setStatus('Ground calibrated from the current tracked surface and saved for this parcel.');
+}
+
+function updateDepthOcclusion() {
+  if (!state.sessionActive || !state.renderer || !state.renderer.xr) return;
+  const xr = state.renderer.xr;
+  const available = typeof xr.hasDepthSensing === 'function' && xr.hasDepthSensing();
+  if (!available) return;
+  const mesh = typeof xr.getDepthSensingMesh === 'function' ? xr.getDepthSensingMesh() : null;
+  if (!mesh) return;
+  if (mesh.material) mesh.material.colorWrite = false;
+  mesh.renderOrder = -2000;
+  mesh.frustumCulled = false;
+  if (!mesh.parent) state.scene.add(mesh);
+  state.depthMesh = mesh;
+  state.depthOcclusionActive = true;
+}
+
+function initScene() {
+  if (state.renderer) return;
+  state.renderer = new THREE.WebGLRenderer({
+    canvas: $('xrCanvas'),
+    antialias: true,
+    alpha: true,
+    logarithmicDepthBuffer: true,
+    powerPreference: 'high-performance'
+  });
+  state.renderer.setPixelRatio(state.renderScale);
+  state.renderer.setSize(window.innerWidth, window.innerHeight);
+  state.renderer.xr.enabled = true;
+  state.renderer.xr.setReferenceSpaceType('local-floor');
+  state.renderer.setClearColor(0x000000, 0);
+  state.renderer.sortObjects = true;
+  state.renderer.outputColorSpace = THREE.SRGBColorSpace;
+  /* Neutral tone mapping keeps hue into the highlights (no bleached-white glare). */
+  state.renderer.toneMapping = THREE.NeutralToneMapping;
+  state.renderer.toneMappingExposure = 0.9;
+  state.renderer.shadowMap.enabled = true;
+  state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  state.scene = new THREE.Scene();
+  state.camera = new THREE.PerspectiveCamera(DEFAULT_CAMERA_VERTICAL_FOV_DEG, window.innerWidth / window.innerHeight, 0.02, 50000);
+  initEnvironmentLighting();
+
+  state.northRoot = new THREE.Group();
+  state.geoRoot = new THREE.Group();
+  state.contentRoot = new THREE.Group();
+  state.contentRoot.name = 'Parcel content';
+  state.modelRoot = buildModelGroup(payload);
+  if (!state.modelRoot) {
+    throw new Error('No valid model geometry found in AR payload.');
+  }
+  state.modelMetrics = getModelMetrics(state.modelRoot);
+  ensureInitialPreviewOffset();
+  loadPayloadOccluders();
+  state.alignmentRoot = buildAlignmentProofGroup(payload);
+  if (state.alignmentRoot) {
+    state.alignmentBaseMaterials = state.alignmentRoot.userData.baseMaterials || [];
+    state.alignmentSweepMaterials = state.alignmentRoot.userData.sweepMaterials || [];
+    state.alignmentSweepMeshes = state.alignmentRoot.userData.sweepMeshes || [];
+    state.alignmentFlowTexture = state.alignmentRoot.userData.flowTexture || null;
+    state.contentRoot.add(state.alignmentRoot);
+  }
+  state.contentRoot.add(state.modelRoot);
+  state.contactShadow = createContactShadow();
+  state.contentRoot.add(state.contactShadow);
+  state.geoRoot.add(state.contentRoot);
+  state.northRoot.add(state.geoRoot);
+  state.scene.add(state.northRoot);
+  rebuildOccluders();
+  void fetchViewerContextTiles();
+
+  const shadowExtent = Math.max(30, state.modelMetrics.radius * 1.9, state.modelMetrics.height * 0.85);
+  state.sunLight.shadow.camera.left = -shadowExtent;
+  state.sunLight.shadow.camera.right = shadowExtent;
+  state.sunLight.shadow.camera.top = shadowExtent;
+  state.sunLight.shadow.camera.bottom = -shadowExtent;
+  state.sunLight.shadow.camera.near = 0.1;
+  state.sunLight.shadow.camera.far = Math.max(360, state.modelMetrics.height * 5);
+  state.sunLight.shadow.camera.updateProjectionMatrix();
+
+  state.camera.position.set(0, VIEWER_EYE_HEIGHT_M, 0);
+  state.camera.lookAt(0, VIEWER_EYE_HEIGHT_M, -10);
+  if (state.deviceOrientation) {
+    setCameraQuaternionFromDevice(
+      state.deviceOrientation.alphaDeg,
+      state.deviceOrientation.betaDeg,
+      state.deviceOrientation.gammaDeg,
+      state.deviceOrientation.screenOrientRad
+    );
+  }
+
+  ensureInitialPreviewOffset();
+  applyQualityMode();
+  updateDetailVisibility();
+
+  state.renderer.setAnimationLoop((time, frame) => {
+    const nowMs = Number(time) || performance.now();
+    const nowS = nowMs * 0.001;
+    if (!state.sessionActive && state.camera && state.relOrientation) {
+      updateOverlayCameraPose(performance.now());
+    }
+    if (state.anchorTargetLoc && state.anchorLoc) {
+      const k = 1 - Math.exp(-(1 / 60) / 0.5);
+      state.anchorLoc.lat += (state.anchorTargetLoc.lat - state.anchorLoc.lat) * k;
+      state.anchorLoc.lng += (state.anchorTargetLoc.lng - state.anchorLoc.lng) * k;
+      if (geoDeltaMeters(state.anchorLoc, state.anchorTargetLoc).distanceMeters < 0.05) {
+        setAnchorFromLocation(state.anchorTargetLoc, 'walk');
+        state.anchorTargetLoc = null;
+        void resolveAnchorEyeElevation();
+      }
+    } else if (state.anchorTargetLoc && !state.anchorLoc) {
+      state.anchorTargetLoc = null;
+      updatePlacement();
+    }
+    if (state.sessionActive && frame) {
+      maybeCreateXrAnchor(frame);
+      updateXrAnchorPose(frame);
+      updateXrHitTest(frame);
+      updateDepthOcclusion();
+    }
+    sampleCameraLighting(nowMs);
+    if (!state.lastSolarUpdateMs || nowMs - state.lastSolarUpdateMs > 60000) {
+      state.lastSolarUpdateMs = nowMs;
+      updateSolarLighting();
+    }
+    temperEstimatedLighting();
+    updateAdaptiveQuality(nowMs);
+    updateDetailVisibility();
+    updateAlignmentProof(nowS);
+    updateContextFade(nowMs);
+    if (state.contactShadow) state.contactShadow.visible = state.previewActive || groundAcknowledged();
+    state.renderer.render(state.scene, state.camera);
+  });
+
+  window.addEventListener('resize', () => {
+    if (!state.renderer || !state.camera) return;
+    syncCameraProjection();
+    applyQualityMode();
+  });
+
+  syncCameraProjection();
+  updatePlacement();
+}
+
+async function startArSession() {
+  setError('');
+  try {
+    if (!payload) throw new Error('AR payload missing. Generate building and open AR from the main app.');
+    if (!state.sensorsEnabled) {
+      throw new Error('Camera and location should auto-start on load, but motion access may still need one tap on the live view or the Enable Sensors button.');
+    }
+    await ensureCameraFeed();
+    if (!navigator.xr) {
+      setStatus('WebXR is unavailable on this device/browser. Using camera-overlay mode with live location alignment.');
+      initScene();
+      updatePlacement();
+      return;
+    }
+
+    const supported = await navigator.xr.isSessionSupported('immersive-ar');
+    if (!supported) {
+      setStatus('Immersive AR is not supported here. Using camera-overlay mode with live location alignment.');
+      initScene();
+      updatePlacement();
+      return;
+    }
+
+    initScene();
+    if (typeof state.renderer.xr.setFramebufferScaleFactor === 'function') {
+      state.renderer.xr.setFramebufferScaleFactor(
+        state.qualityMode === 'high' ? 1.15 : (state.qualityMode === 'performance' ? 0.82 : 1)
+      );
+    }
+    const session = await navigator.xr.requestSession('immersive-ar', {
+      requiredFeatures: ['local-floor'],
+      optionalFeatures: ['dom-overlay', 'anchors', 'hit-test', 'light-estimation', 'depth-sensing'],
+      domOverlay: { root: document.getElementById('overlay') },
+      depthSensing: {
+        usagePreference: ['gpu-optimized', 'cpu-optimized'],
+        dataFormatPreference: ['float32', 'luminance-alpha', 'unsigned-short'],
+        depthTypeRequest: ['smooth', 'raw'],
+        matchDepthView: true
+      }
+    });
+    session.addEventListener('end', () => {
+      state.sessionActive = false;
+      state.xrSession = null;
+      state.xrHeadingOffsetRad = 0;
+      releaseXrAnchor();
+      if (state.xrHitTestSource && typeof state.xrHitTestSource.cancel === 'function') state.xrHitTestSource.cancel();
+      state.xrHitTestSource = null;
+      state.latestHitPose = null;
+      if (state.depthMesh && state.depthMesh.parent) state.depthMesh.parent.remove(state.depthMesh);
+      state.depthMesh = null;
+      state.depthOcclusionActive = false;
+      syncUiState();
+      updatePlacement();
+      setStatus('AR session ended. You can start it again.');
+    });
+
+    await state.renderer.xr.setSession(session);
+    state.sessionActive = true;
+    state.xrSession = session;
+    state.xrHeadingOffsetRad = Number.isFinite(state.headingDeg) ? toRad(state.headingDeg) : 0;
+    await setupXrHitTesting(session);
+    applyQualityMode();
+    if (isCompactViewport()) setPanelCollapsed(true);
+    updatePlacement();
+    syncUiState();
+    setStatus('AR is active. Local-floor tracking is live; runtime anchors, light estimation, and depth occlusion will engage automatically when this device exposes them.');
+  } catch (err) {
+    setError(String(err && err.message ? err.message : err));
+  }
+}
+
+function relockParcel() {
+  captureStablePoseLock();
+  state.anchorTargetLoc = null;
+  state.movedSinceLockM = 0;
+  if (state.userLoc) {
+    setAnchorFromLocation(state.userLoc, 'manual');
+    state.anchorSettled = true;
+    invalidateXrAnchor();
+    void resolveAnchorEyeElevation();
+  }
+  rebuildOccluders();
+  updatePlacement();
+  syncUiState();
+  setStatus('Re-aiming: hold the phone still, pointed at the street, for a second. Heading then locks to the gyroscope; tap Lock to freeze it exactly as you see it.');
+}
+
+function stepHeadingTrim(deltaDeg) {
+  state.headingTrimDeg = clamp(state.headingTrimDeg + deltaDeg, -45, 45);
+  saveCalibration();
+  invalidateXrAnchor();
+  updatePlacement();
+  syncUiState();
+}
+
+function stepLensTrim(deltaDeg) {
+  state.lensTrimDeg = clamp(state.lensTrimDeg + deltaDeg, -20, 20);
+  try { localStorage.setItem(LENS_STORAGE_KEY, String(state.lensTrimDeg)); } catch (err) { /* storage unavailable */ }
+  syncCameraProjection();
+  syncUiState();
+}
+
+async function requestWakeLock() {
+  try {
+    if (navigator.wakeLock && !state.wakeLock && document.visibilityState === 'visible') {
+      state.wakeLock = await navigator.wakeLock.request('screen');
+      state.wakeLock.addEventListener('release', () => { state.wakeLock = null; });
+    }
+  } catch (err) { /* not critical */ }
+}
+
+async function attemptAutoSensorStartup() {
+  if (state.autoStartAttempted) return;
+  state.autoStartAttempted = true;
+  await enableSensors({ userInitiated: false });
+}
+
+async function boot() {
+  const loadedPayload = await loadArPayloadByKey(payloadKey);
+  if (!loadedPayload) {
+    setError('AR payload not found. Open AR from the main generator on the same device. For cross-device handoff, use a server-backed payload API.');
+    setStatus('No payload loaded.');
+    return;
+  }
+  payload = loadedPayload;
+
+  const site = payload.site || {};
+  const lng = Number(site.lng);
+  const lat = Number(site.lat);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+    setError('Payload is missing valid site coordinates.');
+    setStatus('Invalid payload.');
+    return;
+  }
+
+  loadSavedCalibration();
+  setStatus('Payload ready. Attempting to start camera, location, and motion access.');
+
+  $('enableSensors').addEventListener('click', async () => {
+    await enableSensors();
+  });
+  $('startAr').addEventListener('click', async () => {
+    await startArSession();
+  });
+  $('recenter').addEventListener('click', relockParcel);
+  $('toggleFixedPosition').addEventListener('click', relockParcel);
+  $('quickLock').addEventListener('click', lockAlignmentNow);
+  bindDialControl('rotateLeft', () => stepHeadingTrim(-HEADING_TRIM_STEP_DEG));
+  bindDialControl('rotateRight', () => stepHeadingTrim(HEADING_TRIM_STEP_DEG));
+  bindDialControl('lensNarrower', () => stepLensTrim(-LENS_TRIM_STEP_DEG));
+  bindDialControl('lensWider', () => stepLensTrim(LENS_TRIM_STEP_DEG));
+  $('viewerLevel').value = String(state.viewerLevelM);
+  if (!$('viewerLevel').value) $('viewerLevel').value = '0';
+  $('viewerLevel').addEventListener('change', event => {
+    state.viewerLevelM = Number(event.target.value) || 0;
+    saveCalibration();
+    invalidateXrAnchor();
+    updatePlacement();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    void requestWakeLock();
+    /* iOS may re-reference the gyro's yaw frame while backgrounded; that step is folded
+       into the north offset on the next event (see onDeviceOrientation), so the building
+       stays put instead of re-aiming from the compass. */
+  });
+  $('toggleBindMode').addEventListener('click', () => {
+    clearBindHold();
+    state.bindMode = !state.bindMode;
+    syncUiState();
+    setStatus(
+      state.bindMode
+        ? 'Repositioning active. Use the simple buttons to move the model relative to the camera view.'
+        : 'Repositioning closed. The building will stay where you left it.'
+    );
+  });
+  bindDialControl('pushBack', () => applyBindNudge('away'));
+  bindDialControl('pullForward', () => applyBindNudge('toward'));
+  bindDialControl('moveLeft', () => applyBindNudge('left'));
+  bindDialControl('moveRight', () => applyBindNudge('right'));
+  bindDialControl('raiseUp', () => applyBindNudge('up'));
+  bindDialControl('dropDown', () => applyBindNudge('down'));
+  $('bindDone').addEventListener('click', () => $('toggleBindMode').click());
+  $('resetBind').addEventListener('click', () => {
+    clearBindHold();
+    resetManualOffset();
+    setStatus('Model position reset. The building is back on its baseline placement.');
+  });
+  $('calibrateGround').addEventListener('click', calibrateGroundFromHit);
+  $('qualityMode').addEventListener('change', event => {
+    state.qualityMode = event.target.value;
+    applyQualityMode();
+    updateDetailVisibility();
+    rebuildOccluders();
+    updateMetrics(state.lastPlacementDistanceM);
+  });
+  try {
+    const savedContext = localStorage.getItem(CONTEXT_MODE_STORAGE_KEY);
+    if (CONTEXT_MODES[savedContext]) state.contextMode = savedContext;
+  } catch (err) { /* storage unavailable */ }
+  $('contextMode').value = state.contextMode;
+  $('contextMode').addEventListener('change', event => setContextMode(event.target.value));
+  $('contextChip').addEventListener('click', () => {
+    const next = CONTEXT_MODE_ORDER[(CONTEXT_MODE_ORDER.indexOf(state.contextMode) + 1) % CONTEXT_MODE_ORDER.length];
+    setContextMode(next);
+    setStatus(`Context: ${CONTEXT_MODES[next]}.${next === 'outlines' ? ' Line the outlines up with the real buildings using Reposition Model.' : ''}`);
+  });
+  syncContextChip();
+  $('detailMode').addEventListener('change', event => {
+    state.detailMode = event.target.value;
+    const seeThrough = state.detailMode === 'complete';
+    state.materialCache.forEach(material => {
+      if (!GLASS_LAYERS.has(material.userData.layer)) return;
+      material.opacity = seeThrough ? 0.2 : clamp(Math.max(material.userData.baseOpacity, 0.84), 0.84, 0.94);
+      material.metalness = seeThrough ? 0.08 : 0.45;
+      material.envMapIntensity = seeThrough ? 0.6 : 1.35;
+      material.depthWrite = !seeThrough;
+      material.needsUpdate = true;
+    });
+    if (seeThrough && !state.interiorRoot) buildInteriorGroup();
+    updateDetailVisibility();
+  });
+  $('panelToggle').addEventListener('click', () => {
+    setPanelCollapsed(!document.body.classList.contains('panel-collapsed'));
+  });
+  window.addEventListener('pointerup', clearBindHold);
+  window.addEventListener('pointercancel', clearBindHold);
+  window.addEventListener('blur', clearBindHold);
+  if (isCompactViewport()) setPanelCollapsed(true);
+  syncUiState();
+  bindCanvasInteractions();
+
+  // Render a non-AR preview immediately so desktop/dev environments can validate geometry.
+  try {
+    initScene();
+    void ensureSiteGroundElevation();
+    void attemptAutoSensorStartup();
+  } catch (err) {
+    setError(String(err && err.message ? err.message : err));
+  }
+}
+
+void boot();
+if (AR_DEBUG) window.__arDebug = { state, THREE, relativeDeviceQuat };
+</script>
+</body>
+</html>
