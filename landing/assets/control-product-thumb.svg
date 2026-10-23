@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Program Control Desk product screenshot placeholder">
+  <rect width="1200" height="760" fill="#ecf0f4"/>
+  <rect x="40" y="40" width="1120" height="680" fill="#f8fbfe" stroke="#33414f" stroke-width="4"/>
+  <rect x="88" y="88" width="1024" height="66" fill="#dde6ef" stroke="#33414f" stroke-width="2"/>
+  <rect x="88" y="182" width="1024" height="496" fill="#f2f6fa" stroke="#33414f" stroke-width="2"/>
+  <rect x="112" y="210" width="648" height="438" fill="#f9fcff" stroke="#33414f" stroke-width="2"/>
+  <rect x="784" y="210" width="304" height="206" fill="#ebf1f7" stroke="#33414f" stroke-width="2"/>
+  <rect x="784" y="442" width="304" height="206" fill="#e6edf5" stroke="#33414f" stroke-width="2"/>
+  <g stroke="#98a8ba" stroke-width="1" opacity="0.5">
+    <path d="M136 238h600M136 270h600M136 302h600M136 334h600M136 366h600M136 398h600M136 430h600M136 462h600M136 494h600M136 526h600M136 558h600M136 590h600"/>
+    <path d="M136 238v380M176 238v380M216 238v380M256 238v380M296 238v380M336 238v380M376 238v380M416 238v380M456 238v380M496 238v380M536 238v380M576 238v380M616 238v380M656 238v380M696 238v380"/>
+  </g>
+  <text x="600" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="28" fill="#2d3b48">DROP CONTROL DESK SCREENSHOT HERE</text>
+  <text x="936" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" fill="#46586a">Program Matrix</text>
+  <text x="936" y="474" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" fill="#46586a">Iteration Notes</text>
+</svg>

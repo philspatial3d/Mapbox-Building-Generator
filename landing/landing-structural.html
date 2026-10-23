@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Structural Pulse</title>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    :root {
+      --bg: #11161c;
+      --surface: rgba(19, 28, 36, 0.82);
+      --ink: #ebf2f7;
+      --sub: #a3b2bf;
+      --line: rgba(163, 178, 191, 0.35);
+      --accent: #61a8dc;
+      --accent-2: #b48a53;
+      --ok: #6aa678;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 10% 15%, #1f2d3a, #11161c 55%);
+      color: var(--ink);
+      font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #hero3d {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .overlay {
+      position: relative;
+      z-index: 2;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 24px 18px 48px;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+    .stamp {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--sub);
+    }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: rgba(31, 47, 61, 0.82);
+      font-weight: 700;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+    .btn:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(43, 64, 82, .9); }
+    .btn.primary { background: var(--accent); color: #0f1720; border-color: var(--accent); }
+    .btn.plugin { background: var(--ok); border-color: var(--ok); color: #0f1720; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1;
+    }
+    .thesis, .body { color: var(--sub); max-width: 66ch; }
+    .thesis strong { color: var(--ink); }
+    .pill-row {
+      margin: 16px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    .steps {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .step {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      transition: border-color 120ms ease, transform 120ms ease;
+    }
+    .step:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .step b { display: block; margin-bottom: 5px; color: var(--ink); }
+
+    .meter {
+      margin-top: 12px;
+      border-top: 1px dashed var(--line);
+      padding-top: 12px;
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--sub);
+    }
+    .meter strong { color: #fff; }
+
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="hero3d"></canvas>
+  <main class="overlay">
+    <header class="top">
+      <div class="stamp">Mapbox Building Generator / Concept 02</div>
+      <nav class="nav">
+        <a class="btn primary" href="../app.html">Open Map</a>
+        <a class="btn" href="../account.php">Your Account</a>
+        <a class="btn plugin" href="../qgis-plugin.html">Parametric QGIS Plugin</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <article class="panel">
+        <h1>Structural Pulse</h1>
+        <p class="thesis"><strong>Design thesis:</strong> Present the product as an engineered instrument where structure is visible and legible. The animated wireframe tower acts as a persistent metaphor for controllable systems: envelope, core, circulation, and facade are seen as one stack.</p>
+
+        <div class="pill-row">
+          <span class="pill">exoskeleton-aware</span>
+          <span class="pill">core-first planning</span>
+          <span class="pill">floorplan mode</span>
+          <span class="pill">parcel-constrained generation</span>
+        </div>
+
+        <p class="body">The generator works by taking a selected map footprint, resolving massing constraints and structural layers, then producing interior logic (stairs, corridors, room programs) by typology. You can inspect both tower form and 2D typical-floor plan from the same source geometry.</p>
+
+        <div class="steps">
+          <div class="step"><b>Parcel</b>Click an existing extruded context building or upload GeoJSON.</div>
+          <div class="step"><b>Parameters</b>Tune floors, taper, facade, and structural systems.</div>
+          <div class="step"><b>Generation</b>Compute shell, core, windows, stairs, and room programs.</div>
+          <div class="step"><b>Delivery</b>Switch to floorplan mode or export GeoJSON for GIS/BIM workflows.</div>
+        </div>
+      </article>
+
+      <aside class="panel">
+        <h2 style="margin-top:0">Interaction Notes</h2>
+        <p class="body">Move your cursor to shift perspective. Hover buttons and cards for responsive feedback. Motion is intentionally tool-like, not decorative.</p>
+        <div class="meter" id="fpsMeter"><strong>Scene:</strong> initializing...</div>
+        <div class="meter"><strong>Call to Action:</strong> Start in the map, save to your account, then take outputs into the Parametric QGIS plugin for analysis and publishing.</div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('hero3d');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 1000);
+    camera.position.set(0, 18, 52);
+
+    const ambient = new THREE.AmbientLight(0xd6ecff, 0.52);
+    const key = new THREE.DirectionalLight(0x6fb2e0, 1.0);
+    key.position.set(16, 24, 20);
+    const rim = new THREE.DirectionalLight(0xb48a53, 0.55);
+    rim.position.set(-16, 12, -22);
+    scene.add(ambient, key, rim);
+
+    const tower = new THREE.Group();
+    scene.add(tower);
+
+    const slabMat = new THREE.MeshStandardMaterial({ color: 0x2d4053, metalness: 0.12, roughness: 0.82, transparent: true, opacity: 0.8 });
+    const frameMat = new THREE.LineBasicMaterial({ color: 0x70b3e2 });
+
+    for (let i = 0; i < 26; i++) {
+      const s = 1 - i * 0.006;
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(18 * s, 0.28, 13 * s), slabMat);
+      slab.position.y = i * 0.82;
+      tower.add(slab);
+
+      if (i % 2 === 0) {
+        const edge = new THREE.EdgesGeometry(new THREE.BoxGeometry(18 * s, 0.3, 13 * s));
+        const lines = new THREE.LineSegments(edge, frameMat);
+        lines.position.y = slab.position.y;
+        tower.add(lines);
+      }
+    }
+
+    const core = new THREE.Mesh(
+      new THREE.BoxGeometry(5.6, 22, 4.4),
+      new THREE.MeshStandardMaterial({ color: 0x6f7f8d, roughness: 0.72, metalness: 0.05, transparent: true, opacity: 0.85 })
+    );
+    core.position.y = 10.8;
+    tower.add(core);
+
+    const ringGeo = new THREE.TorusGeometry(10.8, 0.1, 10, 80);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xb48a53, transparent: true, opacity: 0.55 });
+    for (let i = 0; i < 6; i++) {
+      const r = new THREE.Mesh(ringGeo, ringMat);
+      r.rotation.x = Math.PI / 2;
+      r.position.y = 1 + i * 3.2;
+      tower.add(r);
+    }
+
+    let mouseX = 0;
+    let mouseY = 0;
+    window.addEventListener('pointermove', e => {
+      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+    });
+
+    function resize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const meter = document.getElementById('fpsMeter');
+    let frames = 0;
+    let last = performance.now();
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      tower.rotation.y += 0.0026;
+      tower.rotation.x = THREE.MathUtils.lerp(tower.rotation.x, mouseY * 0.12, 0.04);
+      tower.position.x = THREE.MathUtils.lerp(tower.position.x, mouseX * 1.8, 0.04);
+      renderer.render(scene, camera);
+
+      frames++;
+      if (now - last > 1000) {
+        const fps = Math.round((frames * 1000) / (now - last));
+        meter.innerHTML = `<strong>Scene:</strong> ${fps} fps | live structural preview`;
+        frames = 0;
+        last = now;
+      }
+    }
+    animate(performance.now());
+  </script>
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mapbox Building Generator - Native AR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+  :root {
+    --bg: #08111a;
+    --panel: rgba(12, 22, 33, 0.74);
+    --panel-strong: rgba(9, 18, 29, 0.9);
+    --line: rgba(137, 176, 214, 0.24);
+    --text: #eef6ff;
+    --muted: #9fb4ca;
+    --accent: #7bc8ff;
+    --accent-strong: #2f8fe9;
+    --accent-warm: #f2b36b;
+    --shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+    --radius-xl: 30px;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 12% 20%, rgba(77, 133, 255, 0.22), transparent 34%),
+      radial-gradient(circle at 88% 18%, rgba(255, 181, 106, 0.18), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(54, 143, 255, 0.14), transparent 44%),
+      linear-gradient(180deg, #07111a 0%, #0c1721 52%, #08111a 100%);
+    color: var(--text);
+    font-family: 'Manrope', 'Segoe UI', sans-serif;
+  }
+
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.72));
+  }
+
+  body::after {
+    background: radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.24) 100%);
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    width: min(1120px, calc(100vw - 28px));
+    margin: 0 auto;
+    padding: max(env(safe-area-inset-top), 18px) 0 max(env(safe-area-inset-bottom), 28px);
+  }
+
+  .shell {
+    display: grid;
+    gap: 18px;
+  }
+
+  .panel {
+    position: relative;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 26%, transparent 74%, rgba(123, 200, 255, 0.05));
+    pointer-events: none;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: 18px;
+    padding: 22px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(139, 179, 214, 0.26);
+    background: rgba(10, 20, 30, 0.52);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #dff4ff);
+    box-shadow: 0 0 16px rgba(123, 200, 255, 0.7);
+  }
+
+  h1 {
+    margin: 16px 0 12px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(2.2rem, 4vw, 4.2rem);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    max-width: 10ch;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 54ch;
+    color: #c9d8e6;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .hero-aside {
+    display: grid;
+    gap: 14px;
+  }
+
+  .platformBadge,
+  .miniCard,
+  .stepCard,
+  .metricCard,
+  .assetCard {
+    background: rgba(9, 18, 29, 0.7);
+    border: 1px solid rgba(137, 176, 214, 0.18);
+    border-radius: var(--radius-lg);
+  }
+
+  .platformBadge {
+    padding: 18px;
+  }
+
+  .platformBadge .label,
+  .metricCard .label,
+  .assetCard .label,
+  .stepCard .label,
+  .miniCard .label {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .platformBadge .value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .platformBadge .meta {
+    display: block;
+    margin-top: 8px;
+    color: #c9d8e6;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .miniStack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .miniCard {
+    padding: 16px;
+    min-height: 128px;
+  }
+
+  .miniCard strong {
+    display: block;
+    font-size: 20px;
+    line-height: 1.08;
+    margin-bottom: 8px;
+  }
+
+  .miniCard p {
+    margin: 0;
+    color: #c3d1df;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .details {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    gap: 18px;
+  }
+
+  .stage {
+    padding: 22px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .sectionTitle {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sectionTitle h2 {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(1.4rem, 2vw, 2.2rem);
+    letter-spacing: -0.04em;
+  }
+
+  .sectionTitle span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .metricCard,
+  .assetCard,
+  .stepCard {
+    padding: 16px;
+  }
+
+  .metricCard .value,
+  .assetCard .value {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .assetStack,
+  .stepStack,
+  .actionStack {
+    display: grid;
+    gap: 14px;
+  }
+
+  .actionsPanel {
+    padding: 22px;
+    display: grid;
+    gap: 16px;
+    background: var(--panel-strong);
+  }
+
+  .actionStack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .action, button.action {
+    position: relative;
+    min-height: 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(137, 176, 214, 0.2);
+    background:
+      linear-gradient(160deg, rgba(21, 38, 56, 0.96), rgba(11, 20, 31, 0.94));
+    color: var(--text);
+    text-decoration: none;
+    font: inherit;
+    text-align: left;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    cursor: pointer;
+  }
+
+  .action:hover,
+  button.action:hover,
+  .action:focus-visible,
+  button.action:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(123, 200, 255, 0.48);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    outline: none;
+  }
+
+  .action.primary {
+    background:
+      radial-gradient(circle at top left, rgba(162, 226, 255, 0.18), transparent 44%),
+      linear-gradient(145deg, rgba(60, 145, 221, 0.98), rgba(15, 79, 144, 0.98));
+    border-color: rgba(194, 233, 255, 0.36);
+  }
+
+  .action.warm {
+    background:
+      radial-gradient(circle at top left, rgba(255, 218, 170, 0.18), transparent 40%),
+      linear-gradient(145deg, rgba(138, 83, 32, 0.98), rgba(54, 30, 9, 0.98));
+    border-color: rgba(255, 214, 166, 0.28);
+  }
+
+  .action .title {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .action .meta {
+    color: rgba(238, 246, 255, 0.74);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .quicklookPoster {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0.01;
+    pointer-events: none;
+  }
+
+  .footnote {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  #status,
+  #error {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  #status {
+    background: rgba(9, 18, 29, 0.64);
+    border: 1px solid rgba(137, 176, 214, 0.18);
+    color: #d8e7f4;
+  }
+
+  #error {
+    display: none;
+    background: rgba(86, 23, 28, 0.52);
+    border: 1px solid rgba(244, 128, 128, 0.32);
+    color: #ffe1e1;
+  }
+
+  @media (max-width: 900px) {
+    .hero,
+    .details {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    main {
+      width: calc(100vw - 18px);
+    }
+    .hero,
+    .stage,
+    .actionsPanel {
+      padding: 18px;
+    }
+    h1 {
+      max-width: none;
+    }
+    .miniStack,
+    .metricsGrid,
+    .actionStack {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="shell">
+    <section class="panel hero">
+      <div>
+        <span class="eyebrow">Native Spatial Handoff</span>
+        <h1>Launch the proposal in platform-native AR.</h1>
+        <p class="lede">This bridge stages the generated building as first-party mobile assets and opens the strongest native path available on the current device: ARCore Scene Viewer on Android, georeferenced Web AR on iPhone Safari, and optional ARKit or ARCore companion wrappers for persistent geospatial tracking. Quick Look remains available on iPhone as a fast native preview, but not as a parcel-locked geospatial anchor.</p>
+      </div>
+      <div class="hero-aside">
+        <div class="platformBadge">
+          <span class="label">Detected Platform</span>
+          <span class="value" id="platform">-</span>
+          <span class="meta" id="deviceNote">Reading device capabilities…</span>
+        </div>
+        <div class="miniStack">
+          <div class="miniCard">
+            <span class="label">Apple Path</span>
+            <strong>Georeferenced Web AR</strong>
+            <p>Uses the staged parcel payload plus live location and heading to keep the building aligned to the site in Safari.</p>
+          </div>
+          <div class="miniCard">
+            <span class="label">Android Path</span>
+            <strong>Scene Viewer</strong>
+            <p>Uses the staged GLB asset for ARCore-native viewing with Google’s device runtime.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="details">
+      <section class="panel stage">
+        <div class="sectionTitle">
+          <h2>Staged Package</h2>
+          <span>Parcel metadata, Apple asset, Android asset, and fallback payload</span>
+        </div>
+
+        <div class="metricsGrid">
+          <div class="metricCard"><span class="label">Target Parcel</span><span class="value" id="target">-</span></div>
+          <div class="metricCard"><span class="label">Manifest</span><span class="value" id="manifestUrl">-</span></div>
+          <div class="assetCard"><span class="label">Android Asset</span><span class="value" id="assetUrl">-</span></div>
+          <div class="assetCard"><span class="label">Apple Asset</span><span class="value" id="usdzUrl">-</span></div>
+        </div>
+
+        <div class="stepStack">
+          <div class="stepCard">
+            <span class="label">Step 1</span>
+            <div class="value">Choose the strongest native viewer for this phone.</div>
+          </div>
+          <div class="stepCard">
+            <span class="label">Step 2</span>
+            <div class="value">If you need true geospatial anchors or persistent world maps, hand the same manifest to an installed companion wrapper.</div>
+          </div>
+          <div class="stepCard">
+            <span class="label">Step 3</span>
+            <div class="value">If the device cannot open the native path, fall back to the web AR viewer without losing the parcel payload.</div>
+          </div>
+        </div>
+
+        <div id="status">Preparing native AR package…</div>
+        <div id="error"></div>
+      </section>
+
+      <aside class="panel actionsPanel">
+        <div class="sectionTitle">
+          <h2>Launch Paths</h2>
+          <span>Choose native, wrapper, or fallback</span>
+        </div>
+
+        <div class="actionStack">
+          <a id="launchNative" class="action primary" href="#">
+            <img id="quickLookPoster" class="quicklookPoster" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2312283d'/%3E%3Cpath d='M16 44V20h14.8c10.4 0 17.2 4.8 17.2 12S41.2 44 30.8 44H16Zm9.4-7.4h5.4c5.2 0 8.6-1.8 8.6-4.6s-3.4-4.6-8.6-4.6h-5.4v9.2Z' fill='%23dff4ff'/%3E%3C/svg%3E">
+            <span class="title" id="launchLabel">Launch Native AR</span>
+            <span class="meta" id="launchMeta">Preparing device-specific viewer…</span>
+          </a>
+
+          <button id="launchArkitCompanion" class="action warm" type="button">
+            <span class="title">ARKit Companion</span>
+            <span class="meta">Optional wrapper: geospatial anchors, persistent world maps, saved calibration.</span>
+          </button>
+
+          <button id="launchArcoreCompanion" class="action" type="button">
+            <span class="title">ARCore Companion</span>
+            <span class="meta">Optional wrapper: Geospatial API, VPS, persistent site alignment.</span>
+          </button>
+
+          <a id="openWebAr" class="action" href="#">
+            <span class="title">Open Web AR Fallback</span>
+            <span class="meta">Return to the browser-based parcel overlay if native launch is unavailable.</span>
+          </a>
+
+          <a id="openQuickLook" class="action" href="#">
+            <span class="title">Open Quick Look Preview</span>
+            <span class="meta">Launch the staged USDZ in Apple Quick Look for plane-based placement and visual inspection.</span>
+          </a>
+
+          <a id="downloadUsdz" class="action" href="#" download>
+            <span class="title">Download USDZ</span>
+            <span class="meta">Inspect the Apple-ready asset directly or reuse it in a native wrapper.</span>
+          </a>
+
+          <a id="downloadGlb" class="action" href="#" download>
+            <span class="title">Download GLB</span>
+            <span class="meta">Inspect the Android/native bridge asset directly.</span>
+          </a>
+        </div>
+
+        <p class="footnote">Quick Look on iPhone requires a USDZ link from Safari with <code>rel="ar"</code>, and Apple documents it as a plane-based AR preview flow rather than a geographic anchor workflow. Android Scene Viewer requires an HTTPS GLB URL. For parcel-accurate alignment on iPhone, this page now prioritizes the georeferenced web viewer and keeps the ARKit companion hooks available for stronger native anchoring.</p>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const key = new URLSearchParams(window.location.search).get('k') || '';
+let manifest = null;
+
+function setStatus(message) {
+  const el = $('status');
+  if (el) el.textContent = message;
+}
+
+function setError(message) {
+  const el = $('error');
+  if (!el) return;
+  el.style.display = message ? 'block' : 'none';
+  el.textContent = message || '';
+}
+
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent || '');
+}
+
+function isAppleMobile() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+}
+
+function getPlatformLabel() {
+  if (isAndroid()) return 'Android / ARCore';
+  if (isAppleMobile()) return 'iPhone / Georeferenced Web AR';
+  return 'Desktop / Preview';
+}
+
+function getWebArUrl() {
+  const webArUrl = new URL('./ar.html', window.location.href);
+  if (manifest && manifest.webArPayloadKey) webArUrl.searchParams.set('k', manifest.webArPayloadKey);
+  return webArUrl.toString();
+}
+
+async function ensureNativeAssetServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    throw new Error('Service workers are unavailable in this browser.');
+  }
+  if (!window.isSecureContext) {
+    throw new Error('Native AR staging requires HTTPS.');
+  }
+  const scriptUrl = new URL('./sw-ar-assets.js', window.location.href);
+  await navigator.serviceWorker.register(scriptUrl.href);
+  await navigator.serviceWorker.ready;
+}
+
+function getAssetUrls(packageKey) {
+  return {
+    glbUrl: new URL(`./__mbg_ar_assets/${packageKey}.glb`, window.location.href).toString(),
+    usdzUrl: new URL(`./__mbg_ar_assets/${packageKey}.usdz`, window.location.href).toString(),
+    manifestUrl: new URL(`./__mbg_ar_assets/${packageKey}.json`, window.location.href).toString()
+  };
+}
+
+function buildSceneViewerIntent(glbUrl, title, fallbackUrl) {
+  return `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl)}&mode=ar_only&title=${encodeURIComponent(title)}&link=${encodeURIComponent(fallbackUrl)}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end;`;
+}
+
+function buildCompanionLaunchUrl(baseScheme, manifestUrl) {
+  const url = new URL(baseScheme);
+  url.searchParams.set('manifest', manifestUrl);
+  url.searchParams.set('tracking', 'persistent');
+  url.searchParams.set('anchor', 'geospatial');
+  return url.toString();
+}
+
+async function loadManifest() {
+  if (!key) throw new Error('Missing native AR package key.');
+  await ensureNativeAssetServiceWorker();
+  const { manifestUrl } = getAssetUrls(key);
+  const res = await fetch(manifestUrl, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Native AR package not found. Re-open it from the main generator on the same device/browser.');
+  }
+  manifest = await res.json();
+  return manifest;
+}
+
+function launchCompanion(schemeUrl, label) {
+  setStatus(`${label} handoff requested. If the wrapper is installed it should open immediately; otherwise stay here and use the native or web fallback path.`);
+  window.location.href = schemeUrl;
+}
+
+function bindUi() {
+  const platform = getPlatformLabel();
+  $('platform').textContent = platform;
+
+  const { glbUrl, usdzUrl, manifestUrl } = getAssetUrls(key);
+  $('assetUrl').textContent = glbUrl;
+  $('usdzUrl').textContent = usdzUrl;
+  $('manifestUrl').textContent = manifestUrl;
+  $('downloadGlb').href = glbUrl;
+  $('downloadUsdz').href = usdzUrl;
+  $('downloadGlb').download = manifest && manifest.modelFileName ? manifest.modelFileName : 'building-native-ar.glb';
+  $('downloadUsdz').download = manifest && manifest.usdzFileName ? manifest.usdzFileName : 'building-native-ar.usdz';
+  $('openQuickLook').href = usdzUrl;
+  $('openQuickLook').setAttribute('rel', 'ar');
+
+  const site = manifest && manifest.site ? manifest.site : null;
+  $('target').textContent = site && Number.isFinite(site.lat) && Number.isFinite(site.lng)
+    ? `${site.lat.toFixed(6)}, ${site.lng.toFixed(6)}`
+    : '-';
+
+  const webArUrl = getWebArUrl();
+  $('openWebAr').href = webArUrl;
+
+  const noteEl = $('deviceNote');
+  const launchNative = $('launchNative');
+  const launchLabel = $('launchLabel');
+  const launchMeta = $('launchMeta');
+  const quickLookAction = $('openQuickLook');
+
+  if (isAndroid()) {
+    noteEl.textContent = 'Android is configured for Scene Viewer first, with the optional ARCore companion available when you need geospatial anchors and persistent world tracking.';
+    launchLabel.textContent = 'Open Scene Viewer';
+    launchMeta.textContent = 'Native ARCore viewer using the staged GLB asset.';
+    launchNative.removeAttribute('rel');
+    launchNative.href = buildSceneViewerIntent(glbUrl, 'Generated Building', window.location.href);
+    quickLookAction.style.display = 'none';
+  } else if (isAppleMobile()) {
+    noteEl.textContent = 'iPhone is configured for parcel-locked Web AR first because Safari Quick Look does not expose a geographic anchor from the web handoff. Quick Look remains available below as a visual preview path.';
+    launchLabel.textContent = 'Open Georeferenced Web AR';
+    launchMeta.textContent = 'Parcel-aligned browser AR using the staged payload, live location, and device heading.';
+    launchNative.removeAttribute('rel');
+    launchNative.href = webArUrl;
+    quickLookAction.style.display = '';
+  } else {
+    noteEl.textContent = 'Desktop can inspect the native package and wrapper manifest, but native launch paths should be tested from the corresponding phone hardware.';
+    launchLabel.textContent = 'Inspect Georeferenced Web AR';
+    launchMeta.textContent = 'Desktop can preview the parcel-aware web path; phone hardware is still required for real sensor alignment.';
+    launchNative.removeAttribute('rel');
+    launchNative.href = webArUrl;
+    launchNative.addEventListener('click', event => {
+      event.preventDefault();
+      setStatus('Desktop preview mode. Open this page on a phone for live sensor alignment, or use the download buttons to inspect the staged assets.');
+    });
+    quickLookAction.removeAttribute('rel');
+  }
+
+  const arkitScheme = manifest && manifest.nativeCompanion && manifest.nativeCompanion.arkitScheme
+    ? manifest.nativeCompanion.arkitScheme
+    : 'mbg-arkit://open';
+  const arcoreScheme = manifest && manifest.nativeCompanion && manifest.nativeCompanion.arcoreScheme
+    ? manifest.nativeCompanion.arcoreScheme
+    : 'mbg-arcore://open';
+
+  $('launchArkitCompanion').addEventListener('click', () => {
+    launchCompanion(buildCompanionLaunchUrl(arkitScheme, manifestUrl), 'ARKit companion');
+  });
+  $('launchArcoreCompanion').addEventListener('click', () => {
+    launchCompanion(buildCompanionLaunchUrl(arcoreScheme, manifestUrl), 'ARCore companion');
+  });
+}
+
+async function boot() {
+  try {
+    await loadManifest();
+    bindUi();
+    setStatus('Native package staged successfully. iPhone now prioritizes georeferenced Web AR for parcel alignment, while Quick Look remains available as a non-geospatial preview and the companion-wrapper hooks remain available for stronger native anchoring.');
+  } catch (err) {
+    setError(String(err && err.message ? err.message : err));
+    setStatus('Native AR package unavailable.');
+  }
+}
+
+void boot();
+</script>
+</body>
+</html>

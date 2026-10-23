@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parametric QGIS Plugin | Mapbox Building Generator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Avenir Next", sans-serif;
+      background: #e9f0eb;
+      color: #182422;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 44px; }
+    .top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #456159; }
+    .btn { text-decoration: none; border: 1px solid #89a59d; border-radius: 10px; padding: 9px 12px; font-weight: 700; color: #182422; background: #fff; }
+    .btn.primary { background: #3f7662; color: #fff; border-color: #3f7662; }
+    h1 { margin: 16px 0 8px; font-family: "Fraunces", serif; font-size: clamp(2rem, 4vw, 3rem); }
+    .card { background: #fff; border: 1px solid #b6cbc5; border-radius: 14px; padding: 18px; margin-top: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .chip { border: 1px solid #b6cbc5; border-radius: 10px; padding: 10px; }
+    .chip b { display: block; margin-bottom: 6px; }
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="tag">QGIS Integration</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="btn primary" href="./index.html">Open Generator Map</a>
+        <a class="btn" href="./account.php">Your Account</a>
+        <a class="btn" href="./landing/index.html">Landing Concepts</a>
+      </div>
+    </header>
+
+    <h1>Parametric QGIS Plugin</h1>
+    <div class="card">
+      <p>Use the Parametric QGIS Plugin to ingest exported building GeoJSON, run geospatial analysis, and publish map-ready planning layers.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap; margin-top:10px;">
+        <a class="btn primary" href="#" aria-disabled="true">Download Plugin (coming soon)</a>
+        <a class="btn" href="#" aria-disabled="true">Read Plugin Docs (coming soon)</a>
+      </div>
+    </div>
+
+    <div class="card grid">
+      <div class="chip"><b>1. Import</b>Load GeoJSON from the generator into QGIS.</div>
+      <div class="chip"><b>2. Validate</b>Check CRS, topology, and schema attributes.</div>
+      <div class="chip"><b>3. Analyze</b>Run parcel overlays, access, and environmental metrics.</div>
+      <div class="chip"><b>4. Publish</b>Export map products and planning deliverables.</div>
+    </div>
+  </main>
+</body>
+</html>

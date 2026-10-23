@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Material Ledger</title>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Work+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    :root {
+      --bg: #ece6dc;
+      --surface: rgba(255, 252, 245, 0.88);
+      --ink: #29241f;
+      --sub: #6d6255;
+      --line: #d0c4b2;
+      --accent: #7c5a35;
+      --accent2: #3f6b6a;
+      --accent3: #2e5f93;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 85% 10%, #f5f0e6, #ece6dc 52%);
+      color: var(--ink);
+      font-family: "Work Sans", "Avenir Next", sans-serif;
+      min-height: 100vh;
+    }
+    .bg3d {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.84;
+    }
+    .shell { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 22px 16px 50px; }
+    .top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .brand {
+      font-family: "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 12px;
+      color: var(--sub);
+    }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 700;
+      padding: 10px 14px;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+    .btn:hover { transform: translateY(-2px); border-color: var(--accent3); }
+    .btn.primary { background: var(--accent3); border-color: var(--accent3); color: #fff; }
+    .btn.plugin { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(3px);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-family: "Fraunces", "Iowan Old Style", serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.06;
+    }
+    .thesis, .desc { color: var(--sub); }
+    .thesis strong { color: var(--ink); }
+    .how {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .how .item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      transition: border-color 130ms ease, transform 130ms ease;
+    }
+    .how .item:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .how b { display: block; margin-bottom: 5px; }
+
+    #ring {
+      width: 100%;
+      height: 320px;
+      display: block;
+    }
+    .meter {
+      border-top: 1px dashed var(--line);
+      margin-top: 8px;
+      padding-top: 10px;
+      min-height: 40px;
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--sub);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .how { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene" class="bg3d"></canvas>
+  <main class="shell">
+    <header class="top">
+      <div class="brand">Mapbox Building Generator / Concept 05</div>
+      <nav class="nav">
+        <a class="btn primary" href="../app.html">Open Map</a>
+        <a class="btn" href="../account.php">Your Account</a>
+        <a class="btn plugin" href="../qgis-plugin.html">Parametric QGIS Plugin</a>
+      </nav>
+    </header>
+
+    <section class="layout">
+      <article class="panel">
+        <h1>Material Ledger</h1>
+        <p class="thesis"><strong>Design thesis:</strong> Sustainability should look measurable, not abstract. This concept pairs a calm material-forward palette with a live score ring and structural shell preview so users can reason about design intent and performance at the same time.</p>
+        <p class="desc">The generator pipeline starts with footprint capture, applies parametric envelope and facade controls, then builds floorplate logic and exports geometry for GIS. The landing page emphasizes accountability: every visual treatment maps to a building decision.</p>
+
+        <div class="how">
+          <div class="item"><b>Footprint Fidelity</b>Map parcel selection and uploaded GeoJSON are normalized before generation.</div>
+          <div class="item"><b>Structural Stack</b>Core, slabs, exoskeleton, and facade are generated from one parameter set.</div>
+          <div class="item"><b>Program Logic</b>Floorplans align to typology: residential, office, warehouse, data center.</div>
+          <div class="item"><b>GIS Delivery</b>Export to GeoJSON and continue in the Parametric QGIS plugin.</div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+          <a class="btn primary" href="../app.html">Start on Map</a>
+          <a class="btn" href="../account.php">Account Workspace</a>
+          <a class="btn plugin" href="../qgis-plugin.html">Plugin Access</a>
+        </div>
+      </article>
+
+      <aside class="panel">
+        <h2 style="margin-top:0">Sustainability Score Ring</h2>
+        <p class="desc">Hover ring segments to inspect where design quality is strongest and where iteration is needed.</p>
+        <svg id="ring" viewBox="0 0 420 320" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="ringDetail" class="meter">Hover a segment to inspect sustainability and coherence signals.</div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    (function init3D() {
+      const canvas = document.getElementById('scene');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 700);
+      camera.position.set(0, 20, 50);
+
+      scene.add(new THREE.AmbientLight(0xf3e9d7, 0.6));
+      const key = new THREE.DirectionalLight(0x6f8eb1, 0.9);
+      key.position.set(12, 20, 18);
+      const warm = new THREE.DirectionalLight(0x9c6c3b, 0.55);
+      warm.position.set(-18, 10, -12);
+      scene.add(key, warm);
+
+      const group = new THREE.Group();
+      scene.add(group);
+
+      const shellMat = new THREE.MeshStandardMaterial({ color: 0x88735b, roughness: 0.8, metalness: 0.08, transparent: true, opacity: 0.78 });
+      for (let i = 0; i < 20; i++) {
+        const scale = 1 - i * 0.008;
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(20 * scale, 0.24, 12 * scale), shellMat);
+        slab.position.y = i * 0.9;
+        group.add(slab);
+      }
+
+      const edge = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(20, 18, 12)),
+        new THREE.LineBasicMaterial({ color: 0x3f6b6a, transparent: true, opacity: 0.7 })
+      );
+      edge.position.y = 8.5;
+      group.add(edge);
+
+      function resize() {
+        renderer.setSize(window.innerWidth, window.innerHeight, false);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function tick() {
+        requestAnimationFrame(tick);
+        group.rotation.y += 0.002;
+        renderer.render(scene, camera);
+      }
+      tick();
+    })();
+
+    const metrics = [
+      { label: 'Envelope Efficiency', value: 0.82, color: '#3f6b6a', note: 'Compact core and stable taper improve net area ratio.' },
+      { label: 'Facade Performance', value: 0.74, color: '#2e5f93', note: 'Facade settings balance visibility, shade, and consistency.' },
+      { label: 'Circulation Clarity', value: 0.79, color: '#7c5a35', note: 'Corridor + stair placement avoids dead-end floorplan zones.' },
+      { label: 'Material Restraint', value: 0.86, color: '#9a7d57', note: 'Material palette stays coherent across facade and structure.' },
+      { label: 'GIS Readiness', value: 0.91, color: '#5a7f9a', note: 'Export pipeline supports direct downstream plugin workflows.' }
+    ];
+
+    const svg = d3.select('#ring');
+    const cx = 210;
+    const cy = 160;
+    const inner = 64;
+    const outer = 126;
+    const pie = d3.pie().sort(null).value(d => d.value);
+    const arc = d3.arc().innerRadius(inner).outerRadius(d => inner + (outer - inner) * d.data.value);
+    const baseArc = d3.arc().innerRadius(inner).outerRadius(outer);
+
+    svg.append('g').attr('transform', `translate(${cx},${cy})`)
+      .selectAll('path.base')
+      .data(metrics)
+      .enter()
+      .append('path')
+      .attr('d', baseArc({ startAngle: 0, endAngle: (Math.PI * 2) / metrics.length }))
+      .attr('transform', (_, i) => `rotate(${(360 / metrics.length) * i})`)
+      .attr('fill', '#efe6db')
+      .attr('stroke', '#d0c4b2')
+      .attr('stroke-width', 1);
+
+    const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+    const detail = document.getElementById('ringDetail');
+
+    g.selectAll('path.metric')
+      .data(pie(metrics))
+      .enter()
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', d => d.data.color)
+      .attr('opacity', 0.84)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.6)
+      .style('cursor', 'pointer')
+      .on('mouseenter', function(_, d) {
+        d3.select(this).attr('opacity', 1);
+        detail.textContent = `${d.data.label}: ${Math.round(d.data.value * 100)}% | ${d.data.note}`;
+      })
+      .on('mouseleave', function() {
+        d3.select(this).attr('opacity', 0.84);
+        detail.textContent = 'Hover a segment to inspect sustainability and coherence signals.';
+      });
+
+    g.append('circle').attr('r', 44).attr('fill', '#fff8ed').attr('stroke', '#d0c4b2');
+    g.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('y', -4)
+      .attr('font-family', 'IBM Plex Mono, monospace')
+      .attr('font-size', 12)
+      .attr('fill', '#6d6255')
+      .text('overall');
+    g.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('y', 16)
+      .attr('font-family', 'Fraunces, serif')
+      .attr('font-size', 24)
+      .attr('fill', '#29241f')
+      .text(Math.round(d3.mean(metrics, d => d.value) * 100));
+  </script>
+</body>
+</html>

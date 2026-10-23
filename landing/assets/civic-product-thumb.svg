@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Civic Fabric Studio product screenshot placeholder">
+  <rect width="1200" height="760" fill="#efe8da"/>
+  <rect x="40" y="40" width="1120" height="680" fill="#fbf8f1" stroke="#6b5a46" stroke-width="4"/>
+  <rect x="88" y="88" width="1024" height="70" fill="#e4d6bf" stroke="#6b5a46" stroke-width="2"/>
+  <rect x="88" y="188" width="720" height="490" fill="#f0eadf" stroke="#6b5a46" stroke-width="2"/>
+  <rect x="832" y="188" width="280" height="490" fill="#ede3d4" stroke="#6b5a46" stroke-width="2"/>
+  <g stroke="#9f8a70" stroke-width="1" opacity="0.45">
+    <path d="M120 220h656M120 260h656M120 300h656M120 340h656M120 380h656M120 420h656M120 460h656M120 500h656M120 540h656M120 580h656M120 620h656"/>
+    <path d="M120 220v424M168 220v424M216 220v424M264 220v424M312 220v424M360 220v424M408 220v424M456 220v424M504 220v424M552 220v424M600 220v424M648 220v424M696 220v424M744 220v424"/>
+  </g>
+  <text x="600" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="28" fill="#5f503f">DROP CIVIC PRODUCT SCREENSHOT HERE</text>
+  <text x="970" y="230" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#5f503f">Value Panel</text>
+  <text x="970" y="260" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#7a6a59">CTA + KPIs + Notes</text>
+</svg>

@@ -2221,3 +2221,31 @@ The library had no Foster, SOM or Gulf-style buildings, few offices and few cont
 **Follow-ups**
 - Diagrid members at sharp convex corners of non-rounded plans project slightly past the corner.
 - Window frames still export with the metal PBR profile in GLB (carried from BG-090).
+
+
+---
+
+## BG-092 — Push latest generator and prepare private Bluehost upload
+Status: Release packaging complete; Bluehost deployment and phone AR QA pending
+
+**Acceptance**
+- [x] Include the existing account/PHP and viewer support files required by the latest app.
+- [x] Document the exact upload tree, private hosting setup, and neighbourhood search workflow.
+- [x] Exclude local databases and saved user files from the upload package and Git.
+- [x] Move the public Mapbox token into an ignored hosting config and remove it from the unpublished commits after GitHub push protection flagged it.
+- [x] Fix the browser favicon 404 without changing the pinned Mapbox version.
+- [x] Run geometry checks (6 scenarios, 37 presets), AR contracts, PHP lint, and isolated account save/download smoke checks.
+- [x] Check local browser map-click generation, GeoJSON upload/download, GLB export, and the mobile menu at 390px.
+- [ ] Verify the hosted Bluehost URL and camera/location permissions on a physical phone.
+
+**Files**
+- codex/BLUEHOST_DEPLOYMENT.md
+- favicon.svg and favicon links in entry pages
+- Existing account.html/account.php, backend-config.php, setup.php, api/, storage protection/scaffolds
+- Existing native-ar.html, sw-ar-assets.js, qgis-plugin.html, landing/
+- scripts/smoke_account_flows.sh
+
+**Validation and limits**
+- Local browser after favicon fix: zero console errors; existing Mapbox 3.9.3 warnings about unsupported fill-extrusion paint properties remain.
+- Phone tracking and public deployment are unverified. Existing demo account access requires directory privacy for this personal-use package.
+- Keep unrelated haunted_ar, agency, native wrapper notes, and design tooling out of this release commit.

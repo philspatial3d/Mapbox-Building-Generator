@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Civic Fabric Studio</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    :root {
+      --paper: #ece4d6;
+      --sheet: #f8f3ea;
+      --sheet-2: #f1e8da;
+      --ink: #251f18;
+      --ink-soft: #5f5448;
+      --line: #9e8a72;
+      --line-strong: #6d5c48;
+      --accent: #7f5228;
+      --accent-green: #476d59;
+      --accent-blue: #3f5f7e;
+      --success: #3f6f58;
+      --warn: #996230;
+      --danger: #8e4635;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "IBM Plex Sans", "Avenir Next", sans-serif;
+      background:
+        repeating-linear-gradient(0deg, rgba(109,92,72,.06) 0 1px, transparent 1px 38px),
+        repeating-linear-gradient(90deg, rgba(109,92,72,.06) 0 1px, transparent 1px 38px),
+        var(--paper);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(159,138,114,.18), transparent 40%),
+        radial-gradient(circle at 88% 22%, rgba(127,82,40,.12), transparent 36%),
+        radial-gradient(circle at 70% 86%, rgba(71,109,89,.11), transparent 32%);
+      mix-blend-mode: multiply;
+      opacity: .5;
+      z-index: 0;
+    }
+
+    #fabric {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: .45;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 2;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 20px 16px 64px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+      border: 2px solid var(--line-strong);
+      background: rgba(248,243,234,.95);
+      padding: 10px;
+      box-shadow: 0 5px 0 rgba(109,92,72,.15);
+    }
+
+    .stamp {
+      font-family: "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      text-decoration: none;
+      border: 2px solid var(--line-strong);
+      border-radius: 0;
+      background: var(--sheet);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 13px;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn.plugin {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    .section {
+      border: 2px solid var(--line-strong);
+      background: rgba(248,243,234,.92);
+      margin-top: 14px;
+      padding: 22px;
+      box-shadow: 0 6px 0 rgba(109,92,72,.12);
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: "Source Serif 4", "Iowan Old Style", serif;
+      font-size: clamp(2rem, 4.2vw, 3.85rem);
+      line-height: 1.03;
+      max-width: 14ch;
+    }
+
+    .hero-sub {
+      margin-top: 12px;
+      color: var(--ink-soft);
+      max-width: 70ch;
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+
+    .hero-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+    }
+
+    .slab {
+      border: 2px solid var(--line);
+      background: var(--sheet);
+      padding: 14px;
+      min-height: 100%;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .kpi .item {
+      border: 2px solid var(--line);
+      background: var(--sheet);
+      padding: 12px;
+    }
+
+    .kpi .label {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--ink-soft);
+    }
+
+    .kpi .value {
+      margin-top: 6px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .shot {
+      margin-top: 16px;
+      border: 2px solid var(--line-strong);
+      background: #fff;
+      padding: 8px;
+    }
+
+    .shot img {
+      width: 100%;
+      display: block;
+      border: 1px solid var(--line);
+      background: #f2ebde;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+    }
+
+    .caption {
+      margin-top: 8px;
+      color: var(--ink-soft);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-family: "Source Serif 4", serif;
+      font-size: clamp(1.55rem, 2.4vw, 2.1rem);
+      line-height: 1.12;
+    }
+
+    .lede {
+      margin: 0 0 14px;
+      color: var(--ink-soft);
+      max-width: 76ch;
+      line-height: 1.55;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      border: 2px solid var(--line);
+      background: var(--sheet);
+      transition: border-color 130ms ease, background 130ms ease;
+    }
+
+    .step:hover {
+      border-color: var(--accent-blue);
+      background: #fff;
+    }
+
+    .step .num {
+      border-right: 2px solid var(--line);
+      padding: 12px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .step .body {
+      padding: 12px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+    }
+
+    .step b {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .value-card {
+      border: 2px solid var(--line);
+      background: var(--sheet);
+      padding: 12px;
+      transition: border-color 120ms ease, transform 120ms ease;
+    }
+
+    .value-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .value-card b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+
+    .value-card p {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+
+    .fabric-module {
+      display: grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    #fabricPreview {
+      width: 100%;
+      min-height: 320px;
+      border: 2px solid var(--line-strong);
+      background: #f3ebdf;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fabric-note {
+      border: 2px solid var(--line);
+      background: var(--sheet);
+      padding: 12px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    .fabric-note strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 4px;
+      font-family: "IBM Plex Sans", sans-serif;
+      font-size: 15px;
+    }
+
+    .cta-band {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 10px;
+      align-items: center;
+      background: linear-gradient(90deg, rgba(127,82,40,.13), rgba(63,95,126,.1));
+      border: 2px solid var(--line-strong);
+      padding: 16px;
+    }
+
+    .cta-band p {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .fabric-module,
+      .cta-band {
+        grid-template-columns: 1fr;
+      }
+      .cta-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 860px) {
+      .topbar { grid-template-columns: 1fr; }
+      .nav { justify-content: flex-start; }
+      .kpi { grid-template-columns: 1fr 1fr; }
+      .value-grid { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 1fr; }
+      .step .num { border-right: 0; border-bottom: 2px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div id="fabric"></div>
+  <main class="shell">
+    <header class="topbar">
+      <div class="stamp">Mapbox Building Generator / Civic Fabric Studio / Concept 03 Refined</div>
+      <nav class="nav">
+        <a class="btn primary" href="../app.html">Open Map</a>
+        <a class="btn" href="../account.php">Your Account</a>
+        <a class="btn plugin" href="../qgis-plugin.html">Parametric QGIS Plugin</a>
+      </nav>
+    </header>
+
+    <section class="section">
+      <h1 class="hero-title">Generate complete building concepts from real parcels in under a minute.</h1>
+      <p class="hero-sub">Civic Fabric Studio is the architect-focused front door to Mapbox Building Generator. It turns context geometry into buildable envelope options with floorplan logic, so teams can move from "what if" to a defensible massing direction quickly and with less iteration waste.</p>
+
+      <div class="kpi">
+        <div class="item">
+          <div class="label">Typical first concept time</div>
+          <div class="value">45-90s</div>
+        </div>
+        <div class="item">
+          <div class="label">Modes</div>
+          <div class="value">3D + 2D</div>
+        </div>
+        <div class="item">
+          <div class="label">Output</div>
+          <div class="value">GeoJSON</div>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="slab">
+          <h2>What the product does</h2>
+          <p class="lede">Select a parcel or upload a footprint, adjust envelope and facade controls, and generate coherent stairs, core, and room programs. Toggle floorplan mode to inspect a typical floor at zero pitch and export your geometry to downstream tools.</p>
+          <div class="value-grid">
+            <div class="value-card">
+              <b>For architects</b>
+              <p>Rapidly test massing and circulation options before committing to detailed BIM work.</p>
+            </div>
+            <div class="value-card">
+              <b>For junior teams</b>
+              <p>Use presets and visual rules to produce credible concepts without inventing every parameter from scratch.</p>
+            </div>
+            <div class="value-card">
+              <b>For planning + GIS</b>
+              <p>Keep parcel reality in the loop and export machine-readable outputs for analysis and mapping.</p>
+            </div>
+            <div class="value-card">
+              <b>For iterative design reviews</b>
+              <p>Compare options quickly in the same coordinate context and preserve assumptions in a repeatable workflow.</p>
+            </div>
+          </div>
+        </div>
+
+        <figure class="shot">
+          <img src="./assets/civic-product-thumb.svg" alt="Replace with a screenshot of the Civic Fabric Studio product UI">
+          <figcaption class="caption">Screenshot placeholder: replace <code>landing/assets/civic-product-thumb.svg</code> with your product capture.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>How the generator works</h2>
+      <p class="lede">A deterministic pipeline converts map context into architectural geometry. Decorative motion is secondary; the core interaction is predictable control over form, structure, and program.</p>
+      <div class="timeline">
+        <article class="step">
+          <div class="num">Step 01</div>
+          <div class="body">
+            <b>Capture footprint and context</b>
+            Click an existing extruded building or upload Polygon/MultiPolygon GeoJSON. The footprint is cleaned, validated, and prepared for generation.
+          </div>
+        </article>
+        <article class="step">
+          <div class="num">Step 02</div>
+          <div class="body">
+            <b>Set envelope and facade intent</b>
+            Tune floors, taper mode, podium, facade opacity, mullions, exoskeleton, and roof systems using direct controls.
+          </div>
+        </article>
+        <article class="step">
+          <div class="num">Step 03</div>
+          <div class="body">
+            <b>Generate interior logic</b>
+            Build stairs, stairwells, floor slabs, core, corridors, and typology-aware room partitions from the same geometry source.
+          </div>
+        </article>
+        <article class="step">
+          <div class="num">Step 04</div>
+          <div class="body">
+            <b>Inspect and deliver</b>
+            Switch to floorplan view for a typical floor at zero pitch, then export GeoJSON to handoff workflows or the Parametric QGIS plugin.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section fabric-module">
+      <div>
+        <h2>Urban fabric interaction layer</h2>
+        <p class="lede">This p5 preview is a lightweight demonstration of context pressure and corridor emphasis. It supports the story but does not replace the core product UI.</p>
+        <div id="fabricPreview"></div>
+      </div>
+      <aside class="fabric-note" id="fabricReadout">
+        <strong>Fabric Readout</strong>
+        Move pointer over the preview to inspect axis pressure and parcel density response.
+      </aside>
+    </section>
+
+    <section class="section cta-band">
+      <p><strong>Payoff:</strong> Go from parcel click to a coherent, discussable building concept quickly, with enough structure to present to principals, planning teams, or clients in the same session.</p>
+      <div class="cta-actions">
+        <a class="btn primary" href="../app.html">Launch Generator</a>
+        <a class="btn" href="../account.php">Open Account Workspace</a>
+        <a class="btn plugin" href="../qgis-plugin.html">Open Parametric QGIS Plugin</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const bgSketch = p => {
+      const cells = [];
+      let cols = 0;
+      let rows = 0;
+      const cw = 42;
+      const ch = 36;
+
+      p.setup = () => {
+        const cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+        cnv.parent('fabric');
+        p.noiseDetail(2, 0.46);
+        rebuild();
+      };
+
+      function rebuild() {
+        cols = Math.ceil(p.width / cw);
+        rows = Math.ceil(p.height / ch);
+        cells.length = 0;
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            cells.push({ x, y, seed: p.noise(x * 0.14, y * 0.14) });
+          }
+        }
+      }
+
+      p.draw = () => {
+        p.clear();
+        const axisX = p.map(p.mouseX || p.width * 0.5, 0, p.width, 0, cols, true);
+        for (const c of cells) {
+          const px = c.x * cw;
+          const py = c.y * ch;
+          const d = Math.abs(c.x - axisX);
+          const axisBoost = p.constrain(1 - d / 6, 0, 1);
+          const n = p.constrain(c.seed * 1.1 + axisBoost * 0.7, 0, 1.4);
+
+          let fill;
+          if (axisBoost > 0.78) fill = p.color(127, 82, 40, 58);
+          else if (n > 0.9) fill = p.color(63, 95, 126, 50);
+          else if (n > 0.65) fill = p.color(71, 109, 89, 44);
+          else fill = p.color(160, 138, 114, 28);
+
+          p.noStroke();
+          p.fill(fill);
+          p.rect(px + 3, py + 3, cw - 6, ch - 6);
+        }
+      };
+
+      p.windowResized = () => {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        rebuild();
+      };
+    };
+
+    const moduleSketch = p => {
+      const cells = [];
+      let cols = 18;
+      let rows = 10;
+      let cw = 0;
+      let ch = 0;
+      const readout = document.getElementById('fabricReadout');
+
+      function rebuild() {
+        cw = p.width / cols;
+        ch = p.height / rows;
+        cells.length = 0;
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            cells.push({ x, y, base: p.noise(x * 0.2, y * 0.2) });
+          }
+        }
+      }
+
+      p.setup = () => {
+        const host = document.getElementById('fabricPreview');
+        const cnv = p.createCanvas(host.clientWidth, host.clientHeight);
+        cnv.parent('fabricPreview');
+        rebuild();
+      };
+
+      p.draw = () => {
+        p.background(243, 235, 223);
+        const mx = p.map(p.mouseX || p.width * 0.5, 0, p.width, 0, cols, true);
+        const my = p.map(p.mouseY || p.height * 0.5, 0, p.height, 0, rows, true);
+
+        for (const c of cells) {
+          const px = c.x * cw;
+          const py = c.y * ch;
+          const axis = p.constrain(1 - Math.abs(c.y - my) / 2.8, 0, 1);
+          const val = p.constrain(c.base * 1.3 + axis * 0.8, 0, 1.6);
+
+          if (axis > 0.74) p.fill(127, 82, 40, 185);
+          else if (val > 0.95) p.fill(63, 95, 126, 160);
+          else if (val > 0.68) p.fill(71, 109, 89, 145);
+          else p.fill(209, 187, 155, 125);
+
+          p.noStroke();
+          p.rect(px + 2, py + 2, cw - 4, ch - 4);
+
+          p.stroke(109, 92, 72, 60);
+          p.strokeWeight(1);
+          p.noFill();
+          p.rect(px + 2, py + 2, cw - 4, ch - 4);
+        }
+
+        p.stroke(127, 82, 40, 220);
+        p.strokeWeight(2);
+        p.line(0, my * ch + ch * 0.5, p.width, my * ch + ch * 0.5);
+
+        const density = (cells.reduce((acc, c) => acc + c.base, 0) / cells.length) * 100;
+        const pressure = Math.round((1 - Math.abs(cols * 0.5 - mx) / (cols * 0.5)) * 100);
+        if (readout) {
+          readout.innerHTML = '<strong>Fabric Readout</strong>' +
+            `Density index: ${density.toFixed(1)} | Axis pressure: ${pressure}%<br>` +
+            'Interpretation: stronger axis pressure suggests clearer corridor opportunities.';
+        }
+      };
+
+      p.windowResized = () => {
+        const host = document.getElementById('fabricPreview');
+        p.resizeCanvas(host.clientWidth, host.clientHeight);
+        rebuild();
+      };
+    };
+
+    new p5(bgSketch);
+    new p5(moduleSketch);
+  </script>
+</body>
+</html>
