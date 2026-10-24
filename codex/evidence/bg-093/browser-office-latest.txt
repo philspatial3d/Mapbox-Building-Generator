@@ -1,0 +1,184 @@
+### Result
+{"layouts":[{"width":1280,"height":720,"panel":{"x":868,"y":72,"width":396,"height":610.59375,"right":1264,"bottom":682.59375},"dock":{"x":12,"y":596,"width":430,"height":112,"right":442,"bottom":708},"small":[],"overflow":false,"bodyOverflow":false,"statusInside":true,"interiorInside":true},{"width":390,"height":844,"panel":{"x":12,"y":68,"width":366,"height":590.59375,"right":378,"bottom":658.59375},"dock":{"x":12,"y":720,"width":366,"height":112,"right":378,"bottom":832},"small":[],"overflow":false,"bodyOverflow":false,"statusInside":true,"interiorInside":true},{"width":320,"height":640,"panel":{"x":12,"y":68,"width":296,"height":386.59375,"right":308,"bottom":454.59375},"dock":{"x":12,"y":516,"width":296,"height":112,"right":308,"bottom":628},"small":[],"overflow":false,"bodyOverflow":false,"statusInside":true,"interiorInside":true},{"width":844,"height":390,"panel":{"x":468,"y":72,"width":360,"height":290.59375,"right":828,"bottom":362.59375},"dock":{"x":12,"y":266,"width":390,"height":112,"right":402,"bottom":378},"small":[],"overflow":false,"bodyOverflow":false,"statusInside":true,"interiorInside":true}],"geometry":{"visible":true,"meshes":8,"inside":true,"telemetry":{"p50":16.699999999999932,"p95":33.299999999999955,"loadMs":232,"roomLoadMs":185.40000000596046,"estimatedMaterialTextureMiB":25.979166666666657,"floors":2,"drawCalls":73,"triangles":394108,"geometries":79,"textures":18,"assetFailures":[],"decoderWorkers":2,"residentRooms":[{"id":"part-0-room-0","detail":"high"}]}},"trackingUnchanged":true,"errors":[]}
+### Ran Playwright code
+```js
+await (async (page) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  const assert = (value, message) => {
+    if (!value) throw new Error(message);
+  };
+  await page.waitForFunction(() => window.__arDebug?.interior);
+  if (
+    await page
+      .getByRole("button", { name: "Continue with preview" })
+      .isVisible()
+  )
+    await page.getByRole("button", { name: "Continue with preview" }).click();
+  const control = page.getByRole("button", { name: "Controls", exact: true });
+  const open = async () => {
+    if ((await control.getAttribute("aria-expanded")) !== "true")
+      await control.click();
+  };
+  const close = async () => {
+    if ((await control.getAttribute("aria-expanded")) === "true")
+      await page.getByRole("button", { name: "Close controls" }).click();
+  };
+  const tracking = () =>
+    page.evaluate(() => {
+      const s = window.__arDebug.state;
+      return JSON.stringify({
+        heading: s.headingDeg,
+        locked: s.headingLocked,
+        offset: s.manualOffsetM,
+        geo: s.geoRoot.matrix.elements,
+        camera: s.camera.position.toArray(),
+        quaternion: s.camera.quaternion.toArray(),
+      });
+    });
+  const before = await tracking();
+  const layouts = [];
+  for (const [width, height] of [
+    [1280, 720],
+    [390, 844],
+    [320, 640],
+    [844, 390],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await open();
+    const layout = await page.evaluate(() => {
+      const box = (id) => {
+        const b = document.getElementById(id).getBoundingClientRect();
+        return {
+          x: b.x,
+          y: b.y,
+          width: b.width,
+          height: b.height,
+          right: b.right,
+          bottom: b.bottom,
+        };
+      };
+      const small = [
+        ...document.querySelectorAll(
+          "#panel button,#panel select,#arInteriorControls button,#arInteriorControls select,#toolsToggle,#backToMap,#contextChip",
+        ),
+      ]
+        .filter(
+          (e) => e.checkVisibility() && e.getBoundingClientRect().height < 43.5,
+        )
+        .map((e) => e.id || e.textContent);
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        panel: box("panel"),
+        dock: box("arInteriorControls"),
+        small,
+        overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        bodyOverflow:
+          document.getElementById("panelBody").scrollWidth >
+          document.getElementById("panelBody").clientWidth + 1,
+        statusInside: !!document.getElementById("status").closest("#panel"),
+        interiorInside: !!document
+          .querySelector(".interior-tools")
+          .closest("#panel"),
+      };
+    });
+    assert(
+      !layout.overflow && !layout.bodyOverflow,
+      `Horizontal overflow at ${width}x${height}`,
+    );
+    assert(!layout.small.length, `Undersized touch controls: ${layout.small}`);
+    assert(
+      layout.statusInside && layout.interiorInside,
+      "Interior and tracking controls must share the panel",
+    );
+    assert(
+      layout.panel.x >= 0 &&
+        layout.panel.right <= width + 1 &&
+        layout.panel.bottom <= height + 1,
+      "Panel outside viewport",
+    );
+    if (width <= 600)
+      assert(
+        layout.panel.bottom <= layout.dock.y + 2,
+        "Phone panel overlaps the floor/movement dock",
+      );
+    layouts.push(layout);
+    await close();
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const settle = () =>
+    page.waitForFunction(
+      () =>
+        document
+          .querySelector("#arInteriorControls .interior-picker")
+          .getAttribute("aria-busy") === "false",
+    );
+  await page.getByRole("button", { name: "Ground", exact: true }).click();
+  await settle();
+  await open();
+  const room = page.getByLabel("Room override");
+  const value = await room
+    .locator("option")
+    .evaluateAll(
+      (options) =>
+        options.find((o) => /living|workspace|bedroom/i.test(o.textContent))
+          ?.value,
+    );
+  assert(
+    value,
+    "A habitable room is required for the browser regression fixture",
+  );
+  await room.selectOption(value);
+  await page.getByLabel("Interior style").selectOption("quiet");
+  await page.getByLabel("Interior style").selectOption("warm");
+  await page.getByRole("button", { name: "Visit room", exact: true }).click();
+  await settle();
+  await page.waitForFunction(() => window.__arDebug.interior.walking);
+  const geometry = await page.evaluate((value) => {
+    const { interior: i, THREE } = window.__arDebug;
+    const g = i.root.children.find((g) => g.userData.floor === i.store.current);
+    const room = g.userData.rooms.find((r) => r.userData.roomId === value);
+    const floorMesh = room.children.find(
+      (o) => o.isMesh && !o.userData.furniture && !o.userData.ceiling,
+    );
+    floorMesh.geometry.computeBoundingBox();
+    const b = floorMesh.geometry.boundingBox;
+    const furniture = room.children.filter(
+      (o) => o.isMesh && o.userData.furniture,
+    );
+    return {
+      visible: room.visible,
+      meshes: furniture.length,
+      inside: furniture.every((o) => {
+        o.geometry.computeBoundingBox();
+        const c = o.geometry.boundingBox.getCenter(new THREE.Vector3());
+        return (
+          c.x >= b.min.x - 0.6 &&
+          c.x <= b.max.x + 0.6 &&
+          c.z >= b.min.z - 0.6 &&
+          c.z <= b.max.z + 0.6
+        );
+      }),
+      telemetry: i.telemetry(),
+    };
+  }, value);
+  assert(
+    geometry.visible && geometry.meshes && geometry.inside,
+    "Batched imported models must stay in the selected translated room",
+  );
+  const canvas = page.locator("#xrCanvas");
+  const c = await canvas.boundingBox();
+  await page.mouse.move(c.width * 0.65, c.height * 0.35);
+  await page.mouse.down();
+  await page.mouse.move(c.width * 0.7, c.height * 0.4, { steps: 8 });
+  await page.mouse.up();
+  const after = await tracking();
+  assert(
+    before === after,
+    "UI, style, room and virtual look must not change physical tracking state",
+  );
+  assert(!errors.length, `Console errors: ${errors.join("; ")}`);
+  return { layouts, geometry, trackingUnchanged: true, errors };
+})(page);
+```

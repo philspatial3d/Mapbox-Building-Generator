@@ -2249,3 +2249,51 @@ Status: Release packaging complete; Bluehost deployment and phone AR QA pending
 - Local browser after favicon fix: zero console errors; existing Mapbox 3.9.3 warnings about unsupported fill-extrusion paint properties remain.
 - Phone tracking and public deployment are unverified. Existing demo account access requires directory privacy for this personal-use package.
 - Keep unrelated haunted_ar, agency, native wrapper notes, and design tooling out of this release commit.
+
+---
+
+## BG-093 — Streamed human-scale interiors, floor navigation and lift interaction
+Status: Substantial local review build; automated and desktop checks pass. **Visual/device release gates remain open.**
+
+**Starting state**
+- Verified base: `feature/bg-091-ultramodern-presets` at `e955928`, already pushed earlier in this chat, with ignored hosting token configuration. New branch: `codex/bg-093-interior-immersion`.
+- No push, token changes, deployment, framework, Mapbox upgrade or changes to unrelated folders.
+
+**Implemented and checked**
+- [x] Interior schema 2 and defaults for older presets/payloads; actual per-floor plates, storey heights, composite floor/room/object IDs, doors, passages, material families and furnishing transforms/facing.
+- [x] Re-plan changed plates rather than stretching furnishings with taper. Select plans by circulation connectivity before aesthetic score. Repair real openings before wall construction; transfer inaccessible corner wings to adjoining accessible units where necessary.
+- [x] Room containment and 0.9 m entry routes for furnishings; opening/shaft-aware finish plates, real wall heights, ceilings, skirting, frames, thresholds, window sills/headers and glazing apertures.
+- [x] Local CC0 furniture candidates with meshopt, 1K WebP, two LODs and manifests recording sources, authors, licence/rights, bounds, material slots, measured triangles, texture dimensions and clearances. Eight individual eye-level asset reviews captured.
+- [x] Debounced, cancellable active-floor window; architectural neighbours, room-bounded batches, selected-room refill, three-room LRU, settled distance LOD, shared materials and finite source-model cache. Explicit image-bitmap cleanup at scene teardown.
+- [x] Four finish palettes, independent opposite-side wall finishes, room overrides, clear/restore furniture and explicit optional desk screens. Settings survive presets/session/handoff; finish changes reuse geometry.
+- [x] Integrated responsive AR Controls panel, collapsed alignment section and persistent floor/movement dock. Browser checks at 320/390 px, desktop and landscape show no overflow/clipped panel and 44 px controls.
+- [x] Imagegen plaster/oak/stone: three 1K WebP base-colour surfaces with prompts, flags, provenance/hashes, sRGB/mipmaps/metre UVs and restrained procedural normals. Local API credentials remain ignored and are never needed on the host.
+- [x] Disposable source-generated worker planner with byte-exact parity and restricted-host fallback; Meshopt decoder worker probe and ownership. Fix duplicate desktop AR popup/renderers and missing-session restore.
+- [x] Conventional floor picker in AR and editor floorplan, Ground/Top/setback jumps, roof/podium/plant labels, keyboard paging, selected/loading states and mobile touch spacing. Lift preview uses the same state. Floor changes do not call calibration/heading/placement code.
+- [x] Separate virtual walkthrough camera and lightweight collision; tracked camera is untouched. Lift car/doors/panel and explicit call/board/travel/arrive/exit state transitions. Unaligned shafts reject virtual travel and offer floor preview.
+- [x] Immediate startup sheet with independent camera/motion/orientation/location results, gesture-gated requests, retry and permission-free preview.
+- [x] Existing 37-preset regeneration remains byte-for-byte identical; existing geometry and AR checks pass. New checks cover semantic plans, complete furniture containment, connectivity on rectangular/elongated/concave plans, actual taper replanning, migrations, 120-floor state, lift transitions, stream cancellation and asset binary/codec/budget metadata.
+- [x] Baselines and final warmed desktop samples recorded separately from cold spikes/device targets: residential 16.6/17.3 ms p50/p95; office 16.6/18.1 ms. Three floor-switch rounds retained identical tracked-state values and 118 geometries/21 textures (before final threshold). Room/style exercise retains three detailed rooms; finish edits reuse geometry. Cold two-storey preview reached 444 calls/166.6 ms p95; targets are not universally met.
+
+**New add-ons / build tools**
+- All viewer add-ons use the existing Three.js **0.185.1** URL: `GLTFLoader` loads local models, `MeshoptDecoder` decodes the chosen compression, `RoundedBoxGeometry` provides curved fixture edges, and `RoomEnvironment` supplies one shared static interior IBL map without replacing AR/XR lighting. Existing `BufferGeometryUtils` is reused for room batching.
+- `KTX2Loader` was not added: the permitted WebP texture route is used. The existing main editor's Three.js export version is unchanged.
+- Asset preparation uses build-only `@gltf-transform/cli@4.3.0` and Python standard library. Neither is required to run the web app.
+
+**Open acceptance / release gates**
+- [ ] Complete and visually approve the entire requested hero/fixture set and style-specific furniture selection; independent frame/upholstery/glass/metal control for every imported model. Source texture atlases are currently retained.
+- [ ] Resolve low-LOD budget exceptions: bed 2,232 triangles; plant 6,433. High variants are within 15k. Tune actual phone texture/geometry budgets.
+- [ ] Fully furnished high-detail neighbours, portal visibility and direct native-model footprint/clearance planning. Current neighbours are architectural; room bounds, LRU and settled distance LOD provide bounded streaming.
+- [x] Varied-plate planning runs in a disposable worker; asynchronous model decoding uses workers where supported. Restricted-host planner fallback remains on the main thread. A 40-floor/26-plan case still took 5.59 seconds to prepare; optimise further.
+- [x] Desktop browser lift call/board/travel 2→4/exit-to-idle after fixing the car/shaft threshold gap. One car and no stationary blocking slabs.
+- [ ] Broader landing alignment/exit coverage across setback/taper cases; unaligned shafts remain preview-only. Physical mode never moves the tracked camera.
+- [x] Eye-level reviews of eight GLBs and 18 designed fixtures; residential/office/setback/taper screenshots and desktop walkthrough clips. Two-/120-storey pickers pass Home/End and Ground/Top.
+- [ ] Broad furnished-room/four-style aesthetic sign-off and further fixture/lighting/junction refinement; review evidence is not approval.
+- [ ] Named Android/iOS phone tests for permissions, positional tracking, thermal behaviour, 60 fps and stable 30 fps fallback. No physical device was available; desktop results do not establish these targets.
+- [ ] Optional tactile selector remains deferred; accessible conventional controls are available.
+
+**Review and evidence**
+- `codex/INTERIOR_IMMERSION_REVIEW.md`
+- `assets/interior/README.md`, per-model and aggregate manifests
+- `codex/evidence/bg-093/`
+- Run `node scripts/check_interior.mjs`, `node scripts/check_external_fidelity.mjs`, `node scripts/check_ar_fidelity.mjs`.

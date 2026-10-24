@@ -99,6 +99,6 @@ includesAll(ar, [
 assert.match(ar, /option value="massing" selected>Massing \(solid\)/, 'context masses are visible by default');
 assert.match(ar, /option value="outlines">Outlines \(align to street\)/, 'context outlines are available for street alignment');
 assert.match(ar, /@media \(max-width: 520px\)[\s\S]*#panel \{ max-height: min\(50vh, 520px\); \}/, 'phone panel keeps half the camera view clear');
-includesAll(app, ['buildArInteriorPayload', 'interior: buildArInteriorPayload(config)'], 'AR interior payload');
+includesAll(app, ['buildArInteriorPayload', 'interior: await buildArInteriorPayload(config)'], 'AR interior payload');
 
 console.log('AR fidelity contract checks passed.');

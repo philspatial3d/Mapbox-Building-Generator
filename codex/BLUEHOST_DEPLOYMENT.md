@@ -1,7 +1,55 @@
-# Bluehost deployment — BG-090/091
+# Bluehost deployment — BG-093 interior review update
+
+## Latest update: exact replacement files
+
+The BG-093 branch is a local review build. It has not been pushed or deployed, and
+phone/visual release checks remain open in `INTERIOR_IMMERSION_REVIEW.md`.
+The older `output/mapbox-building-generator-bluehost.zip` **does not include BG-093**.
+
+For the installation at `https://tapestry.media/building-generator/app.html`, back up
+the existing files, then upload these paths together under `public_html/building-generator/`:
+
+```text
+app.html                                      # replace
+ar.html                                       # replace
+js/interior/                                  # add every file, preserving paths
+  architecture.js   ar-ui.css       contact.js
+  elevator.js       floor-picker.js furniture.js
+  interior.css      kitchen.js      lighting.js
+  materials.js      permissions.js  planner.js
+  planner.worker.js planner-runtime.js
+  review.html       scene.js        seating.js   state.js
+assets/interior/                              # add complete recursive model library
+  manifest.json     README.md
+  GothicBed_01/     dining_chair_02/  dining_table/
+  modern_arm_chair_01/              modern_ceiling_lamp_01/
+  modern_coffee_table_01/           potted_plant_01/  sofa_02/
+  # Each model directory includes high.glb, low.glb and provenance/manifest JSON.
+assets/interior-textures/                     # add all generated finish files
+  plaster.webp      oak.webp        stone.webp   manifest.json
+```
+
+The new model/finish assets total about 5.3 MiB on disk. Preserve filename case,
+especially `GothicBed_01`. The worker and its generated runtime must be uploaded
+together; there is no build step on Bluehost. Keep existing `js/textures.js` and
+texture PNGs, PHP/API files, `presets/defaults.json`, `mapbox-config.js`, authentication
+settings, databases and user storage. The 37-preset JSON is unchanged in BG-093.
+Do not overwrite the entire existing `js/` directory with only the new subdirectory.
+
+**Never upload `.env`, `.env.*`, `.git/`, scripts, local evidence or local databases.**
+The image API key was used only during texture generation. The hosted app needs no
+image API key. The generated WebP files are ordinary static assets.
+
+After upload, clear the browser cache, generate a fresh building in the editor and
+launch AR again (old handoff payloads cannot acquire new room plans). Check the
+floor picker, Controls panel, preview, room visit and return to map. On a phone,
+use HTTPS and test camera/motion/location independently. These instructions identify
+the required files; they do not claim that the current hosted site was updated.
+
+## Existing BG-090/091 full installation package
 
 The generator is `app.html`; `index.html` is the landing page. There is no build step.
-The upload package is `output/mapbox-building-generator-bluehost.zip`.
+The previous full installation package is `output/mapbox-building-generator-bluehost.zip`.
 
 ## Files to upload
 

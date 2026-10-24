@@ -1,0 +1,12 @@
+{
+  "id": "modern_arm_chair_01",
+  "source": "https://polyhaven.com/a/modern_arm_chair_01",
+  "author": "Vibrant Nordic",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

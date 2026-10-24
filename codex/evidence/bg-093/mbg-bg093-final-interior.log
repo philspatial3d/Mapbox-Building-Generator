@@ -1,0 +1,7 @@
+Interior checks passed: migration, 120-floor state, courtyard collision, elevator transitions, cancellable bounded resource lifecycle, 8 licensed GLBs. Low-LOD budget exceptions: GothicBed_01, potted_plant_01.
+Renderer ownership and shared ImageBitmap lifecycle regressions passed.
+Legacy interior payload migration passed without furniture scale transforms.
+Opposite wall-side finish ownership and triangle conservation passed.
+Quantized GLB batching preserves translated metre coordinates without mutating source geometry.
+Planner worker ordering, cancellation, cleanup and restricted-host fallback passed.
+Three generated 1K WebP textures: provenance, hashes, real dimensions and transfer budgets passed.

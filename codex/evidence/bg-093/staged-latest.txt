@@ -1,0 +1,12 @@
+### Result
+[{"label":"residential","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvlp8y3q-b9iqwb","handoffMs":907},{"label":"office","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvlp8z2j-19yh4k","handoffMs":916}]
+### Ran Playwright code
+```js
+await (async(page)=>{const results=[];for(const [preset,label] of [["curated:1","residential"],["curated:30","office"]]){await page.getByLabel("Presets",{exact:true}).selectOption(preset);const opened=page.context().waitForEvent("page");const start=Date.now();await page.getByRole("button",{name:"Open AR Viewer",exact:true}).click();const popup=await opened;await popup.waitForURL(/ar.html\?k=/,{timeout:120000});results.push({label,url:popup.url(),handoffMs:Date.now()-start});await popup.close();}return results;})(page);
+```
+### Page
+- Page URL: http://127.0.0.1:8153/app.html
+- Page Title: Building Generator - Program Control Desk
+- Console: 0 errors, 72 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-24T00-42-44-609Z.log#L81-L154

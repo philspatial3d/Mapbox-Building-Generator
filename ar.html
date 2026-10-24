@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="./js/interior/interior.css">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -1024,6 +1025,7 @@
     .eyebrow { display: none; }
   }
 </style>
+<link rel="stylesheet" href="./js/interior/ar-ui.css">
 </head>
 <body>
 <video id="cameraFeed" autoplay playsinline muted></video>
@@ -1034,21 +1036,29 @@
     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>Map</span>
   </a>
+  <button id="toolsToggle" type="button" aria-controls="panel" aria-expanded="false">Controls</button>
   <button id="contextChip" type="button" aria-label="Change how nearby buildings are shown">
     <span class="chipLabel">Context</span><span class="chipMode">Massing</span><span class="chipMeta">loading</span>
   </button>
-  <div id="panel">
+  <div id="panel" role="region" aria-label="Building controls">
     <div id="panelHeader">
       <div class="panelTitle">
         <span class="eyebrow">Building AR</span>
-        <h1>Parcel-locked architectural view</h1>
+        <h1>Explore &amp; align</h1>
       </div>
       <div class="headerActions">
         <button id="quickLock" class="primary" type="button" title="Freeze the building exactly where it is now">Lock</button>
-        <button id="panelToggle" type="button">Minimize</button>
+        <button id="panelToggle" type="button" aria-label="Close controls">Close</button>
       </div>
     </div>
 
+    <div id="panelBody">
+    <section class="arSection" id="interiorSection" aria-labelledby="interiorHeading">
+      <h2 id="interiorHeading">Interior studio</h2>
+      <div id="interiorToolsSlot"></div>
+    </section>
+    <details class="arSection" id="trackingDetails">
+    <summary>Camera &amp; alignment</summary>
     <div class="row">
       <div class="metric"><span class="k">Distance</span><span class="v" id="distanceMeters">-</span></div>
       <div class="metric"><span class="k">Tracking</span><span class="v" id="anchorState">Waiting</span></div>
@@ -1075,14 +1085,14 @@
             <option value="performance">Performance</option>
           </select>
         </label>
-        <label class="viewerSetting" for="viewerLevel">Viewer
+        <label class="viewerSetting" for="viewerLevel">Device height
           <select id="viewerLevel">
-            <option value="0" selected>Street level</option>
-            <option value="3">Balcony / porch +3 m</option>
-            <option value="6">2nd floor / deck +6 m</option>
-            <option value="9">Roof +9 m</option>
-            <option value="15">High floor +15 m</option>
-            <option value="30">Tower +30 m</option>
+            <option value="0" selected>Street level (device)</option>
+            <option value="3">Device +3 m</option>
+            <option value="6">Device +6 m</option>
+            <option value="9">Device +9 m</option>
+            <option value="15">Device +15 m</option>
+            <option value="30">Device +30 m</option>
           </select>
         </label>
         <label class="viewerSetting" for="contextMode">Context
@@ -1140,11 +1150,10 @@
         </div>
       </div>
         </div>
-      </div>
-    </div>
-
+    </details>
     <div id="status">Waiting for payload…</div>
     <div id="error"></div>
+    </div>
   </div>
 </div>
 <script src="./mapbox-config.js"></script>
@@ -1153,6 +1162,9 @@ import * as THREE from 'https://esm.sh/three@0.185.1';
 import { mergeGeometries } from 'https://esm.sh/three@0.185.1/examples/jsm/utils/BufferGeometryUtils.js';
 import { XREstimatedLight } from 'https://esm.sh/three@0.185.1/examples/jsm/webxr/XREstimatedLight.js';
 
+import { createInteriorScene } from './js/interior/scene.js';
+import { mountPermissionSheet } from './js/interior/permissions.js';
+let interiorScene = null, permissionSheet = null;
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const toRad = deg => (deg * Math.PI) / 180;
@@ -1487,8 +1499,7 @@ function isCompactViewport() {
 
 function setPanelCollapsed(collapsed) {
   document.body.classList.toggle('panel-collapsed', Boolean(collapsed));
-  const toggle = $('panelToggle');
-  if (toggle) toggle.textContent = document.body.classList.contains('panel-collapsed') ? 'Expand' : 'Minimize';
+  $('toolsToggle')?.setAttribute('aria-expanded', String(!collapsed));
 }
 
 function syncUiState() {
@@ -2929,69 +2940,14 @@ const FURNITURE_COLOR = {
 };
 
 function buildInteriorGroup() {
-  const interior = payload && payload.interior;
-  if (!interior || !Array.isArray(interior.floors) || !interior.floors.length || !state.modelRoot) return;
-  const project = localMetersProjector(Number(payload.site.lng), Number(payload.site.lat));
-  const floorH = Number(interior.floorHeight) || 3.2;
-  const buckets = new Map();
-  const add = (key, color, polyCoords, depth, base) => {
-    const geo = polygonToGeometry(polyCoords, project, depth, base);
-    if (!geo) return;
-    if (!buckets.has(key)) buckets.set(key, { color, geometries: [] });
-    buckets.get(key).geometries.push(geo);
-  };
-  const eachPolygon = (feature, fn) => {
-    const g = feature && feature.geometry;
-    if (!g) return;
-    if (g.type === 'Polygon') fn(g.coordinates);
-    else if (g.type === 'MultiPolygon') g.coordinates.forEach(fn);
-  };
-  (interior.rooms || []).forEach(room => eachPolygon(room, coords => {
-    const fill = room.properties && room.properties.fill ? room.properties.fill : '#e8e4dc';
-    add(`floor|${fill}`, fill, coords, 0.03, 0.02);
-  }));
-  (interior.walls || []).forEach(wall => eachPolygon(wall, coords => add('walls', '#d9d4ca', coords, 2.4, 0.02)));
-  (interior.furniture || []).forEach(item => eachPolygon(item, coords => {
-    const kind = item.properties && item.properties.kind;
-    const h = FURNITURE_HEIGHT_M[kind] || 0.75;
-    const base = kind === 'pillow' ? 0.52 : (kind === 'sink' || kind === 'hob' ? 0.9 : 0.03);
-    add(`furniture|${kind}`, FURNITURE_COLOR[kind] || '#cfc8bd', coords, Math.max(0.02, h - base), base);
-  }));
-  const group = new THREE.Group();
-  group.name = 'Interior unit plans';
-  const matrix = new THREE.Matrix4();
-  const origin = Array.isArray(interior.origin) ? project(interior.origin[0], interior.origin[1]) : { x: 0, y: 0 };
-  /* local shape coords (x, y) become world (x, -y) after polygonToGeometry's rotation */
-  const ox = origin.x, oz = -origin.y;
-  const floorSpecs = interior.floors.map(f => (typeof f === 'number' ? { base: f, scale: 1 } : f));
-  buckets.forEach((bucket, key) => {
-    const geometry = bucket.geometries.length === 1 ? bucket.geometries[0] : mergeGeometries(bucket.geometries, false);
-    if (bucket.geometries.length > 1) bucket.geometries.forEach(g => g.dispose());
-    if (!geometry) return;
-    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(bucket.color), roughness: key.startsWith('floor') ? 0.8 : 0.7, metalness: 0, envMapIntensity: 0.35 });
-    const mesh = new THREE.InstancedMesh(geometry, material, floorSpecs.length);
-    floorSpecs.forEach((spec, i) => {
-      const k = Number(spec.scale) || 1;
-      /* scale x/z about the taper origin, keep heights, lift to the floor base */
-      matrix.set(
-        k, 0, 0, ox * (1 - k),
-        0, 1, 0, Number(spec.base) || 0,
-        0, 0, k, oz * (1 - k),
-        0, 0, 0, 1
-      );
-      mesh.setMatrixAt(i, matrix);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    mesh.computeBoundingSphere();
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-    mesh.userData.internal = true;
-    mesh.userData.lod = key.startsWith('furniture') ? 'fine' : 'medium';
-    mesh.userData.layer = 'interior';
-    group.add(mesh);
-  });
-  state.interiorRoot = group;
-  state.modelRoot.add(group);
+  if (!payload?.interior?.floors?.length || !state.modelRoot) return;
+  if (!interiorScene) {
+    interiorScene = createInteriorScene({ interior: payload.interior, site: payload.site, revision: payload.createdAt, modelRoot: state.modelRoot,
+      project: localMetersProjector(Number(payload.site.lng), Number(payload.site.lat)), polygonToGeometry,
+      renderer: state.renderer, getQuality: () => state.qualityMode, onWalkStart: () => setPanelCollapsed(true), onExplore: () => { $('detailMode').value = 'complete'; $('detailMode').dispatchEvent(new Event('change')); }, physicallyTracked: () => state.sessionActive || Boolean(state.cameraReady && state.userLoc && state.relOrientation) });
+    state.interiorRoot = interiorScene.root;
+  }
+  interiorScene.enable(state.detailMode === 'complete');
 }
 
 function getModelMetrics(group) {
@@ -3681,13 +3637,13 @@ function onDeviceOrientation(event) {
   ensureInitialPreviewOffset();
 }
 
-async function enableOrientation({ userInitiated = false } = {}) {
+async function enableOrientation({ userInitiated = false, preGranted = false } = {}) {
   if (typeof window.DeviceOrientationEvent === 'undefined') {
     setStatus('Device orientation is unavailable on this device/browser.');
     return;
   }
   if (state.orientationReady) return;
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+  if (!preGranted && typeof DeviceOrientationEvent.requestPermission === 'function') {
     if (!userInitiated) {
       state.orientationGestureRequired = true;
       updateSensorState();
@@ -4209,7 +4165,7 @@ function updateDetailVisibility() {
     ? state.lastPlacementDistanceM
     : Math.max(20, state.modelMetrics.radius * 2.8);
   state.modelRoot.traverse(object => {
-    if (!object.isMesh) return;
+    if (!object.isMesh || object.userData.interiorManaged) return;
     const internalVisible = !object.userData.internal
       || (state.detailMode === 'complete' && distance <= LOD_FINE_DISTANCE_M * 1.25);
     const lodVisible = object.userData.lod === 'fine'
@@ -4463,7 +4419,8 @@ function initScene() {
     updateAlignmentProof(nowS);
     updateContextFade(nowMs);
     if (state.contactShadow) state.contactShadow.visible = state.previewActive || groundAcknowledged();
-    state.renderer.render(state.scene, state.camera);
+    interiorScene?.update(nowMs);
+    state.renderer.render(state.scene, interiorScene?.walking ? interiorScene.camera : state.camera);
   });
 
   window.addEventListener('resize', () => {
@@ -4481,7 +4438,7 @@ async function startArSession() {
   try {
     if (!payload) throw new Error('AR payload missing. Generate building and open AR from the main app.');
     if (!state.sensorsEnabled) {
-      throw new Error('Camera and location should auto-start on load, but motion access may still need one tap on the live view or the Enable Sensors button.');
+      throw new Error('Use Enable Camera & Motion first, or continue with the virtual preview.');
     }
     await ensureCameraFeed();
     if (!navigator.xr) {
@@ -4612,10 +4569,12 @@ async function boot() {
   }
 
   loadSavedCalibration();
-  setStatus('Payload ready. Attempting to start camera, location, and motion access.');
+  setStatus('Choose Enable Camera & Motion, or continue with the virtual preview.');
+  permissionSheet = mountPermissionSheet({ camera: ensureCameraFeed, location: enableGeolocation, orientationGranted: () => enableOrientation({ userInitiated: true, preGranted: true }) });
 
   $('enableSensors').addEventListener('click', async () => {
-    await enableSensors();
+    if (permissionSheet) permissionSheet.open();
+    else await enableSensors();
   });
   $('startAr').addEventListener('click', async () => {
     await startArSession();
@@ -4667,6 +4626,7 @@ async function boot() {
   $('calibrateGround').addEventListener('click', calibrateGroundFromHit);
   $('qualityMode').addEventListener('change', event => {
     state.qualityMode = event.target.value;
+    interiorScene?.refreshQuality();
     applyQualityMode();
     updateDetailVisibility();
     rebuildOccluders();
@@ -4695,16 +4655,28 @@ async function boot() {
       material.depthWrite = !seeThrough;
       material.needsUpdate = true;
     });
-    if (seeThrough && !state.interiorRoot) buildInteriorGroup();
+    if (seeThrough) buildInteriorGroup();
+    else interiorScene?.enable(false);
     updateDetailVisibility();
   });
   $('panelToggle').addEventListener('click', () => {
-    setPanelCollapsed(!document.body.classList.contains('panel-collapsed'));
+    setPanelCollapsed(true);
+    $('toolsToggle').focus();
+  });
+  $('toolsToggle').addEventListener('click', () => {
+    const opening=document.body.classList.contains('panel-collapsed');
+    setPanelCollapsed(!opening);
+    if(opening)$('panelToggle').focus({preventScroll:true});
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!document.body.classList.contains('panel-collapsed')&&$('permissionSheet')?.hidden!==false){
+      setPanelCollapsed(true);$('toolsToggle').focus();
+    }
   });
   window.addEventListener('pointerup', clearBindHold);
   window.addEventListener('pointercancel', clearBindHold);
   window.addEventListener('blur', clearBindHold);
-  if (isCompactViewport()) setPanelCollapsed(true);
+  setPanelCollapsed(true);
   syncUiState();
   bindCanvasInteractions();
 
@@ -4712,14 +4684,16 @@ async function boot() {
   try {
     initScene();
     void ensureSiteGroundElevation();
-    void attemptAutoSensorStartup();
+    buildInteriorGroup();
+
   } catch (err) {
     setError(String(err && err.message ? err.message : err));
   }
 }
 
 void boot();
-if (AR_DEBUG) window.__arDebug = { state, THREE, relativeDeviceQuat };
+if (AR_DEBUG) window.__arDebug = { state, THREE, relativeDeviceQuat, get interior() { return interiorScene; } };
+window.addEventListener('pagehide', event => { if (!event.persisted) { interiorScene?.dispose(); permissionSheet?.dispose(); } });
 </script>
 </body>
 </html>

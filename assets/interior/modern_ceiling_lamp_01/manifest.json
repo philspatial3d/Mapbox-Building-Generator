@@ -1,0 +1,103 @@
+{
+  "id": "modern_ceiling_lamp_01",
+  "source": "https://polyhaven.com/a/modern_ceiling_lamp_01",
+  "author": "James Ray Cock",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/modern_ceiling_lamp_01/high.glb",
+      "triangles": 5602,
+      "bytes": 157804,
+      "textures": [
+        {
+          "name": "modern_ceiling_lamp_01_gl_normal",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_ceiling_lamp_01_basecolor",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_ceiling_lamp_01_metallic-modern_ceiling_lamp_01_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/modern_ceiling_lamp_01/low.glb",
+      "triangles": 684,
+      "bytes": 127336,
+      "textures": [
+        {
+          "name": "modern_ceiling_lamp_01_gl_normal",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_ceiling_lamp_01_basecolor",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_ceiling_lamp_01_metallic-modern_ceiling_lamp_01_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.21479694229823887,
+      0.0003292858600616455,
+      -0.21396480519661631
+    ],
+    "max": [
+      0.21394541544181644,
+      0.9515514969825745,
+      0.21396471578964915
+    ]
+  },
+  "materialSlots": [
+    "modern_ceiling_lamp_01_glass",
+    "modern_ceiling_globe"
+  ],
+  "footprint": [
+    0.4287423577400553,
+    0.42792952098626547
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 2.2287423577400554,
+    "depth": 2.2279295209862653,
+    "margin": 0.9
+  }
+}

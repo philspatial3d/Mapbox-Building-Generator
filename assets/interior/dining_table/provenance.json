@@ -1,0 +1,12 @@
+{
+  "id": "dining_table",
+  "source": "https://polyhaven.com/a/dining_table",
+  "author": "Aron \u0141yczek",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

@@ -1,0 +1,19 @@
+### Result
+{"errors":[],"geo":"building-styled.geojson","glb":"building.glb"}
+### Ran Playwright code
+```js
+await (async(page)=>{const errors=[];page.on("pageerror",e=>errors.push(e.message));await page.getByLabel("Presets",{exact:true}).selectOption("curated:1");await page.locator("#geoUpload").setInputFiles("output/playwright/neighbourhood.geojson");await page.getByRole("button",{name:"Regenerate Building",exact:true}).click();await page.waitForFunction(()=>!document.querySelector("#buildingLoader").classList.contains("active"));const geoPromise=page.waitForEvent("download");await page.getByRole("button",{name:"Download GeoJSON",exact:true}).click();const geo=await geoPromise;await geo.saveAs("/tmp/mbg-final-export.geojson");const glbPromise=page.waitForEvent("download");await page.getByRole("button",{name:"Export 3D",exact:true}).click();const glb=await glbPromise;await glb.saveAs("/tmp/mbg-final-export.glb");await page.screenshot({path:"codex/evidence/bg-093/app-final-export.png"});return {errors,geo:geo.suggestedFilename(),glb:glb.suggestedFilename()};})(page);
+```
+### Open tabs
+- 0: (current) [Building Generator - Program Control Desk](http://127.0.0.1:8153/app.html)
+- 1: [Mapbox Building Generator - AR Viewer](http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvlp8y3q-b9iqwb&debug=1)
+### Page
+- Page URL: http://127.0.0.1:8153/app.html
+- Page Title: Building Generator - Program Control Desk
+- Console: 0 errors, 113 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-24T00-42-44-609Z.log#L155-L195
+- Downloading file building-styled.geojson ...
+- Downloaded file building-styled.geojson to ".playwright-cli/building-styled.geojson"
+- Downloading file building.glb ...
+- Downloaded file building.glb to ".playwright-cli/building.glb"

@@ -1,0 +1,6 @@
+### Result
+{"p50":16.69999999999891,"p95":16.799999999999272,"loadMs":278.59999999403954,"roomLoadMs":69.80000001192093,"estimatedMaterialTextureMiB":92.56249999999997,"floors":2,"drawCalls":102,"triangles":234081,"geometries":260,"textures":38,"assetFailures":[],"decoderWorkers":2,"residentRooms":[{"id":"part-0-room-4","detail":"high"}],"frameIntervalP50":16.600000008940697,"frameIntervalP95":17.299999997019768,"ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.screenshot({path:"/tmp/mbg-interior-evidence/residential-latest.png"});return await page.evaluate(async()=>{const a=[];let p=performance.now();for(let n=0;n<300;n++){await new Promise(requestAnimationFrame);const t=performance.now();if(n>=120)a.push(t-p);p=t;}a.sort((a,b)=>a-b);return {...window.__arDebug.interior.telemetry(),frameIntervalP50:a[90],frameIntervalP95:a[171],ua:navigator.userAgent};});})(page);
+```

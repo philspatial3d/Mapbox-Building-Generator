@@ -1,0 +1,152 @@
+.interior-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font: 13px/1.4 system-ui;
+  color: #26332f;
+  background: #f2f0e9;
+  border: 1px solid #aaa99d;
+  padding: 8px;
+  border-radius: 10px;
+}
+.interior-picker label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.interior-picker select,
+.interior-picker button,
+.interior-tools select,
+.interior-tools button {
+  min-height: 44px;
+  border: 1px solid #8b938b;
+  border-radius: 5px;
+  background: #faf9f4;
+  color: #26332f;
+  font: inherit;
+  padding: 5px 8px;
+  max-width: 100%;
+}
+.interior-picker [role="status"] {
+  font-size: 11px;
+  flex-basis: 100%;
+}
+.interior-tools {
+  font: 13px/1.4 system-ui;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 6px;
+  background: #f2f0e9;
+  color: #26332f;
+  border-radius: 8px;
+}
+.interior-tools label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.interior-tools [role="status"] {
+  flex-basis: 100%;
+}
+#arInteriorControls {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 12px;
+  z-index: 40;
+  width: min(480px, calc(100vw - 24px));
+  max-height: 48vh;
+  overflow: auto;
+  pointer-events: auto;
+}
+#arInteriorControls [hidden] {
+  display: none;
+}
+#appFloorPicker {
+  position: fixed;
+  left: 12px;
+  bottom: max(42px, env(safe-area-inset-bottom));
+  z-index: 6;
+  max-width: calc(100vw - 24px);
+}
+#appFloorPicker[hidden] {
+  display: none;
+}
+#permissionSheet {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  background: #15231f88;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+#permissionSheet[hidden] {
+  display: none;
+}
+#permissionSheet > section {
+  max-width: 440px;
+  background: #f6f3eb;
+  color: #26332f;
+  padding: 24px;
+  border-radius: 16px;
+  font: 15px/1.5 system-ui;
+  max-height: 85vh;
+  overflow: auto;
+}
+#permissionSheet button {
+  min-height: 48px;
+  padding: 10px 14px;
+  margin: 5px;
+  border: 1px solid #6b796e;
+  border-radius: 6px;
+  background: #f8f6f0;
+  color: #26332f;
+}
+#permissionSheet button:first-of-type {
+  background: #315b4b;
+  color: white;
+}
+#permissionResults {
+  white-space: pre-line;
+}
+@media (max-width: 600px) {
+  #arInteriorControls {
+    max-height: 34vh;
+  }
+  .interior-tools select {
+    max-width: 165px;
+  }
+  .interior-picker {
+    padding: 6px;
+  }
+}
+
+body.interior-walk #panel {
+  display: none;
+}
+
+.interior-tools label {
+  min-height: 44px;
+}
+
+#arInteriorControls {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  max-height: none;
+}
+#arInteriorControls > .interior-picker {
+  flex: none;
+}
+#arInteriorControls > .interior-tools {
+  overflow: auto;
+  max-height: 26vh;
+  flex: none;
+}
+@media (max-width: 600px) {
+  #arInteriorControls > .interior-tools {
+    max-height: 20vh;
+  }
+}

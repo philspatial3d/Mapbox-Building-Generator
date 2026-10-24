@@ -1,0 +1,151 @@
+{
+  "id": "modern_arm_chair_01",
+  "source": "https://polyhaven.com/a/modern_arm_chair_01",
+  "author": "Vibrant Nordic",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/modern_arm_chair_01/high.glb",
+      "triangles": 8916,
+      "bytes": 326376,
+      "textures": [
+        {
+          "name": "modern_arm_chair_01_legs_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_legs_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_legs_metal-modern_arm_chair_01_legs_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_metal-modern_arm_chair_01_pillow_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/modern_arm_chair_01/low.glb",
+      "triangles": 1068,
+      "bytes": 273656,
+      "textures": [
+        {
+          "name": "modern_arm_chair_01_legs_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_legs_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_legs_metal-modern_arm_chair_01_legs_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_arm_chair_01_pillow_metal-modern_arm_chair_01_pillow_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.41018591105499086,
+      0.0003443049790803343,
+      -0.49331333352577145
+    ],
+    "max": [
+      0.40977657615699586,
+      1.0221245224529412,
+      0.49304275824081356
+    ]
+  },
+  "materialSlots": [
+    "modern_arm_chair_01_legs",
+    "modern_arm_chair_01_pillow"
+  ],
+  "footprint": [
+    0.8199624872119867,
+    0.986356091766585
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 2.619962487211987,
+    "depth": 2.786356091766585,
+    "margin": 0.9
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "id": "dining_table",
+  "source": "https://polyhaven.com/a/dining_table",
+  "author": "Aron Łyczek",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/dining_table/high.glb",
+      "triangles": 1048,
+      "bytes": 370460,
+      "textures": [
+        {
+          "name": "dining_table_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_table_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_table_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/dining_table/low.glb",
+      "triangles": 156,
+      "bytes": 363656,
+      "textures": [
+        {
+          "name": "dining_table_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_table_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_table_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -1.127947986125946,
+      -0.000004057031878945683,
+      -0.676106611428002
+    ],
+    "max": [
+      1.127947986125946,
+      0.8680825030475945,
+      0.6951796209189688
+    ]
+  },
+  "materialSlots": [
+    "dining_table"
+  ],
+  "footprint": [
+    2.255895972251892,
+    1.3712862323469708
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 4.055895972251892,
+    "depth": 3.171286232346971,
+    "margin": 0.9
+  }
+}

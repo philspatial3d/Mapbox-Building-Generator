@@ -1,0 +1,102 @@
+{
+  "id": "sofa_02",
+  "source": "https://polyhaven.com/a/sofa_02",
+  "author": "Kirill Sannikov",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/sofa_02/high.glb",
+      "triangles": 2728,
+      "bytes": 169264,
+      "textures": [
+        {
+          "name": "sofa_02_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "sofa_02_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "sofa_02_metallic-sofa_02_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/sofa_02/low.glb",
+      "triangles": 327,
+      "bytes": 151712,
+      "textures": [
+        {
+          "name": "sofa_02_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "sofa_02_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "sofa_02_metallic-sofa_02_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.9035836756229401,
+      -0.000021122769578607592,
+      -0.39759554452954254
+    ],
+    "max": [
+      0.9035836756229401,
+      0.7095100510876022,
+      0.4021643895631882
+    ]
+  },
+  "materialSlots": [
+    "sofa_02"
+  ],
+  "footprint": [
+    1.8071673512458801,
+    0.7997599340927307
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 3.60716735124588,
+    "depth": 2.599759934092731,
+    "margin": 0.9
+  }
+}

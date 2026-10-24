@@ -1,0 +1,15 @@
+### Result
+[{"label":"120-storey","entries":121,"end":"120","home":"0","top":"119","aria":"Floor 119 of 120","telemetry":{"p50":16.700000000000045,"p95":49.89999999999998,"loadMs":253.09999999403954,"roomLoadMs":0,"estimatedMaterialTextureMiB":25.770833333333325,"floors":3,"drawCalls":40,"triangles":402203,"geometries":25,"textures":9,"assetFailures":[],"decoderWorkers":2,"residentRooms":[]}},{"label":"two-storey","entries":3,"end":"2","home":"0","top":"1","aria":"Floor 1 of 2","telemetry":{"p50":16.69999999999999,"p95":166.60000000000002,"loadMs":275,"roomLoadMs":0,"estimatedMaterialTextureMiB":71.22916666666666,"floors":3,"drawCalls":444,"triangles":246237,"geometries":396,"textures":27,"assetFailures":[],"decoderWorkers":2,"residentRooms":[]}}]
+### Ran Playwright code
+```js
+await (async(page)=>{const results=[];for(const [key,label] of [["mbg_ar_payload_mvloeatn-c51v91","120-storey"],["mbg_ar_payload_mvlo3ba9-di2eo6","two-storey"]]){await page.goto("http://127.0.0.1:8153/ar.html?k="+key+"&debug=1");await page.waitForFunction(()=>window.__arDebug?.interior);await page.getByRole("button",{name:"Continue with preview"}).click();const picker=page.getByLabel("Active floor",{exact:true});const count=await picker.locator("option").count();await picker.focus();await picker.press("End");const end=await picker.inputValue();await picker.press("Home");const home=await picker.inputValue();await page.getByRole("button",{name:"Top",exact:true}).click();await page.waitForTimeout(200);await page.waitForFunction(()=>document.querySelector("#arInteriorControls .interior-picker").getAttribute("aria-busy")==="false");const top=await picker.inputValue();results.push({label,entries:count,end,home,top,aria:await picker.getAttribute("aria-valuetext"),telemetry:await page.evaluate(()=>window.__arDebug.interior.telemetry())});await page.screenshot({path:"/tmp/mbg-interior-evidence/picker-"+label+".png"});}return results;})(page);
+```
+### Open tabs
+- 0: [Building Generator - Program Control Desk](http://127.0.0.1:8153/app.html)
+- 1: (current) [Mapbox Building Generator - AR Viewer](http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvlo3ba9-di2eo6&debug=1)
+### Page
+- Page URL: http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvlo3ba9-di2eo6&debug=1
+- Page Title: Mapbox Building Generator - AR Viewer
+- Console: 0 errors, 1 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-24T01-15-51-683Z.log#L2-L3

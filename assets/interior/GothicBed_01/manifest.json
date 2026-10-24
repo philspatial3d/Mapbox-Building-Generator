@@ -1,0 +1,102 @@
+{
+  "id": "GothicBed_01",
+  "source": "https://polyhaven.com/a/GothicBed_01",
+  "author": "Kirill Sannikov",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/GothicBed_01/high.glb",
+      "triangles": 14057,
+      "bytes": 369432,
+      "textures": [
+        {
+          "name": "GothicBed_01_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "GothicBed_01_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "GothicBed_01_metallic-GothicBed_01_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/GothicBed_01/low.glb",
+      "triangles": 2232,
+      "bytes": 269624,
+      "textures": [
+        {
+          "name": "GothicBed_01_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "GothicBed_01_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "GothicBed_01_metallic-GothicBed_01_roughness",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.7125520119671201,
+      -0.00006000493092894743,
+      -1.0157067477703094
+    ],
+    "max": [
+      0.6894193897251463,
+      1.5339003024924258,
+      1.0157072842121124
+    ]
+  },
+  "materialSlots": [
+    "GothicBed_01"
+  ],
+  "footprint": [
+    1.4019714016922664,
+    2.031414031982422
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 3.2019714016922665,
+    "depth": 3.8314140319824217,
+    "margin": 0.9
+  }
+}

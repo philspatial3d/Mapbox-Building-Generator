@@ -1,0 +1,12 @@
+{
+  "id": "potted_plant_01",
+  "source": "https://polyhaven.com/a/potted_plant_01",
+  "author": "Rico Cilliers",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

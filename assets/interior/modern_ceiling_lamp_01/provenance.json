@@ -1,0 +1,12 @@
+{
+  "id": "modern_ceiling_lamp_01",
+  "source": "https://polyhaven.com/a/modern_ceiling_lamp_01",
+  "author": "James Ray Cock",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

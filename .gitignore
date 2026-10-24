@@ -10,3 +10,8 @@ Downloads Inbox */
 
 # Hosting-specific Mapbox public browser token
 /mapbox-config.js
+
+# Local API credentials
+.env
+.env.*
+!.env.example

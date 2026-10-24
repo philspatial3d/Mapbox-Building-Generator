@@ -1,0 +1,12 @@
+### Result
+[{"label":"residential","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvloe936-xykoch","handoffMs":842},{"label":"office","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvloe9yz-ycuwnr","handoffMs":851},{"label":"120-floor tower","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvloeatn-c51v91","handoffMs":743},{"label":"tapered tower","url":"http://127.0.0.1:8153/ar.html?k=mbg_ar_payload_mvloefas-63t1u4","handoffMs":5588}]
+### Ran Playwright code
+```js
+await (async(page)=>{const results=[];for(const [preset,label,tall] of [["curated:1","residential",false],["curated:30","office",false],["curated:27","120-floor tower",true],["curated:22","tapered tower",false]]){await page.getByLabel("Presets",{exact:true}).selectOption(preset);if(tall){await page.locator("#floors").fill("120");await page.locator("#floors").press("Tab");await page.getByRole("button",{name:"Regenerate Building",exact:true}).click();}const opened=page.context().waitForEvent("page");const start=Date.now();await page.getByRole("button",{name:"Open AR Viewer",exact:true}).click();const popup=await opened;await popup.waitForURL(/ar.html\?k=/,{timeout:120000});results.push({label,url:popup.url(),handoffMs:Date.now()-start});await popup.close();}return results;})(page);
+```
+### Page
+- Page URL: http://127.0.0.1:8153/app.html
+- Page Title: Building Generator - Program Control Desk
+- Console: 0 errors, 78 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-24T00-42-44-609Z.log#L38-L80

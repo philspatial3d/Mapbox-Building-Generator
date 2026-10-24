@@ -1,0 +1,12 @@
+{
+  "id": "sofa_02",
+  "source": "https://polyhaven.com/a/sofa_02",
+  "author": "Kirill Sannikov",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

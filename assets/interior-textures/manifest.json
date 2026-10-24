@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "created": "2026-10-23",
+  "textures": [
+    {
+      "file": "plaster.webp",
+      "sha256": "71348dd1f4ec1973bdd418d1daaccf75582416910b763b8d51b654d439547b66",
+      "bytes": 242552,
+      "generated": true,
+      "generator": "OpenAI Image API",
+      "model": "gpt-image-1.5",
+      "source": "generated for this project",
+      "author": "AI-generated at project owner request",
+      "licence": "Generated project asset; not a third-party stock download",
+      "prompt": "Use case: photorealistic-natural\nAsset type: seamless tileable PBR base-colour texture for human-scale building interiors, 1 square metre per tile\nComposition: orthographic straight-on surface scan filling the entire square, no perspective\nLighting: perfectly even diffuse flat albedo, no cast shadows, no highlights, no vignette\nConstraints: opposite edges must tile seamlessly; no objects, no lettering, no watermark, no baked directional lighting; subtle low contrast suitable for a calm designed interior\nMaterial: Smooth warm-white painted plaster, very fine mineral microtexture only visible up close. Uniform pale neutral cream. No coarse aggregate, fabric, cracks, stains or dramatic mottling.",
+      "flags": {
+        "size": "1024x1024",
+        "quality": "high",
+        "output_format": "webp",
+        "output_compression": 90
+      },
+      "colourSpace": "sRGB",
+      "physicalTileMetres": [
+        1,
+        1
+      ]
+    },
+    {
+      "file": "oak.webp",
+      "sha256": "544c176e0991d2c15e1d3d9eb889058b674e2033faa0ce9848ad969b09df9a8c",
+      "bytes": 155476,
+      "generated": true,
+      "generator": "OpenAI Image API",
+      "model": "gpt-image-1.5",
+      "source": "generated for this project",
+      "author": "AI-generated at project owner request",
+      "licence": "Generated project asset; not a third-party stock download",
+      "prompt": "Use case: photorealistic-natural\nAsset type: seamless tileable PBR base-colour texture for human-scale building interiors, 1 square metre per tile\nComposition: orthographic straight-on surface scan filling the entire square, no perspective\nLighting: perfectly even diffuse flat albedo, no cast shadows, no highlights, no vignette\nConstraints: opposite edges must tile seamlessly; no objects, no lettering, no watermark, no baked directional lighting; subtle low contrast suitable for a calm designed interior\nMaterial: Natural pale quarter-sawn oak, restrained fine straight grain running vertically. Warm neutral desaturated beige. One continuous wood surface with no plank joints, no dramatic knots, no dark streaks and no lacquer shine.",
+      "flags": {
+        "size": "1024x1024",
+        "quality": "high",
+        "output_format": "webp",
+        "output_compression": 90
+      },
+      "colourSpace": "sRGB",
+      "physicalTileMetres": [
+        1,
+        1
+      ]
+    },
+    {
+      "file": "stone.webp",
+      "sha256": "9091c6a60510c39c74a272463086f40ca5e7bb374af59fbf8d386ada1d30a875",
+      "bytes": 461714,
+      "generated": true,
+      "generator": "OpenAI Image API",
+      "model": "gpt-image-1.5",
+      "source": "generated for this project",
+      "author": "AI-generated at project owner request",
+      "licence": "Generated project asset; not a third-party stock download",
+      "prompt": "Use case: photorealistic-natural\nAsset type: seamless tileable PBR base-colour texture for human-scale building interiors, 1 square metre per tile\nComposition: orthographic straight-on surface scan filling the entire square, no perspective\nLighting: perfectly even diffuse flat albedo, no cast shadows, no highlights, no vignette\nConstraints: opposite edges must tile seamlessly; no objects, no lettering, no watermark, no baked directional lighting; subtle low contrast suitable for a calm designed interior\nMaterial: Honed warm grey limestone, very fine quiet mineral grain, uniform pale greige, subtle tiny fossil specks, no large veins or tile grout, matte and calm.",
+      "flags": {
+        "size": "1024x1024",
+        "quality": "high",
+        "output_format": "webp",
+        "output_compression": 90
+      },
+      "colourSpace": "sRGB",
+      "physicalTileMetres": [
+        1,
+        1
+      ]
+    }
+  ]
+}

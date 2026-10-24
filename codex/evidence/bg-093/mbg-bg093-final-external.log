@@ -1,0 +1,908 @@
+PASS HTML control IDs are unique
+PASS control #buildingType exists
+PASS control #facadeType exists
+PASS control #facadeArticulation exists
+PASS control #facadeArticulationDensity exists
+PASS control #panelModuleWidth exists
+PASS control #facadeArticulationDepth exists
+PASS control #facadeArticulationWidth exists
+PASS control #facadeArticulationColor exists
+PASS control #windowStyle exists
+PASS control #windowProportion exists
+PASS control #separatorStyle exists
+PASS control #separatorEvery exists
+PASS control #balconyType exists
+PASS control #balconyWidthRatio exists
+PASS control #balconySlabThickness exists
+PASS control #roofProfile exists
+PASS control #roofAccentColor exists
+PASS control #viewTransparency exists
+PASS control #floorplanStatus exists
+PASS control #downloadGeo exists
+PASS control #siteMenu exists
+PASS control #siteMenuToggle exists
+PASS control #siteMenuBody exists
+PASS control #podiumStyle exists
+PASS control #podiumUpperFloorHt exists
+PASS control #podiumBaseHeight exists
+PASS control #podiumBayWidth exists
+PASS control #podiumPierWidth exists
+PASS control #podiumCapDepth exists
+PASS control #podiumEntranceSide exists
+PASS control #podiumEntranceStyle exists
+PASS control #podiumEntranceWidth exists
+PASS control #podiumEntranceHeight exists
+PASS control #podiumEntranceRecess exists
+PASS control #podiumDoorStyle exists
+PASS control #podiumDoorCount exists
+PASS control #podiumDoorHeight exists
+PASS control #podiumCanopyStyle exists
+PASS control #podiumCanopyDepth exists
+PASS control #podiumLobbyDepth exists
+PASS all 246 static DOM references resolve to controls
+PASS building typology remains internal and is not exposed as a misleading editor option
+PASS randomizer describes archetypes as design profiles rather than building types
+PASS site and footprint tools share one hideable menu
+PASS map and editor typography use the compact scale
+PASS facade articulation is off in the initial editor state
+PASS slab edge is the initial facade band type
+PASS clicking the active hidden parcel or its visible generated geometry rebuilds the current building
+PASS active balcony types recover from zero depth and rerender from balcony controls
+PASS legacy and secondary tools stay outside the primary editor flow
+PASS live configuration derives legacy rib and exoskeleton fields only from facade articulation
+PASS facade climate metadata cannot lower the rendered wall-shell opacity
+PASS panel grid uses the explicit module-width control instead of opaque density scaling
+PASS podium editor offers six coordinated architectural compositions
+PASS podium geometry uses a deterministic layered entrance system instead of random glazing
+PASS Mapbox extrusion opacity remains a supported layer constant while controls set that constant
+PASS legacy presets receive a complete podium composition fallback
+PASS narrow screens use a bounded, scrollable mobile editor sheet
+PASS core is wired through geometry, presentation, and export
+PASS windows is wired through geometry, presentation, and export
+PASS windowSills is wired through geometry, presentation, and export
+PASS seps is wired through geometry, presentation, and export
+PASS balconies is wired through geometry, presentation, and export
+PASS railings is wired through geometry, presentation, and export
+PASS facadePanels is wired through geometry, presentation, and export
+PASS facadeJoints is wired through geometry, presentation, and export
+PASS verticalRibs is wired through geometry, presentation, and export
+PASS exoskeleton is wired through geometry, presentation, and export
+PASS roof is wired through geometry, presentation, and export
+PASS roofTerraces is wired through geometry, presentation, and export
+PASS roofScreens is wired through geometry, presentation, and export
+PASS roofEquipment is wired through geometry, presentation, and export
+PASS roofPlanting is wired through geometry, presentation, and export
+PASS podium is wired through geometry, presentation, and export
+PASS podiumGlass is wired through geometry, presentation, and export
+PASS podiumFrames is wired through geometry, presentation, and export
+PASS podiumDoors is wired through geometry, presentation, and export
+PASS podiumCanopies is wired through geometry, presentation, and export
+PASS podiumLobby is wired through geometry, presentation, and export
+PASS podiumCap is wired through geometry, presentation, and export
+PASS Brooklyn Brick Two-Storey Condos uses the external-fidelity preset contract
+PASS Brooklyn Brick Two-Storey Condos has a valid facade articulation
+PASS Brooklyn Brick Two-Storey Condos has a valid roof assembly
+PASS Brooklyn Brick Two-Storey Condos has a valid facade band
+PASS Brooklyn Brick Two-Storey Condos has a valid podium composition
+PASS Brooklyn Brick Two-Storey Condos has a valid podium entrance side
+PASS Brooklyn Brick Two-Storey Condos has a valid podium entrance treatment
+PASS Brooklyn Brick Two-Storey Condos has a valid podium door system
+PASS Brooklyn Brick Two-Storey Condos has a valid podium canopy system
+PASS Brooklyn Brick Two-Storey Condos keeps internal systems opt-in
+PASS Brooklyn Brick Two-Storey Condos avoids competing balcony and structural systems
+PASS Gabled Stacked Townhouses uses the external-fidelity preset contract
+PASS Gabled Stacked Townhouses has a valid facade articulation
+PASS Gabled Stacked Townhouses has a valid roof assembly
+PASS Gabled Stacked Townhouses has a valid facade band
+PASS Gabled Stacked Townhouses has a valid podium composition
+PASS Gabled Stacked Townhouses has a valid podium entrance side
+PASS Gabled Stacked Townhouses has a valid podium entrance treatment
+PASS Gabled Stacked Townhouses has a valid podium door system
+PASS Gabled Stacked Townhouses has a valid podium canopy system
+PASS Gabled Stacked Townhouses keeps internal systems opt-in
+PASS Gabled Stacked Townhouses avoids competing balcony and structural systems
+PASS Toronto Bay-and-Gable Row uses the external-fidelity preset contract
+PASS Toronto Bay-and-Gable Row has a valid facade articulation
+PASS Toronto Bay-and-Gable Row has a valid roof assembly
+PASS Toronto Bay-and-Gable Row has a valid facade band
+PASS Toronto Bay-and-Gable Row has a valid podium composition
+PASS Toronto Bay-and-Gable Row has a valid podium entrance side
+PASS Toronto Bay-and-Gable Row has a valid podium entrance treatment
+PASS Toronto Bay-and-Gable Row has a valid podium door system
+PASS Toronto Bay-and-Gable Row has a valid podium canopy system
+PASS Toronto Bay-and-Gable Row keeps internal systems opt-in
+PASS Toronto Bay-and-Gable Row avoids competing balcony and structural systems
+PASS Garden Apartment Courtyard uses the external-fidelity preset contract
+PASS Garden Apartment Courtyard has a valid facade articulation
+PASS Garden Apartment Courtyard has a valid roof assembly
+PASS Garden Apartment Courtyard has a valid facade band
+PASS Garden Apartment Courtyard has a valid podium composition
+PASS Garden Apartment Courtyard has a valid podium entrance side
+PASS Garden Apartment Courtyard has a valid podium entrance treatment
+PASS Garden Apartment Courtyard has a valid podium door system
+PASS Garden Apartment Courtyard has a valid podium canopy system
+PASS Garden Apartment Courtyard keeps internal systems opt-in
+PASS Garden Apartment Courtyard avoids competing balcony and structural systems
+PASS Avenue Mid-Rise Rental (5-over-1) uses the external-fidelity preset contract
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid facade articulation
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid roof assembly
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid facade band
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid podium composition
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid podium entrance side
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid podium entrance treatment
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid podium door system
+PASS Avenue Mid-Rise Rental (5-over-1) has a valid podium canopy system
+PASS Avenue Mid-Rise Rental (5-over-1) keeps internal systems opt-in
+PASS Avenue Mid-Rise Rental (5-over-1) avoids competing balcony and structural systems
+PASS Scandinavian Brick Courtyard Block uses the external-fidelity preset contract
+PASS Scandinavian Brick Courtyard Block has a valid facade articulation
+PASS Scandinavian Brick Courtyard Block has a valid roof assembly
+PASS Scandinavian Brick Courtyard Block has a valid facade band
+PASS Scandinavian Brick Courtyard Block has a valid podium composition
+PASS Scandinavian Brick Courtyard Block has a valid podium entrance side
+PASS Scandinavian Brick Courtyard Block has a valid podium entrance treatment
+PASS Scandinavian Brick Courtyard Block has a valid podium door system
+PASS Scandinavian Brick Courtyard Block has a valid podium canopy system
+PASS Scandinavian Brick Courtyard Block keeps internal systems opt-in
+PASS Scandinavian Brick Courtyard Block avoids competing balcony and structural systems
+PASS Mass Timber Mixed-Use uses the external-fidelity preset contract
+PASS Mass Timber Mixed-Use has a valid facade articulation
+PASS Mass Timber Mixed-Use has a valid roof assembly
+PASS Mass Timber Mixed-Use has a valid facade band
+PASS Mass Timber Mixed-Use has a valid podium composition
+PASS Mass Timber Mixed-Use has a valid podium entrance side
+PASS Mass Timber Mixed-Use has a valid podium entrance treatment
+PASS Mass Timber Mixed-Use has a valid podium door system
+PASS Mass Timber Mixed-Use has a valid podium canopy system
+PASS Mass Timber Mixed-Use keeps internal systems opt-in
+PASS Mass Timber Mixed-Use avoids competing balcony and structural systems
+PASS Upper East Side Pre-War Co-op uses the external-fidelity preset contract
+PASS Upper East Side Pre-War Co-op has a valid facade articulation
+PASS Upper East Side Pre-War Co-op has a valid roof assembly
+PASS Upper East Side Pre-War Co-op has a valid facade band
+PASS Upper East Side Pre-War Co-op has a valid podium composition
+PASS Upper East Side Pre-War Co-op has a valid podium entrance side
+PASS Upper East Side Pre-War Co-op has a valid podium entrance treatment
+PASS Upper East Side Pre-War Co-op has a valid podium door system
+PASS Upper East Side Pre-War Co-op has a valid podium canopy system
+PASS Upper East Side Pre-War Co-op keeps internal systems opt-in
+PASS Upper East Side Pre-War Co-op avoids competing balcony and structural systems
+PASS Haussmann Limestone Block uses the external-fidelity preset contract
+PASS Haussmann Limestone Block has a valid facade articulation
+PASS Haussmann Limestone Block has a valid roof assembly
+PASS Haussmann Limestone Block has a valid facade band
+PASS Haussmann Limestone Block has a valid podium composition
+PASS Haussmann Limestone Block has a valid podium entrance side
+PASS Haussmann Limestone Block has a valid podium entrance treatment
+PASS Haussmann Limestone Block has a valid podium door system
+PASS Haussmann Limestone Block has a valid podium canopy system
+PASS Haussmann Limestone Block keeps internal systems opt-in
+PASS Haussmann Limestone Block avoids competing balcony and structural systems
+PASS Limestone Mansion Block uses the external-fidelity preset contract
+PASS Limestone Mansion Block has a valid facade articulation
+PASS Limestone Mansion Block has a valid roof assembly
+PASS Limestone Mansion Block has a valid facade band
+PASS Limestone Mansion Block has a valid podium composition
+PASS Limestone Mansion Block has a valid podium entrance side
+PASS Limestone Mansion Block has a valid podium entrance treatment
+PASS Limestone Mansion Block has a valid podium door system
+PASS Limestone Mansion Block has a valid podium canopy system
+PASS Limestone Mansion Block keeps internal systems opt-in
+PASS Limestone Mansion Block avoids competing balcony and structural systems
+PASS Chicago School Terracotta Office uses the external-fidelity preset contract
+PASS Chicago School Terracotta Office has a valid facade articulation
+PASS Chicago School Terracotta Office has a valid roof assembly
+PASS Chicago School Terracotta Office has a valid facade band
+PASS Chicago School Terracotta Office has a valid podium composition
+PASS Chicago School Terracotta Office has a valid podium entrance side
+PASS Chicago School Terracotta Office has a valid podium entrance treatment
+PASS Chicago School Terracotta Office has a valid podium door system
+PASS Chicago School Terracotta Office has a valid podium canopy system
+PASS Chicago School Terracotta Office keeps internal systems opt-in
+PASS Chicago School Terracotta Office avoids competing balcony and structural systems
+PASS Brick Warehouse Loft Conversion uses the external-fidelity preset contract
+PASS Brick Warehouse Loft Conversion has a valid facade articulation
+PASS Brick Warehouse Loft Conversion has a valid roof assembly
+PASS Brick Warehouse Loft Conversion has a valid facade band
+PASS Brick Warehouse Loft Conversion has a valid podium composition
+PASS Brick Warehouse Loft Conversion has a valid podium entrance side
+PASS Brick Warehouse Loft Conversion has a valid podium entrance treatment
+PASS Brick Warehouse Loft Conversion has a valid podium door system
+PASS Brick Warehouse Loft Conversion has a valid podium canopy system
+PASS Brick Warehouse Loft Conversion keeps internal systems opt-in
+PASS Brick Warehouse Loft Conversion avoids competing balcony and structural systems
+PASS Limestone Art Deco Tower (RAMSA style) uses the external-fidelity preset contract
+PASS Limestone Art Deco Tower (RAMSA style) has a valid facade articulation
+PASS Limestone Art Deco Tower (RAMSA style) has a valid roof assembly
+PASS Limestone Art Deco Tower (RAMSA style) has a valid facade band
+PASS Limestone Art Deco Tower (RAMSA style) has a valid podium composition
+PASS Limestone Art Deco Tower (RAMSA style) has a valid podium entrance side
+PASS Limestone Art Deco Tower (RAMSA style) has a valid podium entrance treatment
+PASS Limestone Art Deco Tower (RAMSA style) has a valid podium door system
+PASS Limestone Art Deco Tower (RAMSA style) has a valid podium canopy system
+PASS Limestone Art Deco Tower (RAMSA style) keeps internal systems opt-in
+PASS Limestone Art Deco Tower (RAMSA style) avoids competing balcony and structural systems
+PASS Art Deco Brick Setback Tower uses the external-fidelity preset contract
+PASS Art Deco Brick Setback Tower has a valid facade articulation
+PASS Art Deco Brick Setback Tower has a valid roof assembly
+PASS Art Deco Brick Setback Tower has a valid facade band
+PASS Art Deco Brick Setback Tower has a valid podium composition
+PASS Art Deco Brick Setback Tower has a valid podium entrance side
+PASS Art Deco Brick Setback Tower has a valid podium entrance treatment
+PASS Art Deco Brick Setback Tower has a valid podium door system
+PASS Art Deco Brick Setback Tower has a valid podium canopy system
+PASS Art Deco Brick Setback Tower keeps internal systems opt-in
+PASS Art Deco Brick Setback Tower avoids competing balcony and structural systems
+PASS Gothic Terracotta Spire uses the external-fidelity preset contract
+PASS Gothic Terracotta Spire has a valid facade articulation
+PASS Gothic Terracotta Spire has a valid roof assembly
+PASS Gothic Terracotta Spire has a valid facade band
+PASS Gothic Terracotta Spire has a valid podium composition
+PASS Gothic Terracotta Spire has a valid podium entrance side
+PASS Gothic Terracotta Spire has a valid podium entrance treatment
+PASS Gothic Terracotta Spire has a valid podium door system
+PASS Gothic Terracotta Spire has a valid podium canopy system
+PASS Gothic Terracotta Spire keeps internal systems opt-in
+PASS Gothic Terracotta Spire avoids competing balcony and structural systems
+PASS Brick-Carried Point Tower (Toronto) uses the external-fidelity preset contract
+PASS Brick-Carried Point Tower (Toronto) has a valid facade articulation
+PASS Brick-Carried Point Tower (Toronto) has a valid roof assembly
+PASS Brick-Carried Point Tower (Toronto) has a valid facade band
+PASS Brick-Carried Point Tower (Toronto) has a valid podium composition
+PASS Brick-Carried Point Tower (Toronto) has a valid podium entrance side
+PASS Brick-Carried Point Tower (Toronto) has a valid podium entrance treatment
+PASS Brick-Carried Point Tower (Toronto) has a valid podium door system
+PASS Brick-Carried Point Tower (Toronto) has a valid podium canopy system
+PASS Brick-Carried Point Tower (Toronto) keeps internal systems opt-in
+PASS Brick-Carried Point Tower (Toronto) avoids competing balcony and structural systems
+PASS Arched Concrete Tower (130 William style) uses the external-fidelity preset contract
+PASS Arched Concrete Tower (130 William style) has a valid facade articulation
+PASS Arched Concrete Tower (130 William style) has a valid roof assembly
+PASS Arched Concrete Tower (130 William style) has a valid facade band
+PASS Arched Concrete Tower (130 William style) has a valid podium composition
+PASS Arched Concrete Tower (130 William style) has a valid podium entrance side
+PASS Arched Concrete Tower (130 William style) has a valid podium entrance treatment
+PASS Arched Concrete Tower (130 William style) has a valid podium door system
+PASS Arched Concrete Tower (130 William style) has a valid podium canopy system
+PASS Arched Concrete Tower (130 William style) keeps internal systems opt-in
+PASS Arched Concrete Tower (130 William style) avoids competing balcony and structural systems
+PASS Green Terracotta Loft (Fitzroy style) uses the external-fidelity preset contract
+PASS Green Terracotta Loft (Fitzroy style) has a valid facade articulation
+PASS Green Terracotta Loft (Fitzroy style) has a valid roof assembly
+PASS Green Terracotta Loft (Fitzroy style) has a valid facade band
+PASS Green Terracotta Loft (Fitzroy style) has a valid podium composition
+PASS Green Terracotta Loft (Fitzroy style) has a valid podium entrance side
+PASS Green Terracotta Loft (Fitzroy style) has a valid podium entrance treatment
+PASS Green Terracotta Loft (Fitzroy style) has a valid podium door system
+PASS Green Terracotta Loft (Fitzroy style) has a valid podium canopy system
+PASS Green Terracotta Loft (Fitzroy style) keeps internal systems opt-in
+PASS Green Terracotta Loft (Fitzroy style) avoids competing balcony and structural systems
+PASS Brutalist Concrete Slab uses the external-fidelity preset contract
+PASS Brutalist Concrete Slab has a valid facade articulation
+PASS Brutalist Concrete Slab has a valid roof assembly
+PASS Brutalist Concrete Slab has a valid facade band
+PASS Brutalist Concrete Slab has a valid podium composition
+PASS Brutalist Concrete Slab has a valid podium entrance side
+PASS Brutalist Concrete Slab has a valid podium entrance treatment
+PASS Brutalist Concrete Slab has a valid podium door system
+PASS Brutalist Concrete Slab has a valid podium canopy system
+PASS Brutalist Concrete Slab keeps internal systems opt-in
+PASS Brutalist Concrete Slab avoids competing balcony and structural systems
+PASS Fluid Band Residences (Hadid style) uses the external-fidelity preset contract
+PASS Fluid Band Residences (Hadid style) has a valid facade articulation
+PASS Fluid Band Residences (Hadid style) has a valid roof assembly
+PASS Fluid Band Residences (Hadid style) has a valid facade band
+PASS Fluid Band Residences (Hadid style) has a valid podium composition
+PASS Fluid Band Residences (Hadid style) has a valid podium entrance side
+PASS Fluid Band Residences (Hadid style) has a valid podium entrance treatment
+PASS Fluid Band Residences (Hadid style) has a valid podium door system
+PASS Fluid Band Residences (Hadid style) has a valid podium canopy system
+PASS Fluid Band Residences (Hadid style) keeps internal systems opt-in
+PASS Fluid Band Residences (Hadid style) avoids competing balcony and structural systems
+PASS Twisting White-Band Tower uses the external-fidelity preset contract
+PASS Twisting White-Band Tower has a valid facade articulation
+PASS Twisting White-Band Tower has a valid roof assembly
+PASS Twisting White-Band Tower has a valid facade band
+PASS Twisting White-Band Tower has a valid podium composition
+PASS Twisting White-Band Tower has a valid podium entrance side
+PASS Twisting White-Band Tower has a valid podium entrance treatment
+PASS Twisting White-Band Tower has a valid podium door system
+PASS Twisting White-Band Tower has a valid podium canopy system
+PASS Twisting White-Band Tower keeps internal systems opt-in
+PASS Twisting White-Band Tower avoids competing balcony and structural systems
+PASS Curved Exoskeleton Residences uses the external-fidelity preset contract
+PASS Curved Exoskeleton Residences has a valid facade articulation
+PASS Curved Exoskeleton Residences has a valid roof assembly
+PASS Curved Exoskeleton Residences has a valid facade band
+PASS Curved Exoskeleton Residences has a valid podium composition
+PASS Curved Exoskeleton Residences has a valid podium entrance side
+PASS Curved Exoskeleton Residences has a valid podium entrance treatment
+PASS Curved Exoskeleton Residences has a valid podium door system
+PASS Curved Exoskeleton Residences has a valid podium canopy system
+PASS Curved Exoskeleton Residences keeps internal systems opt-in
+PASS Curved Exoskeleton Residences avoids competing balcony and structural systems
+PASS Diagrid Cigar Tower (30 St Mary Axe style) uses the external-fidelity preset contract
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid facade articulation
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid roof assembly
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid facade band
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid podium composition
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid podium entrance side
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid podium entrance treatment
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid podium door system
+PASS Diagrid Cigar Tower (30 St Mary Axe style) has a valid podium canopy system
+PASS Diagrid Cigar Tower (30 St Mary Axe style) keeps internal systems opt-in
+PASS Diagrid Cigar Tower (30 St Mary Axe style) avoids competing balcony and structural systems
+PASS Chamfered Obelisk Supertall (One World Trade style) uses the external-fidelity preset contract
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid facade articulation
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid roof assembly
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid facade band
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid podium composition
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid podium entrance side
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid podium entrance treatment
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid podium door system
+PASS Chamfered Obelisk Supertall (One World Trade style) has a valid podium canopy system
+PASS Chamfered Obelisk Supertall (One World Trade style) keeps internal systems opt-in
+PASS Chamfered Obelisk Supertall (One World Trade style) avoids competing balcony and structural systems
+PASS Spiral Setback Supertall (Burj Khalifa style) uses the external-fidelity preset contract
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid facade articulation
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid roof assembly
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid facade band
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid podium composition
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid podium entrance side
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid podium entrance treatment
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid podium door system
+PASS Spiral Setback Supertall (Burj Khalifa style) has a valid podium canopy system
+PASS Spiral Setback Supertall (Burj Khalifa style) keeps internal systems opt-in
+PASS Spiral Setback Supertall (Burj Khalifa style) avoids competing balcony and structural systems
+PASS Gold Sail Tower (Dubai Marina style) uses the external-fidelity preset contract
+PASS Gold Sail Tower (Dubai Marina style) has a valid facade articulation
+PASS Gold Sail Tower (Dubai Marina style) has a valid roof assembly
+PASS Gold Sail Tower (Dubai Marina style) has a valid facade band
+PASS Gold Sail Tower (Dubai Marina style) has a valid podium composition
+PASS Gold Sail Tower (Dubai Marina style) has a valid podium entrance side
+PASS Gold Sail Tower (Dubai Marina style) has a valid podium entrance treatment
+PASS Gold Sail Tower (Dubai Marina style) has a valid podium door system
+PASS Gold Sail Tower (Dubai Marina style) has a valid podium canopy system
+PASS Gold Sail Tower (Dubai Marina style) keeps internal systems opt-in
+PASS Gold Sail Tower (Dubai Marina style) avoids competing balcony and structural systems
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) uses the external-fidelity preset contract
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid facade articulation
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid roof assembly
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid facade band
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid podium composition
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid podium entrance side
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid podium entrance treatment
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid podium door system
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) has a valid podium canopy system
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) keeps internal systems opt-in
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) avoids competing balcony and structural systems
+PASS Bundled-Tube Black Tower (Willis style) uses the external-fidelity preset contract
+PASS Bundled-Tube Black Tower (Willis style) has a valid facade articulation
+PASS Bundled-Tube Black Tower (Willis style) has a valid roof assembly
+PASS Bundled-Tube Black Tower (Willis style) has a valid facade band
+PASS Bundled-Tube Black Tower (Willis style) has a valid podium composition
+PASS Bundled-Tube Black Tower (Willis style) has a valid podium entrance side
+PASS Bundled-Tube Black Tower (Willis style) has a valid podium entrance treatment
+PASS Bundled-Tube Black Tower (Willis style) has a valid podium door system
+PASS Bundled-Tube Black Tower (Willis style) has a valid podium canopy system
+PASS Bundled-Tube Black Tower (Willis style) keeps internal systems opt-in
+PASS Bundled-Tube Black Tower (Willis style) avoids competing balcony and structural systems
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) uses the external-fidelity preset contract
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid facade articulation
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid roof assembly
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid facade band
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid podium composition
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid podium entrance side
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid podium entrance treatment
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid podium door system
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) has a valid podium canopy system
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) keeps internal systems opt-in
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) avoids competing balcony and structural systems
+PASS Diagrid on Landmark Base (Hearst style) uses the external-fidelity preset contract
+PASS Diagrid on Landmark Base (Hearst style) has a valid facade articulation
+PASS Diagrid on Landmark Base (Hearst style) has a valid roof assembly
+PASS Diagrid on Landmark Base (Hearst style) has a valid facade band
+PASS Diagrid on Landmark Base (Hearst style) has a valid podium composition
+PASS Diagrid on Landmark Base (Hearst style) has a valid podium entrance side
+PASS Diagrid on Landmark Base (Hearst style) has a valid podium entrance treatment
+PASS Diagrid on Landmark Base (Hearst style) has a valid podium door system
+PASS Diagrid on Landmark Base (Hearst style) has a valid podium canopy system
+PASS Diagrid on Landmark Base (Hearst style) keeps internal systems opt-in
+PASS Diagrid on Landmark Base (Hearst style) avoids competing balcony and structural systems
+PASS Modernist Glass Slab on Pilotis (Lever House style) uses the external-fidelity preset contract
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid facade articulation
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid roof assembly
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid facade band
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid podium composition
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid podium entrance side
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid podium entrance treatment
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid podium door system
+PASS Modernist Glass Slab on Pilotis (Lever House style) has a valid podium canopy system
+PASS Modernist Glass Slab on Pilotis (Lever House style) keeps internal systems opt-in
+PASS Modernist Glass Slab on Pilotis (Lever House style) avoids competing balcony and structural systems
+PASS Precast Ribbon-Window Office Park uses the external-fidelity preset contract
+PASS Precast Ribbon-Window Office Park has a valid facade articulation
+PASS Precast Ribbon-Window Office Park has a valid roof assembly
+PASS Precast Ribbon-Window Office Park has a valid facade band
+PASS Precast Ribbon-Window Office Park has a valid podium composition
+PASS Precast Ribbon-Window Office Park has a valid podium entrance side
+PASS Precast Ribbon-Window Office Park has a valid podium entrance treatment
+PASS Precast Ribbon-Window Office Park has a valid podium door system
+PASS Precast Ribbon-Window Office Park has a valid podium canopy system
+PASS Precast Ribbon-Window Office Park keeps internal systems opt-in
+PASS Precast Ribbon-Window Office Park avoids competing balcony and structural systems
+PASS Wraparound Balcony Residences (Dubai Marina style) uses the external-fidelity preset contract
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid facade articulation
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid roof assembly
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid facade band
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid podium composition
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid podium entrance side
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid podium entrance treatment
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid podium door system
+PASS Wraparound Balcony Residences (Dubai Marina style) has a valid podium canopy system
+PASS Wraparound Balcony Residences (Dubai Marina style) keeps internal systems opt-in
+PASS Wraparound Balcony Residences (Dubai Marina style) avoids competing balcony and structural systems
+PASS Stepped Garden Terraces (8 House style) uses the external-fidelity preset contract
+PASS Stepped Garden Terraces (8 House style) has a valid facade articulation
+PASS Stepped Garden Terraces (8 House style) has a valid roof assembly
+PASS Stepped Garden Terraces (8 House style) has a valid facade band
+PASS Stepped Garden Terraces (8 House style) has a valid podium composition
+PASS Stepped Garden Terraces (8 House style) has a valid podium entrance side
+PASS Stepped Garden Terraces (8 House style) has a valid podium entrance treatment
+PASS Stepped Garden Terraces (8 House style) has a valid podium door system
+PASS Stepped Garden Terraces (8 House style) has a valid podium canopy system
+PASS Stepped Garden Terraces (8 House style) keeps internal systems opt-in
+PASS Stepped Garden Terraces (8 House style) avoids competing balcony and structural systems
+PASS Setback Crown Office Tower uses the external-fidelity preset contract
+PASS Setback Crown Office Tower has a valid facade articulation
+PASS Setback Crown Office Tower has a valid roof assembly
+PASS Setback Crown Office Tower has a valid facade band
+PASS Setback Crown Office Tower has a valid podium composition
+PASS Setback Crown Office Tower has a valid podium entrance side
+PASS Setback Crown Office Tower has a valid podium entrance treatment
+PASS Setback Crown Office Tower has a valid podium door system
+PASS Setback Crown Office Tower has a valid podium canopy system
+PASS Setback Crown Office Tower keeps internal systems opt-in
+PASS Setback Crown Office Tower avoids competing balcony and structural systems
+PASS Fluted Crystal Spire uses the external-fidelity preset contract
+PASS Fluted Crystal Spire has a valid facade articulation
+PASS Fluted Crystal Spire has a valid roof assembly
+PASS Fluted Crystal Spire has a valid facade band
+PASS Fluted Crystal Spire has a valid podium composition
+PASS Fluted Crystal Spire has a valid podium entrance side
+PASS Fluted Crystal Spire has a valid podium entrance treatment
+PASS Fluted Crystal Spire has a valid podium door system
+PASS Fluted Crystal Spire has a valid podium canopy system
+PASS Fluted Crystal Spire keeps internal systems opt-in
+PASS Fluted Crystal Spire avoids competing balcony and structural systems
+PASS Bronze Rainscreen Exchange uses the external-fidelity preset contract
+PASS Bronze Rainscreen Exchange has a valid facade articulation
+PASS Bronze Rainscreen Exchange has a valid roof assembly
+PASS Bronze Rainscreen Exchange has a valid facade band
+PASS Bronze Rainscreen Exchange has a valid podium composition
+PASS Bronze Rainscreen Exchange has a valid podium entrance side
+PASS Bronze Rainscreen Exchange has a valid podium entrance treatment
+PASS Bronze Rainscreen Exchange has a valid podium door system
+PASS Bronze Rainscreen Exchange has a valid podium canopy system
+PASS Bronze Rainscreen Exchange keeps internal systems opt-in
+PASS Bronze Rainscreen Exchange avoids competing balcony and structural systems
+PASS Townhouse row random sample 1 stays within its exterior rules
+PASS Townhouse row random sample 2 stays within its exterior rules
+PASS Residential tower random sample 1 stays within its exterior rules
+PASS Residential tower random sample 2 stays within its exterior rules
+PASS Office tower random sample 1 stays within its exterior rules
+PASS Office tower random sample 2 stays within its exterior rules
+PASS Mixed-use podium random sample 1 stays within its exterior rules
+PASS Mixed-use podium random sample 2 stays within its exterior rules
+PASS Masonry mid-rise random sample 1 stays within its exterior rules
+PASS Masonry mid-rise random sample 2 stays within its exterior rules
+PASS Pre-war apartment random sample 1 stays within its exterior rules
+PASS Pre-war apartment random sample 2 stays within its exterior rules
+PASS Art Deco setback tower random sample 1 stays within its exterior rules
+PASS Art Deco setback tower random sample 2 stays within its exterior rules
+PASS Glass landmark random sample 1 stays within its exterior rules
+PASS Glass landmark random sample 2 stays within its exterior rules
+PASS Sculptural residences random sample 1 stays within its exterior rules
+PASS Sculptural residences random sample 2 stays within its exterior rules
+PASS Industrial loft random sample 1 stays within its exterior rules
+PASS Industrial loft random sample 2 stays within its exterior rules
+PASS Townhouse row defaults to no facade articulation
+PASS Townhouse row defaults to slab-edge bands
+PASS Residential tower defaults to no facade articulation
+PASS Residential tower defaults to slab-edge bands
+PASS Office tower defaults to no facade articulation
+PASS Office tower defaults to slab-edge bands
+PASS Mixed-use podium defaults to no facade articulation
+PASS Mixed-use podium defaults to slab-edge bands
+PASS Masonry mid-rise defaults to no facade articulation
+PASS Masonry mid-rise defaults to slab-edge bands
+PASS Pre-war apartment defaults to no facade articulation
+PASS Pre-war apartment defaults to slab-edge bands
+PASS Art Deco setback tower defaults to no facade articulation
+PASS Art Deco setback tower defaults to slab-edge bands
+PASS Glass landmark defaults to no facade articulation
+PASS Glass landmark defaults to slab-edge bands
+PASS Sculptural residences defaults to no facade articulation
+PASS Sculptural residences defaults to slab-edge bands
+PASS Industrial loft defaults to no facade articulation
+PASS Industrial loft defaults to slab-edge bands
+PASS advanced preset collection retains schema version 1
+PASS advanced preset collection contains exactly 37 candidates
+PASS advanced preset candidate names are unique
+PASS rejected generic candidates are absent
+PASS every advanced preset includes an architectural design description
+PASS every advanced preset populates every supported preset field
+PASS all advanced presets use the same complete configuration contract
+PASS all advanced presets use available facade and roof textures
+PASS all presets use the opaque architectural view
+PASS every preset belongs to a library category
+PASS at least eight presets are low- or mid-rise (9 floors or fewer)
+PASS at least eight presets are tower-scale
+PASS glass-dominant towers are a minority of the library (40% or fewer)
+PASS ultra-modern, office and contemporary residential categories are populated
+PASS glass reads darker than the wall or piers on every masonry and panel preset
+PASS pitched and mansard roofs appear in the library
+PASS divided lites appear on at least ten presets
+PASS podium outsets stay footprint-safe
+PASS facade bands contribute to at least 15 presets
+PASS preset projections are buildable and competing exterior systems are excluded
+PASS advanced presets configure coherent circulation while keeping internal systems hidden in exterior view
+PASS active parcel hit testing recognizes a repeat click inside the footprint
+PASS active parcel hit testing leaves clicks outside the footprint available for new selection
+PASS uploaded Polygon prepares one usable footprint
+PASS uploaded MultiPolygon prepares each usable footprint
+PASS uploaded MultiPolygon preserves distinct adjacent parts
+PASS Brooklyn Brick Two-Storey Condos emits finite geometry on rectangular, elongated, and concave footprints
+PASS Brooklyn Brick Two-Storey Condos preserves its authored exterior systems across footprint shapes
+PASS Gabled Stacked Townhouses emits finite geometry on rectangular, elongated, and concave footprints
+PASS Gabled Stacked Townhouses preserves its authored exterior systems across footprint shapes
+PASS Toronto Bay-and-Gable Row emits finite geometry on rectangular, elongated, and concave footprints
+PASS Toronto Bay-and-Gable Row preserves its authored exterior systems across footprint shapes
+PASS Garden Apartment Courtyard emits finite geometry on rectangular, elongated, and concave footprints
+PASS Garden Apartment Courtyard preserves its authored exterior systems across footprint shapes
+PASS Avenue Mid-Rise Rental (5-over-1) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Avenue Mid-Rise Rental (5-over-1) preserves its authored exterior systems across footprint shapes
+PASS Scandinavian Brick Courtyard Block emits finite geometry on rectangular, elongated, and concave footprints
+PASS Scandinavian Brick Courtyard Block preserves its authored exterior systems across footprint shapes
+PASS Mass Timber Mixed-Use emits finite geometry on rectangular, elongated, and concave footprints
+PASS Mass Timber Mixed-Use preserves its authored exterior systems across footprint shapes
+PASS Upper East Side Pre-War Co-op emits finite geometry on rectangular, elongated, and concave footprints
+PASS Upper East Side Pre-War Co-op preserves its authored exterior systems across footprint shapes
+PASS Haussmann Limestone Block emits finite geometry on rectangular, elongated, and concave footprints
+PASS Haussmann Limestone Block preserves its authored exterior systems across footprint shapes
+PASS Limestone Mansion Block emits finite geometry on rectangular, elongated, and concave footprints
+PASS Limestone Mansion Block preserves its authored exterior systems across footprint shapes
+PASS Chicago School Terracotta Office emits finite geometry on rectangular, elongated, and concave footprints
+PASS Chicago School Terracotta Office preserves its authored exterior systems across footprint shapes
+PASS Brick Warehouse Loft Conversion emits finite geometry on rectangular, elongated, and concave footprints
+PASS Brick Warehouse Loft Conversion preserves its authored exterior systems across footprint shapes
+PASS Limestone Art Deco Tower (RAMSA style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Limestone Art Deco Tower (RAMSA style) preserves its authored exterior systems across footprint shapes
+PASS Art Deco Brick Setback Tower emits finite geometry on rectangular, elongated, and concave footprints
+PASS Art Deco Brick Setback Tower preserves its authored exterior systems across footprint shapes
+PASS Gothic Terracotta Spire emits finite geometry on rectangular, elongated, and concave footprints
+PASS Gothic Terracotta Spire preserves its authored exterior systems across footprint shapes
+PASS Brick-Carried Point Tower (Toronto) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Brick-Carried Point Tower (Toronto) preserves its authored exterior systems across footprint shapes
+PASS Arched Concrete Tower (130 William style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Arched Concrete Tower (130 William style) preserves its authored exterior systems across footprint shapes
+PASS Green Terracotta Loft (Fitzroy style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Green Terracotta Loft (Fitzroy style) preserves its authored exterior systems across footprint shapes
+PASS Brutalist Concrete Slab emits finite geometry on rectangular, elongated, and concave footprints
+PASS Brutalist Concrete Slab preserves its authored exterior systems across footprint shapes
+PASS Fluid Band Residences (Hadid style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Fluid Band Residences (Hadid style) preserves its authored exterior systems across footprint shapes
+PASS Twisting White-Band Tower emits finite geometry on rectangular, elongated, and concave footprints
+PASS Twisting White-Band Tower preserves its authored exterior systems across footprint shapes
+PASS Curved Exoskeleton Residences emits finite geometry on rectangular, elongated, and concave footprints
+PASS Curved Exoskeleton Residences preserves its authored exterior systems across footprint shapes
+PASS Diagrid Cigar Tower (30 St Mary Axe style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Diagrid Cigar Tower (30 St Mary Axe style) preserves its authored exterior systems across footprint shapes
+PASS Chamfered Obelisk Supertall (One World Trade style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Chamfered Obelisk Supertall (One World Trade style) preserves its authored exterior systems across footprint shapes
+Safe op failed (terrace rail band): Error: Infinite loop when passing sweep line over endpoints (queue size too big). Please file a bug report.
+    at t.value (turf.min.js:88:24826)
+    at Object.intersection (turf.min.js:88:25532)
+    at Object.sy [as intersect] (turf.min.js:88:379613)
+    at app-geometry-runtime.js:9:99
+    at safe (app-geometry-runtime.js:1:52)
+    at safeInt (app-geometry-runtime.js:9:85)
+    at buildSetbackTerrace (app-geometry-runtime.js:6787:54)
+    at Object.build (app-geometry-runtime.js:7962:7)
+    at file:///Users/mercator/Documents/Spatial/Mapbox%20Building%20Generator/scripts/check_external_fidelity.mjs:533:30
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+Safe op failed (terrace rail band): Error: Unable to find segment #2271716 [-79.39019216053171, 43.65043367373248] -> [-79.39019165727973, 43.650434362392396] in SweepLine tree. Please submit a bug report.
+    at t.value (turf.min.js:88:21955)
+    at t.value (turf.min.js:88:25106)
+    at Object.intersection (turf.min.js:88:25532)
+    at Object.sy [as intersect] (turf.min.js:88:379613)
+    at app-geometry-runtime.js:9:99
+    at safe (app-geometry-runtime.js:1:52)
+    at safeInt (app-geometry-runtime.js:9:85)
+    at buildSetbackTerrace (app-geometry-runtime.js:6787:54)
+    at Object.build (app-geometry-runtime.js:7962:7)
+    at file:///Users/mercator/Documents/Spatial/Mapbox%20Building%20Generator/scripts/check_external_fidelity.mjs:533:30
+PASS Spiral Setback Supertall (Burj Khalifa style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Spiral Setback Supertall (Burj Khalifa style) preserves its authored exterior systems across footprint shapes
+PASS Gold Sail Tower (Dubai Marina style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Gold Sail Tower (Dubai Marina style) preserves its authored exterior systems across footprint shapes
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Sun-Shaded Slab Tower (Index Tower Dubai style) preserves its authored exterior systems across footprint shapes
+PASS Bundled-Tube Black Tower (Willis style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Bundled-Tube Black Tower (Willis style) preserves its authored exterior systems across footprint shapes
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Sandstone and Bronze Headquarters (Bloomberg London style) preserves its authored exterior systems across footprint shapes
+PASS Diagrid on Landmark Base (Hearst style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Diagrid on Landmark Base (Hearst style) preserves its authored exterior systems across footprint shapes
+PASS Modernist Glass Slab on Pilotis (Lever House style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Modernist Glass Slab on Pilotis (Lever House style) preserves its authored exterior systems across footprint shapes
+PASS Precast Ribbon-Window Office Park emits finite geometry on rectangular, elongated, and concave footprints
+PASS Precast Ribbon-Window Office Park preserves its authored exterior systems across footprint shapes
+PASS Wraparound Balcony Residences (Dubai Marina style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Wraparound Balcony Residences (Dubai Marina style) preserves its authored exterior systems across footprint shapes
+Safe op failed (setback terrace 4): Error: Unable to complete output ring starting at [-79.39000020917206, 43.650295908973916]. Last matching segment found ends at [-79.39000020917206, 43.65029590897394].
+    at t.value (turf.min.js:88:19010)
+    at t.value (turf.min.js:88:25226)
+    at Object.difference (turf.min.js:88:25796)
+    at t.difference (turf.min.js:88:393694)
+    at app-geometry-runtime.js:7:101
+    at safe (app-geometry-runtime.js:1:52)
+    at safeDiff (app-geometry-runtime.js:7:87)
+    at buildSetbackTerrace (app-geometry-runtime.js:6782:19)
+    at Object.build (app-geometry-runtime.js:7962:7)
+    at file:///Users/mercator/Documents/Spatial/Mapbox%20Building%20Generator/scripts/check_external_fidelity.mjs:533:30
+Safe op failed (setback terrace 5): Error: Unable to complete output ring starting at [-79.38988003718238, 43.65019502265213]. Last matching segment found ends at [-79.38988003718238, 43.65019502265217].
+    at t.value (turf.min.js:88:19010)
+    at t.value (turf.min.js:88:25226)
+    at Object.difference (turf.min.js:88:25796)
+    at t.difference (turf.min.js:88:393694)
+    at app-geometry-runtime.js:7:101
+    at safe (app-geometry-runtime.js:1:52)
+    at safeDiff (app-geometry-runtime.js:7:87)
+    at buildSetbackTerrace (app-geometry-runtime.js:6782:19)
+    at Object.build (app-geometry-runtime.js:7962:7)
+    at file:///Users/mercator/Documents/Spatial/Mapbox%20Building%20Generator/scripts/check_external_fidelity.mjs:533:30
+PASS Stepped Garden Terraces (8 House style) emits finite geometry on rectangular, elongated, and concave footprints
+PASS Stepped Garden Terraces (8 House style) preserves its authored exterior systems across footprint shapes
+PASS Setback Crown Office Tower emits finite geometry on rectangular, elongated, and concave footprints
+PASS Setback Crown Office Tower preserves its authored exterior systems across footprint shapes
+PASS Fluted Crystal Spire emits finite geometry on rectangular, elongated, and concave footprints
+PASS Fluted Crystal Spire preserves its authored exterior systems across footprint shapes
+PASS Bronze Rainscreen Exchange emits finite geometry on rectangular, elongated, and concave footprints
+PASS Bronze Rainscreen Exchange preserves its authored exterior systems across footprint shapes
+PASS Brooklyn Brick Two-Storey Condos generates divided-lite sashes
+PASS Brooklyn Brick Two-Storey Condos generates stoops and front doors
+PASS Brooklyn Brick Two-Storey Condos generates stone keystones
+PASS Toronto Bay-and-Gable Row generates canted bays under a coursed gable
+PASS Haussmann Limestone Block generates a mansard with dormers
+PASS Haussmann Limestone Block generates arched ground-floor openings
+PASS Upper East Side Pre-War Co-op generates rustication, quoins and a water tank
+PASS Limestone Art Deco Tower (RAMSA style) generates a lantern crown over stone-balustraded setbacks
+PASS Scandinavian Brick Courtyard Block generates chimney stacks
+PASS Fluid Band Residences (Hadid style) generates flowing slab bands on every floor
+PASS Gabled Stacked Townhouses generates gable-end walls under coursed gables
+PASS Haussmann Limestone Block generates see-through wrought-iron balconies
+PASS Diagrid Cigar Tower (30 St Mary Axe style) generates a full-height diagrid
+PASS Spiral Setback Supertall (Burj Khalifa style) generates louvred plant floors and a spire
+PASS Gold Sail Tower (Dubai Marina style) generates a sail blade over a glazed crown screen
+PASS Wraparound Balcony Residences (Dubai Marina style) generates a raked glass crown
+PASS Bundled-Tube Black Tower (Willis style) generates louvred mechanical floors
+PASS Chamfered obelisk turns the square plan into a half-area diamond at the roof
+PASS Spiral setback rhythm steps a different face on each tier
+PASS Twisting White-Band Tower rotates its plates through the height
+PASS masonry punched generates windows
+PASS masonry punched generates windowSills
+PASS masonry punched generates seps
+PASS masonry punched emits finite positive extrusion geometry
+PASS masonry punched splits opaque walls into sill, opening, and lintel zones
+PASS masonry punched cuts real plan notches through the window-height wall zone
+PASS panelized office mechanical roof generates facadePanels
+PASS panelized office mechanical roof generates facadeJoints
+PASS panelized office mechanical roof generates roofScreens
+PASS panelized office mechanical roof generates roofEquipment
+PASS panelized office mechanical roof emits finite positive extrusion geometry
+PASS residential balconies terraced roof generates balconies
+PASS residential balconies terraced roof generates railings
+PASS residential balconies terraced roof generates roofTerraces
+PASS residential balconies terraced roof emits finite positive extrusion geometry
+PASS vertical fins green roof generates verticalRibs
+PASS vertical fins green roof generates roofPlanting
+PASS vertical fins green roof emits finite positive extrusion geometry
+PASS expressed frame generates exoskeleton
+PASS expressed frame generates roofScreens
+PASS expressed frame emits finite positive extrusion geometry
+PASS expressed frame splits opaque walls into sill, opening, and lintel zones
+PASS expressed frame cuts real plan notches through the window-height wall zone
+PASS lattice landmark generates exoskeleton
+PASS lattice landmark generates roof
+PASS lattice landmark emits finite positive extrusion geometry
+PASS lattice landmark generates a wound diagrid with node ring beams
+PASS lattice landmark slices diagonal members finely instead of full-floor ties
+PASS lattice landmark groups diagrid members into render-efficient MultiPolygons
+PASS panel module width changes facade module count predictably
+PASS panel-grid groups repeated modules into render-efficient MultiPolygon features
+PASS articulation projection changes panel depth
+PASS View overlay always enables a complete circulation plan
+PASS View overlay selects one representative tower floor instead of the podium
+PASS floorplan produces one bounded core with stairs and a lift bank
+PASS elevator shafts do not overlap each other
+PASS elevator shafts do not overlap the stairwell
+PASS floorplan produces rooms and one dissolved circulation network
+PASS floorplan rooms have no overlapping allocated area
+PASS floorplan rooms do not overlap the service core
+PASS floorplan rooms do not overlap corridors
+PASS office buildings receive a commercial floor program
+PASS residential buildings receive a residential floor program
+PASS rectangular residential plate is filled with units
+PASS rectangular plan is chosen from scored candidates
+PASS rectangular every unit has an entrance on the corridor
+PASS rectangular unit rooms stay clear of the service core
+PASS rectangular unit rooms stay clear of the corridor
+PASS rectangular units do not overlap
+PASS rectangular plan has walls and interior doors
+PASS rectangular rooms are furnished
+PASS rectangular net-to-gross efficiency is plausible
+PASS rectangular habitable rooms keep daylight
+PASS rectangular semantic room IDs are stable and unique
+PASS rectangular door and passage graph references real rooms
+PASS rectangular furnishings carry room identity, placement, rotation and clearance
+PASS rectangular complete furniture footprints stay in their room
+PASS rectangular kitchen fixtures require a retained parent cabinet
+PASS rectangular all rooms connect through actual door or open-passage records ()
+PASS concave residential plate is filled with units
+PASS concave plan is chosen from scored candidates
+PASS concave every unit has an entrance on the corridor
+PASS concave unit rooms stay clear of the service core
+PASS concave unit rooms stay clear of the corridor
+PASS concave units do not overlap
+PASS concave plan has walls and interior doors
+PASS concave rooms are furnished
+PASS concave net-to-gross efficiency is plausible
+PASS concave habitable rooms keep daylight
+PASS concave semantic room IDs are stable and unique
+PASS concave door and passage graph references real rooms
+PASS concave furnishings carry room identity, placement, rotation and clearance
+PASS concave complete furniture footprints stay in their room
+PASS concave kitchen fixtures require a retained parent cabinet
+PASS concave all rooms connect through actual door or open-passage records ()
+PASS office plates get open workspace neighbourhoods
+PASS office workspace is laid out with desk benches
+PASS office plate reserves a connected wc room
+PASS office plate reserves a connected meeting room
+PASS office plate reserves a connected focus room
+PASS office plate reserves a connected pantry room
+PASS office plate reserves a connected reception room
+PASS office support rooms and workspaces connect through real openings
+PASS office washroom has a toilet fixture
+PASS none activates only its intended facade articulation layers
+PASS panel-grid activates only its intended facade articulation layers
+PASS vertical-fins activates only its intended facade articulation layers
+PASS expressed-frame activates only its intended facade articulation layers
+PASS lattice activates only its intended facade articulation layers
+PASS floor count and floor height set exact tower height
+PASS massing height controls materially change the silhouette
+PASS continuous taper changes the upper-floor footprint
+PASS stepped taper creates visible setbacks
+PASS roundness replaces sharp footprint corners with curved geometry
+PASS punched-window spacing changes bay count
+PASS wide punched windows have wider plan openings
+PASS punched-window proportion changes vertical opening height
+PASS mullion counts change facade grid density
+PASS mullion thickness changes rendered member size
+PASS recessed-joint emits one correctly typed facade band per selected floor
+PASS slab-edge emits one correctly typed facade band per selected floor
+PASS spandrel-band emits one correctly typed facade band per selected floor
+PASS belt-course emits one correctly typed facade band per selected floor
+PASS facade bands can be disabled cleanly
+PASS facade-band frequency changes floor rhythm predictably
+PASS facade-band projection changes visible depth
+PASS balcony depth changes usable projection
+PASS balcony bay width changes facade coverage
+PASS balcony frequency changes occupied floors
+PASS all balcony types generate distinct facade-oriented arrangements
+PASS railing height changes the protective edge height
+PASS railing thickness changes the outer-edge member size
+PASS podium floor count creates layered floor plates and spandrels for each requested storey
+PASS podium floor count changes podium height
+PASS podium outset changes its footprint
+PASS tall ground floor changes podium storey height
+PASS default podium emits storefront glazing, entrance framing, clear doors, canopy, visible lobby, and cap
+PASS podium includes a continuous recessed perimeter backing behind storefront layers
+PASS storefront glazing and bays wrap every disconnected podium footprint component
+PASS continuous podium backing spans every disconnected perimeter component
+PASS podium entrance doors carry explicit architectural part metadata and finite geometry
+PASS entrance width changes the glazed door assembly
+PASS door height changes the entrance elevation
+PASS canopy depth changes the weather-protected arrival zone
+PASS lobby depth changes the visible interior arrival hall
+PASS storefront bay width controls podium facade rhythm
+PASS podium cap depth changes the top-of-base reveal
+PASS all six podium compositions have coordinated fallback values
+PASS standard roof remains a restrained slab and parapet assembly
+PASS mechanical roof generates screened equipment
+PASS terraced roof generates a three-stage crown
+PASS green roof generates a planting layer
+PASS tapered roof creates a narrowing crown in the tower envelope
+PASS penthouse floors add a roof structure and cap
+PASS enabled spire generates a tapered multi-stage assembly
+PASS spire height changes crown height
+PASS parapet height changes roof-edge height
+PASS parapet thickness changes roof-edge mass
+PASS street-face setback removes one storey-scale strip (0.910)
+PASS all-face setback steps every face back by the tier depth (0.698)
+PASS floors below a setback tier keep the full plate
+PASS each setback tier is paved as a terrace
+PASS setback terraces get a 1.1 m glass balustrade
+PASS setback terraces get planters
+PASS terrace balustrade stands 1.1 m above the paving
+PASS terrace planting and rails can be switched off
+PASS Terraced Crown steps back one full storey per tier
+PASS Terraced Crown pulls the top floors in by storey-scale setbacks
+PASS legacy stepped taper resolves to setback tiers with terraces
+PASS only tiers with a start floor and depth are active
+PASS legacy presets migrate stepped tapers to explicit tiers and default the new systems off
+PASS pier crown rises two storeys above the roof slab
+PASS crenellated crown alternates pier heights
+PASS crown piers rise above and screen the mechanical bulkhead
+PASS picture-frame crown ties the piers with a top beam
+PASS pier crown replaces the penthouse box
+PASS bay-grid piers stack into continuous full-height members
+PASS bay openings are cut through the wall
+PASS bay openings carry mullions and a transom
+PASS lights per bay sets the mullion subdivision
+PASS bay width sets the opening rhythm
+PASS two-floor window groups share a cut with a recessed spandrel panel
+PASS fins land on every pier line when the bay grid is on (48 vs 48)
+PASS grouped punched windows place two windows per bay
+PASS ribbon mullions follow the bay grid
+PASS piers on faces untouched by a setback stack straight through the tier
+PASS base zone floors take the base wall material
+PASS top zone floors take the top wall material
+PASS shaft floors keep the facade material
+PASS base and top zones take their own frame colour
+PASS plan volumes and connector slots take their own materials
+PASS connector slots are recessed into the plate
+PASS accent panels are optional spandrel panels
+PASS GLB glass exports as transmissive PBR
+PASS GLB brick and metal export with distinct roughness and metalness
+PASS 3D export builds materials from the PBR profile
+PASS Mapbox layers split by per-feature material so zones keep their textures
+PASS advanced presets use storey-scale setback tiers
+PASS advanced presets showcase the pier crown and pier-and-bay facades
+PASS advanced presets showcase colour-blocked volumes and elevation zones
+PASS advanced presets no longer use the legacy stepped taper
+PASS fresh sessions do not require saved interior settings
+PASS styled GeoJSON export contains exterior geometry
+PASS styled GeoJSON export carries architectural and presentation metadata on every feature
+PASS styled GeoJSON export records facade articulation
+PASS styled GeoJSON export records roof assembly
+PASS styled GeoJSON export preserves roof terrace layers
+PASS styled GeoJSON export preserves balcony layers
+PASS styled GeoJSON export preserves facade articulation color
+PASS Solid mode hides internal systems
+PASS Solid mode makes the complete exterior opaque
+PASS Balanced mode renders the envelope fully opaque (no ghosted walls)
+PASS Manual opacity mode still honours the facade-opacity control
+PASS Manual opacity uses the configured facade opacity directly
+PASS Manual opacity supports translucent windows and a fully transparent facade
+PASS punched windows use their configured glazing color and manual opacity without an opaque texture
+PASS ribbon glazing retains its glass texture
+PASS Mapbox rendering and styled GeoJSON export both disable textures for punched windows
+PASS punched facade defaults preserve manual window opacity
+PASS editing either opacity control activates Manual opacity mode
+PASS punched facades respect the configured facade opacity
+PASS X-Ray mode prioritizes internal systems
+PASS Exterior Only mode removes internal systems
+PASS Exterior Only mode keeps all exterior structure opaque
+PASS Balanced mode prevents low component opacity from turning the whole building transparent
+PASS X-Ray is the only mode that makes the complete exterior translucent
+[Envelope Guard] exoskeleton density clamped to prevent facade overload.
+[Envelope Guard] Low silhouette continuity detected; softened step and crown taper settings automatically.
+PASS semantic payload includes each floor plus roof
+PASS every real floor references a plate plan and actual storey height
+PASS interior payload never scales furniture with taper
+PASS changed tapered plates are replanned independently
+PASS handoff preserves prefixed parent fixture references
+PASS generated worker matches source floor semantics and geometry byte-for-byte
+
+External fidelity check passed (6 geometry scenarios, 37 presets).

@@ -1,0 +1,12 @@
+{
+  "id": "modern_coffee_table_01",
+  "source": "https://polyhaven.com/a/modern_coffee_table_01",
+  "author": "Amin",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024
+}

@@ -1,0 +1,332 @@
+/* One responsive studio panel, with a persistent floor/movement dock. */
+#overlay {
+  display: block;
+}
+#toolsToggle {
+  position: fixed;
+  z-index: 5;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 44px;
+  min-width: 88px;
+  border-radius: 24px;
+  pointer-events: auto;
+  background: var(--ar-panel);
+  border: 1px solid var(--ar-line-strong);
+  color: var(--ar-ink);
+  backdrop-filter: blur(14px);
+  font-size: 12px;
+}
+#toolsToggle:hover,
+#toolsToggle:focus-visible {
+  transform: translateX(-50%);
+}
+#toolsToggle[aria-expanded="true"] {
+  background: #d9e5df;
+  color: #172b27;
+  border-color: #d9e5df;
+}
+#backToMap,
+#contextChip {
+  min-height: 44px;
+}
+#panel {
+  position: fixed;
+  top: max(72px, calc(env(safe-area-inset-top) + 60px));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+  width: min(396px, calc(100vw - 32px));
+  max-height: calc(100dvh - 100px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ar-line-strong);
+  border-radius: 16px;
+  background: rgba(20, 29, 33, 0.97);
+  box-shadow: 0 14px 48px #0005;
+}
+body.panel-collapsed #panel {
+  display: none;
+}
+body.interior-walk #panel {
+  display: block;
+}
+body.interior-walk.panel-collapsed #panel {
+  display: none;
+}
+#panelHeader {
+  padding: 14px 16px;
+  align-items: center;
+  border-bottom: 1px solid var(--ar-line);
+}
+.panelTitle h1 {
+  font:
+    600 18px/1.2 "Avenir Next",
+    system-ui;
+  margin: 4px 0 0;
+  letter-spacing: -0.02em;
+}
+.panelTitle .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+#panelToggle,
+#quickLock {
+  min-width: 48px;
+  min-height: 44px;
+  border-radius: 8px;
+}
+#panelBody {
+  padding: 0 16px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: calc(100dvh - 188px);
+  scrollbar-width: thin;
+}
+.arSection {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ar-line);
+}
+.arSection h2,
+.arSection summary {
+  margin: 0 0 12px;
+  font: 600 13px/1.3 system-ui;
+  color: var(--ar-ink);
+}
+.arSection summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: list-item;
+  padding: 12px 0;
+  margin: 0;
+}
+#panel .row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0;
+}
+#panel .metric {
+  min-width: 0;
+  padding: 8px 6px;
+}
+#panel .metric:nth-child(3n) {
+  border-right: 0;
+}
+#panel .metric:nth-child(-n + 3) {
+  border-bottom: 1px solid var(--ar-line);
+}
+#panel .primaryControls,
+#panel .secondaryControls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#panel button,
+#panel select {
+  min-height: 44px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+#panel .viewerSetting {
+  font: 500 11px/1.4 system-ui;
+  text-transform: none;
+  letter-spacing: 0;
+}
+#panel .controls {
+  display: grid;
+}
+#panel .adjustGroups {
+  grid-template-columns: 1fr;
+}
+#panel .interior-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: var(--ar-ink);
+  font: 12px/1.4 system-ui;
+}
+#panel .interior-tools label {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--ar-muted);
+}
+#panel .interior-tools label:has(input) {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+}
+#panel .interior-tools input {
+  width: 18px;
+  height: 18px;
+  accent-color: #b8d7c6;
+}
+#panel .interior-tools select,
+#panel .interior-tools button {
+  width: 100%;
+  max-width: 100%;
+  color: var(--ar-ink);
+  background: #263536;
+  border: 1px solid #4b605e;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 8px 10px;
+}
+#panel .interior-tools button[data-walk] {
+  color: #12251e;
+  background: #bfd9c8;
+  border-color: #bfd9c8;
+}
+#panel .interior-tools [role="status"],
+#panel .interior-tools small {
+  grid-column: 1/-1;
+  color: var(--ar-muted);
+  font-size: 11px;
+}
+#panel .interior-tools small {
+  order: 20;
+}
+#panel .interior-tools button:focus-visible,
+#arInteriorControls button:focus-visible,
+#arInteriorControls select:focus-visible {
+  outline: 2px solid #d5efe1;
+  outline-offset: 2px;
+}
+#panel [hidden],
+#arInteriorControls [hidden] {
+  display: none;
+}
+#arInteriorControls {
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(430px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: none;
+  overflow: visible;
+  z-index: 4;
+}
+#arInteriorControls .interior-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px;
+  border: 1px solid #62736e;
+  border-radius: 14px;
+  padding: 8px;
+  background: rgba(20, 29, 33, 0.96);
+  color: #e6eeeb;
+  box-shadow: 0 4px 24px #0003;
+}
+#arInteriorControls .interior-picker label {
+  min-width: 0;
+}
+#arInteriorControls .interior-picker label select {
+  min-width: 0;
+  width: 100%;
+}
+#arInteriorControls .interior-picker button,
+#arInteriorControls .interior-picker select {
+  background: #2b3c39;
+  color: #eff5f1;
+  border-color: #597369;
+  border-radius: 7px;
+  min-height: 44px;
+  font: 12px/1.2 system-ui;
+}
+#arInteriorControls .interior-picker [role="status"] {
+  grid-column: 1/-1;
+  color: #b5c6bf;
+  min-height: 14px;
+  font-size: 10px;
+}
+#arInteriorControls .interior-picker:has(> select) [role="status"] {
+  grid-column: 2/-1;
+  grid-row: 2;
+  align-self: center;
+}
+#arInteriorControls .interior-picker > select {
+  grid-column: 1;
+  grid-row: 2;
+}
+.interior-walk-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.6fr;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(20, 29, 33, 0.96);
+  border: 1px solid #62736e;
+}
+.interior-walk-controls button {
+  min-height: 44px;
+  border-radius: 7px;
+  background: #2b3c39;
+  color: #eff5f1;
+  font-size: 22px;
+}
+.interior-walk-controls [data-exit] {
+  font-size: 12px;
+}
+body.interior-walk #focusFrame {
+  display: none;
+}
+@media (max-width: 600px) {
+  #panel {
+    left: 12px;
+    right: 12px;
+    top: max(68px, calc(env(safe-area-inset-top) + 60px));
+    width: auto;
+    max-height: calc(100dvh - 240px);
+  }
+  #panelBody {
+    max-height: calc(100dvh - 324px);
+  }
+  #panelHeader {
+    padding: 10px 12px;
+  }
+  #panelBody {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .panelTitle .eyebrow {
+    display: inline-flex;
+  }
+  #contextChip {
+    max-width: 128px;
+    padding: 6px 10px;
+  }
+  #contextChip .chipLabel {
+    display: none;
+  }
+  #contextChip .chipMeta {
+    grid-column: 1/-1;
+  }
+  #toolsToggle {
+    min-width: 80px;
+  }
+  #panel .interior-tools select {
+    max-width: 100%;
+  }
+}
+@media (max-height: 520px) and (min-width: 601px) {
+  #panel {
+    max-height: calc(100dvh - 92px);
+    width: min(360px, 45vw);
+  }
+  #panelBody {
+    max-height: calc(100dvh - 178px);
+  }
+  #arInteriorControls {
+    width: min(390px, 48vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #panel *,
+  #toolsToggle,
+  #arInteriorControls * {
+    transition: none;
+    scroll-behavior: auto;
+  }
+}

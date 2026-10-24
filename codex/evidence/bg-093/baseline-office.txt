@@ -1,0 +1,21 @@
+### Result
+{
+  "p50": 16.69999999552965,
+  "p95": 17.099999994039536,
+  "render": {
+    "frame": 3291,
+    "calls": 62,
+    "triangles": 259474,
+    "points": 0,
+    "lines": 37098
+  },
+  "memory": {
+    "geometries": 41,
+    "textures": 8
+  },
+  "load": 18.100000001490116
+}
+### Ran Playwright code
+```js
+await page.evaluate('async () => { const s=window.__arDebug.state;const a=[];let prev=performance.now();for(let i=0;i<150;i++){await new Promise(requestAnimationFrame);const t=performance.now();if(i>29)a.push(t-prev);prev=t;}a.sort((a,b)=>a-b);return {p50:a[60],p95:a[114],render:s.renderer.info.render,memory:s.renderer.info.memory,load:performance.getEntriesByType("navigation")[0].domContentLoadedEventEnd}; }');
+```

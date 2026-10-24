@@ -1,0 +1,102 @@
+{
+  "id": "modern_coffee_table_01",
+  "source": "https://polyhaven.com/a/modern_coffee_table_01",
+  "author": "Amin",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/modern_coffee_table_01/high.glb",
+      "triangles": 4504,
+      "bytes": 173248,
+      "textures": [
+        {
+          "name": "modern_coffee_table_01_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_coffee_table_01_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_coffee_table_01_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/modern_coffee_table_01/low.glb",
+      "triangles": 846,
+      "bytes": 144392,
+      "textures": [
+        {
+          "name": "modern_coffee_table_01_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_coffee_table_01_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "modern_coffee_table_01_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.29996213056521137,
+      -1.1266436591994555e-7,
+      -0.6000158190727234
+    ],
+    "max": [
+      0.29996213056521137,
+      0.3900000983592512,
+      0.6000158190727234
+    ]
+  },
+  "materialSlots": [
+    "modern_coffee_table_01"
+  ],
+  "footprint": [
+    0.5999242611304227,
+    1.2000316381454468
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 2.3999242611304226,
+    "depth": 3.0000316381454466,
+    "margin": 0.9
+  }
+}

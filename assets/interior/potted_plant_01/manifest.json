@@ -1,0 +1,151 @@
+{
+  "id": "potted_plant_01",
+  "source": "https://polyhaven.com/a/potted_plant_01",
+  "author": "Rico Cilliers",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/potted_plant_01/high.glb",
+      "triangles": 11401,
+      "bytes": 646544,
+      "textures": [
+        {
+          "name": "potted_plant_01_pot_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_pot_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_pot_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_nor_gl.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_diff.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_rough.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/potted_plant_01/low.glb",
+      "triangles": 6433,
+      "bytes": 582108,
+      "textures": [
+        {
+          "name": "potted_plant_01_pot_nor_gl",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_pot_diff",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_pot_rough",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_nor_gl.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_diff.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "potted_plant_01_leaves_rough.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.2933791626509568,
+      0.014851427968286757,
+      -0.3167857589512162
+    ],
+    "max": [
+      0.2840787966069123,
+      1.349747836455398,
+      0.3124904992370896
+    ]
+  },
+  "materialSlots": [
+    "potted_plant_01_pot",
+    "potted_plant_01_leaves"
+  ],
+  "footprint": [
+    0.5774579592578691,
+    0.6292762581883058
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 2.3774579592578693,
+    "depth": 2.429276258188306,
+    "margin": 0.9
+  }
+}

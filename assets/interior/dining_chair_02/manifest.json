@@ -1,0 +1,102 @@
+{
+  "id": "dining_chair_02",
+  "source": "https://polyhaven.com/a/dining_chair_02",
+  "author": "James Ray Cock",
+  "licence": "CC0-1.0",
+  "redistribution": true,
+  "units": "metres",
+  "up": "+Y",
+  "forward": "+Z",
+  "pivot": "floor-centre",
+  "textureSize": 1024,
+  "levels": {
+    "high": {
+      "url": "./assets/interior/dining_chair_02/high.glb",
+      "triangles": 13206,
+      "bytes": 242060,
+      "textures": [
+        {
+          "name": "dining_chair_02_nor_gl.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_chair_02_diff.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_chair_02_metal-dining_chair_02_rough.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    },
+    "low": {
+      "url": "./assets/interior/dining_chair_02/low.glb",
+      "triangles": 1320,
+      "bytes": 167300,
+      "textures": [
+        {
+          "name": "dining_chair_02_nor_gl.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_chair_02_diff.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        },
+        {
+          "name": "dining_chair_02_metal-dining_chair_02_rough.png",
+          "size": [
+            1024,
+            1024
+          ],
+          "mime": "image/webp"
+        }
+      ]
+    }
+  },
+  "bounds": {
+    "min": [
+      -0.21656670677938208,
+      0.0005421042442321777,
+      -0.28820170123789146
+    ],
+    "max": [
+      0.21487760055341468,
+      0.9719662517309189,
+      0.2881839390537484
+    ]
+  },
+  "materialSlots": [
+    "dining_chair_02"
+  ],
+  "footprint": [
+    0.43144430733279676,
+    0.5763856402916399
+  ],
+  "clearance": 0.9,
+  "clearanceZone": {
+    "shape": "rectangle",
+    "width": 2.2314443073327968,
+    "depth": 2.37638564029164,
+    "margin": 0.9
+  }
+}

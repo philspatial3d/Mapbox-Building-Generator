@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="./js/interior/interior.css">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <meta charset="utf-8">
 <title>Building Generator - Program Control Desk</title>
@@ -1192,6 +1193,7 @@
 </style>
 </head><body>
 <div id="map"></div>
+<div id="appFloorPicker" hidden></div>
 <div id="floorplanStatus" role="status" aria-live="polite"></div>
 <div id="buildingLoader" aria-hidden="true" role="status" aria-live="polite">
   <div class="loader-card">
@@ -1807,6 +1809,11 @@
 <script src="./mapbox-config.js"></script>
 <script type="module">
 
+import { migrateSettings, interiorStorageKey, STYLES, createFloorState } from './js/interior/state.js';
+import { mountFloorPicker } from './js/interior/floor-picker.js';
+import { createInteriorPlanner } from './js/interior/planner.js';
+let interiorSettings = migrateSettings();
+let appFloorState = null, appFloorPicker = null, appInteriorFloorTimer = null;
 import { LOCAL_TEXTURES } from './js/textures.js'; 
 import * as THREE from 'https://esm.sh/three@0.160.0';
 import { GLTFExporter } from 'https://esm.sh/three@0.160.0/examples/jsm/exporters/GLTFExporter.js';
@@ -2755,12 +2762,14 @@ function setBuildingLoader(active, title = 'Generating Building', note = 'Applyi
     if (loaderTitleEl) loaderTitleEl.textContent = title;
     if (loaderNoteEl) loaderNoteEl.textContent = note;
     buildingLoader.classList.add('active');
+    if ($('openAR')) $('openAR').disabled = true;
     buildingLoader.setAttribute('aria-hidden', 'false');
     return;
   }
   loaderDepth = Math.max(0, loaderDepth - 1);
   if (loaderDepth === 0) {
     buildingLoader.classList.remove('active');
+    if ($('openAR')) $('openAR').disabled = false;
     buildingLoader.setAttribute('aria-hidden', 'true');
   }
 }
@@ -3701,6 +3710,7 @@ function cfg(){
   elevatorCarWidth: +$('elevatorCarWidth').value, elevatorCarDepth: +$('elevatorCarDepth').value,
   elevatorColor: $('elevatorColor').value, elevatorShaftColor: $('elevatorShaftColor').value,
   cutElevatorShafts: $('cutElevatorShafts').checked,
+  interiorSettings: migrateSettings(interiorSettings),
   enableFloorplans: $('enableFloorplans').checked, floorplanStyle: $('floorplanStyle').value,
   floorplanUnitMix: $('floorplanUnitMix').value, floorplanFurniture: $('floorplanFurniture').checked, floorplanGraph: $('floorplanGraph').checked,
   intWallThick: +$('intWallThick').value, intWallColor: $('intWallColor').value, corridorWidth: +$('corridorWidth').value,
@@ -4139,6 +4149,7 @@ const getPresetByValue = value => {
 const applyPresetConfig = config => {
   if (!config || typeof config !== 'object') return;
 
+  interiorSettings = migrateSettings(config.interiorSettings);
   const normalizedConfig = migrateMassingConfig(applyPodiumConfigFallbacks({ ...config }));
   if (normalizedConfig.facadeArticulation === undefined) {
     if (normalizedConfig.exoType === 'lattice') normalizedConfig.facadeArticulation = 'lattice';
@@ -4606,7 +4617,7 @@ function totalPodiumHeightFor(o) {
 
 function chooseRepresentativeShell(footprint, o) {
   const floorCount = Math.max(1, Math.round(Number(o.floors) || 1));
-  const floorIndex = clamp(Math.floor((floorCount - 1) * 0.32), 0, floorCount - 1);
+  const floorIndex = clamp(Number.isFinite(o.interiorFloorIndex) ? o.interiorFloorIndex : Math.floor((floorCount - 1) * 0.32), 0, floorCount - 1);
   const shell = floorShell(footprint, o, floorIndex);
   const parts = [];
   collectCandidatePolys(shell, parts);
@@ -4641,7 +4652,8 @@ function floorplanOverlayConfig(o) {
   };
 }
 
-function buildTypicalFloorplanSlice(footprints, o) {
+function buildTypicalFloorplanSlice(footprints, o, requestedFloor = null) {
+  if (requestedFloor !== null) o = { ...o, interiorFloorIndex: requestedFloor };
   const podiumH = totalPodiumHeightFor(o);
   const out = {
     slabs: [], perimeters: [], walls: [], stairs: [], railings: [], core: [], rooms: [], corridors: [],
@@ -4653,7 +4665,12 @@ function buildTypicalFloorplanSlice(footprints, o) {
 
   floorplanGroupsFor(footprints).forEach(groupFootprints => {
     const rep = groupFootprints
-      .map(footprint => chooseRepresentativeShell(footprint, o))
+      .map(footprint => {
+        if (requestedFloor === null) return chooseRepresentativeShell(footprint,o);
+        const descriptor = interiorFloorDescriptors([footprint],o)[requestedFloor];
+        const shell = descriptor?.plates?.[0];
+        return shell ? { shell, floorIndex: descriptor.towerIndex || 0, area: turf.area(shell) } : null;
+      })
       .filter(Boolean)
       .sort((a, b) => b.area - a.area)[0];
     if (!rep) return;
@@ -4932,7 +4949,7 @@ function renderFloorplanCard(status, summaries, o) {
   if (!planned.length) return false;
   const m = planned[0].metrics;
   const esc = v => { const span = document.createElement('span'); span.textContent = String(v); return span.innerHTML; };
-  const floorText = planned.length === 1 ? 'Typical floor ' + (planned[0].floorIndex + 1) : planned.length + ' typical floors';
+  const floorText = appFloorState ? 'Floor ' + (appFloorState.current.index === 0 ? 'G' : appFloorState.current.index) : (planned.length === 1 ? 'Typical floor ' + (planned[0].floorIndex + 1) : planned.length + ' typical floors');
   const mixChips = Object.entries(m.mix).map(([label, count]) => {
     const tint = FP_UNIT_TINT[label.toLowerCase()] || FP_UNIT_TINT['2br'];
     return '<span class="fp-chip"><i style="background:' + tint + '"></i>' + count + ' × ' + esc(label) + '</span>';
@@ -4959,8 +4976,14 @@ function renderFloorplanCard(status, summaries, o) {
 }
 
 function renderFloorplanView(footprints, o) {
+  const selected = appFloorState?.current;
+  if (selected?.roof) {
+    addPlanLayer('planRoof', turf.featureCollection(selected.plates), '#e4e2d9', 1, '#696f68', 1);
+    $('floorplanStatus').textContent = 'Roof / Crown · exterior roof geometry is available in Builder mode.';
+    return;
+  }
   const planCfg = floorplanOverlayConfig(o);
-  const plan = buildTypicalFloorplanSlice(footprints, planCfg);
+  const plan = buildTypicalFloorplanSlice(footprints, planCfg, interiorSettings.activeFloor);
   const showFurniture = o.floorplanFurniture !== false;
   addPlanLayer('planSlabs', plan.slabs, '#fbfbf9', 1, '#cfd4d7', 0.8);
   addPlanRoomsLayer('planRooms', plan.rooms);
@@ -5019,6 +5042,38 @@ function renderFloorplanView(footprints, o) {
   }
 }
 
+function syncAppInteriorPicker(footprints, o) {
+  let host = $('appFloorPicker');
+  if (!host) { host = document.createElement('div'); host.id = 'appFloorPicker'; document.body.append(host); }
+  host.hidden = viewMode !== 'floorplan';
+  const floors = interiorFloorDescriptors(footprints, o);
+  const signature = JSON.stringify(floors.map(f => [f.base, f.height, f.setback, f.plant, f.plates.map(p=>p.geometry)]));
+  if (host.dataset.signature === signature) {
+    appFloorState.select(interiorSettings.activeFloor);
+    const style = host.querySelector('[aria-label="Building interior style"]'); if (style) style.value = interiorSettings.style;
+    return;
+  }
+  clearTimeout(appInteriorFloorTimer);
+  host.dataset.signature = signature; appFloorPicker?.dispose();
+  appFloorState = createFloorState(floors, interiorSettings.activeFloor);
+  appFloorPicker = mountFloorPicker(host, appFloorState, index => {
+    interiorSettings.activeFloor = index; scheduleSessionSave();
+    clearTimeout(appInteriorFloorTimer);
+    appFloorPicker.busy(true);
+    appInteriorFloorTimer=setTimeout(()=>{
+      if (viewMode === 'floorplan' && lastPoly) {
+        layers.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+        layers.forEach(id => { if (map.getSource(id)) map.removeSource(id); }); layers = [];
+        renderFloorplanView(footprints, floorplanOverlayConfig(cfg()));
+      }
+      appFloorPicker.busy(false,'Floor '+(index===0?'G':index));
+    },150);
+  });
+  const style = document.createElement('select'); style.id = 'interiorStyle'; style.setAttribute('aria-label','Building interior style');
+  Object.entries(STYLES).forEach(([id,s]) => style.add(new Option(s.name,id)));
+  style.value = interiorSettings.style; style.onchange = () => { interiorSettings.style = style.value; scheduleSessionSave(); }; host.append(style);
+}
+
 /* ---------- render ---------- */
 function render(poly,o){
   const guardedCfg = applyEnvelopeGuards(o);
@@ -5039,6 +5094,7 @@ function render(poly,o){
   lastGeo = g;                   // ← remember for download
   lastCfgSnapshot = safe(() => JSON.parse(JSON.stringify(guardedCfg)), 'clone cfg snapshot') || guardedCfg;
   updateMultiBuildUI();
+  syncAppInteriorPicker(footprints, o);
   if (viewMode === 'floorplan') {
     renderFloorplanView(footprints, o);
     return;
@@ -6598,7 +6654,8 @@ const FP_ROOM_STYLE = {
   meeting: { name: 'Meeting', fill: '#f1dde0', habitable: true, minArea: 8 },
   focus: { name: 'Focus', fill: '#d5eadb', habitable: true, minArea: 3 },
   pantry: { name: 'Pantry', fill: '#f4eccb', habitable: true, minArea: 6 },
-  print: { name: 'Print', fill: '#ecebe8', habitable: false }
+  print: { name: 'Print', fill: '#ecebe8', habitable: false },
+  reception: { name: 'Reception', fill: '#e2dcef', habitable: true, minArea: 12 }
 };
 /* Unit tints for the floor-plate ("fill") view. */
 const FP_UNIT_TINT = { studio: '#d9e9d4', '1br': '#c9e2c6', '2br': '#b6d8b8', '3br': '#a3cda9', key: '#c9e2c6', suite: '#a3cda9' };
@@ -7013,8 +7070,8 @@ function fpFurnishRoom(roomRec, fr, doorsXY, push) {
     const n = Math.max(1, Math.floor(tw / 0.62));
     for (let i = 0; i < n; i++) {
       const cxI = cx - tw / 2 + (tw / n) * (i + 0.5);
-      rect(cxI - 0.21, cxI + 0.21, cy - td / 2 - 0.5, cy - td / 2 - 0.08, 'chair');
-      rect(cxI - 0.21, cxI + 0.21, cy + td / 2 + 0.08, cy + td / 2 + 0.5, 'chair');
+      rect(cxI - 0.21, cxI + 0.21, cy - td / 2 - 0.68, cy - td / 2 - 0.08, 'chair');
+      rect(cxI - 0.21, cxI + 0.21, cy + td / 2 + 0.08, cy + td / 2 + 0.68, 'chair');
     }
   };
   const table = (cx, cy, tw, td) => { rect(cx - tw / 2, cx + tw / 2, cy - td / 2, cy + td / 2, 'table'); chairs(cx, cy, tw, td); };
@@ -7065,16 +7122,24 @@ function fpFurnishRoom(roomRec, fr, doorsXY, push) {
       table((X0 + X1) / 2 + (roomRec.sofaAtX1 === false ? 0.5 : -0.5), Y1 - 1.3, Math.min(1.6, w - 1.8), 0.9);
     }
   } else if (type === 'kitchen') {
-    const runL = w - 0.1;
-    if (runL > 1.2) {
-      rect(X0 + 0.05, X0 + 0.05 + runL, Y1 - 0.64, Y1 - 0.04, 'counter');
-      ell(X0 + 0.05 + runL * 0.35, Y1 - 0.34, 0.2, 0.16, 'sink');
-      if (runL > 2.2) {
-        const hx = X0 + 0.05 + runL * 0.72;
-        [[-0.15, -0.12], [0.15, -0.12], [-0.15, 0.12], [0.15, 0.12]].forEach(([dx, dy]) => ell(hx + dx, Y1 - 0.34 + dy, 0.08, 0.08, 'hob'));
-      }
+    // Try the four walls in order; a door must not delete the whole kitchen.
+    const candidates=[
+      {x0:X0+.05,x1:X1-.05,y0:Y1-.64,y1:Y1-.04,axis:'x'},
+      {x0:X0+.05,x1:X1-.05,y0:Y0+.04,y1:Y0+.64,axis:'x'},
+      {x0:X0+.04,x1:X0+.64,y0:Y0+.05,y1:Y1-.05,axis:'y'},
+      {x0:X1-.64,x1:X1-.04,y0:Y0+.05,y1:Y1-.05,axis:'y'}
+    ];
+    let run=null;
+    for(const r of candidates){
+      const length=r.axis==='x'?r.x1-r.x0:r.y1-r.y0;
+      if(length>1.2&&rect(r.x0,r.x1,r.y0,r.y1,'counter')){run={...r,length};break;}
     }
-    if (d > 2.4 && runL > 2.6) rect(X0 + 0.05, X0 + 0.7, Y1 - 1.4, Y1 - 0.7, 'fridge');
+    if(run){
+      const at=t=>run.axis==='x'?[run.x0+run.length*t,(run.y0+run.y1)/2]:[(run.x0+run.x1)/2,run.y0+run.length*t];
+      const [sx,sy]=at(.3);ell(sx,sy,run.axis==='x'?.2:.16,run.axis==='x'?.16:.2,'sink');
+      if(run.length>2.2){const [hx,hy]=at(.72);for(const dx of [-.13,.13])for(const dy of [-.12,.12])ell(hx+dx,hy+dy,.08,.08,'hob');}
+      if(d>2.4&&w>2.4)for(const [fx,fy] of [[X0+.05,Y0+.05],[X1-.7,Y0+.05],[X0+.05,Y1-.75],[X1-.7,Y1-.75]])if(rect(fx,fx+.65,fy,fy+.7,'fridge'))break;
+    }
   } else if (type === 'bath' || type === 'ensuite' || type === 'wc') {
     const wcX = X1 - 0.5;
     rect(wcX, wcX + 0.42, Y1 - 0.24, Y1 - 0.04, 'wc_tank');
@@ -7103,6 +7168,12 @@ function fpFurnishRoom(roomRec, fr, doorsXY, push) {
       rect(X0 + 0.3, X0 + 1.2, Y0 + 0.4, Y0 + Math.min(2.6, d - 0.6), 'sofa');
       ell(X0 + 2.0, Y0 + 1.4, 0.45, 0.45, 'round_table');
       rect(X0 + 2.7, X0 + 3.45, Y0 + 1.0, Y0 + 1.75, 'armchair');
+    }
+  } else if (type === 'reception') {
+    if (w > 3 && d > 2.8) {
+      rect(X0 + .2, X0 + Math.min(w - 1.2, 2.2), Y0 + .2, Y0 + 1.0, 'reception');
+      rect(X1 - .95, X1 - .1, Y0 + .25, Y0 + Math.min(d - 1.2, 2.2), 'sofa');
+      if (d > 4.5) ell(X1 - 1.5, Y0 + 3.2, .4, .4, 'round_table');
     }
   } else if (type === 'meeting') {
     const tw = Math.min(w - 1.6, 3.6), td = Math.min(d - 1.6, 1.2);
@@ -7233,7 +7304,7 @@ function fpZonePlate(shell, floorIndex, o, coreEnvelope) {
   const innerRooms = [];
   if (innerZone) {
     const inner = fpDiff(fpDiff(innerZone, coreBlock), corridor);
-    const cycle = mode === 'office' ? ['meeting', 'focus', 'pantry', 'meeting', 'focus', 'print'] : ['storage', 'utility', 'refuse', 'storage'];
+    const cycle = mode === 'office' ? ['wc', 'pantry', 'meeting', 'focus', 'print', 'storage'] : ['storage', 'utility', 'refuse', 'storage'];
     let ci = 0;
     fpParts(inner).forEach(piece => {
       if (fpArea(piece) < 3) return;
@@ -7500,6 +7571,7 @@ function fpPlanCandidate(ctx, o, seed, variant) {
     const e = fpContactEdges(room.poly, corridor).sort((a, b) => b.len - a.len)[0];
     if (e && e.len > 1.1) doors.push({ c: e.m, dir: e.t, into: e.into, w: 0.9, roomA: room, roomB: null, entry: true });
   });
+  if (mode === 'office') fpOfficeServiceRooms(rooms, corridor);
 
   /* ---- evaluation ---- */
   rooms.forEach(room => { room.area = fpArea(room.poly); });
@@ -7556,11 +7628,84 @@ function fpPlanCandidate(ctx, o, seed, variant) {
   return { rooms, doors, units, scores, ruleFails, uniqueUnits, netArea, mixCounts, variant, seed };
 }
 
+/* Reserve modest, corridor-facing support rooms when the inner zone cannot
+   supply them. Keep the remainder as one generous workspace; never add cubicles. */
+function fpOfficeServiceRooms(rooms, corridor) {
+  for (const [type, width, depth] of [['wc', 2.8, 3], ['meeting', 4.6, 3.5], ['focus', 2.8, 3.2], ['pantry', 3, 3.2], ['reception', 4.5, 3.8]]) {
+    if (rooms.some(r => r.type === type)) continue;
+    const hosts = rooms.filter(r => r.type === 'workspace' && fpArea(r.poly) > 65).sort((a,b) => fpArea(b.poly)-fpArea(a.poly));
+    for (const host of hosts) {
+      const {fr,rec}=host;
+      if(rec.x1-rec.x0 < width+2 || rec.y1-rec.y0 < depth+2) continue;
+      const x1=rec.x1, x0=x1-width, y1=rec.y1, y0=y1-depth;
+      const poly=fpLargestPart(fpInt(host.poly,fpLocalRect(fr,x0,x1,y0,y1)));
+      if(!poly || fpArea(poly)<width*depth*.8 || !fpContactEdges(poly,corridor).some(e=>e.len>1.05))continue;
+      const remainder=fpDiff(host.poly,poly);
+      if(!remainder || fpParts(remainder).length!==1 || fpArea(remainder)<40)continue;
+      host.poly=remainder;
+      rooms.push({poly,type,unit:`S-${type}`,fr,rec:{type,x0:x0+.12,x1:x1-.12,y0:y0+.12,y1:y1-.12},inner:true});
+      break;
+    }
+  }
+}
+
 /* ---------- stage C: detail the chosen plan ---------- */
+function fpRepairConnectivity(ctx, cand) {
+  const {rooms, doors} = cand; const {mode, corridor} = ctx;
+  // Repair missing links using shared room edges before the wall polygons are built.
+  // The same added records carve real openings and feed the semantic graph.
+  const contactForOpening = (poly, region) => {
+    const direct = fpContactEdges(poly,region).filter(e=>e.len>=1.15).sort((a,b)=>b.len-a.len)[0];
+    if(direct || !region)return direct;
+    for(const [a,b]of fpEdges(poly)){
+      const len=fpLen(fpSub(b,a)),t=fpNorm(fpSub(b,a)),n=[-t[1],t[0]];let start=null;
+      for(let d=0;d<=len+.01;d+=.2){const m=fpAdd(a,t,Math.min(d,len));let out=fpAdd(m,n,.22);if(fpPointInPoly(out,poly))out=fpAdd(m,n,-.22);const hit=[.22,.4,.6,.8].some(offset=>{const v=fpAdd(m,n,offset);return fpPointInPoly(fpPointInPoly(v,poly)?fpAdd(m,n,-offset):v,region);});if(hit&&start===null)start=d;if((!hit||d+.2>len)&&start!==null){const end=hit?Math.min(d,len):d-.2;if(end-start>=1.15){const mid=fpAdd(a,t,(start+end)/2);return{m:mid,t,len:end-start,into:fpPointInPoly(fpAdd(mid,n,.2),poly)?n:[-n[0],-n[1]]};}start=null;}}
+    }
+    return null;
+  };
+  const reachable = new Set(doors.filter(d=>d.entry).map(d=>d.roomA));
+  for(let pass=0;pass<rooms.length;pass++) {
+    for(const d of doors)if(reachable.has(d.roomA)||reachable.has(d.roomB)){if(d.roomA)reachable.add(d.roomA);if(d.roomB)reachable.add(d.roomB);}
+    let changed=false;
+    for(const room of rooms) {
+      if(reachable.has(room))continue;
+      const direct=contactForOpening(room.poly,corridor);
+      const neighbour=direct?null:rooms.filter(r=>reachable.has(r)&&(r.unit===room.unit||mode==='office')).map(r=>({room:r,edge:contactForOpening(room.poly,r.poly)})).find(r=>r.edge);
+      const edge=direct||neighbour?.edge;if(!edge)continue;
+      doors.push({c:edge.m,dir:edge.t,into:edge.into,w:.95,roomA:room,roomB:neighbour?.room||null,entry:Boolean(direct)});
+      reachable.add(room);changed=true;
+    }
+    if(!changed)break;
+  }
+
+  // Concave corners can leave a disconnected wing of a unit. Reassign that wing
+  // to an adjoining accessible unit, rather than adding a door between homes.
+  for(const unitId of new Set(rooms.filter(r=>!reachable.has(r)).map(r=>r.unit))) {
+    const wing=rooms.filter(r=>r.unit===unitId&&!reachable.has(r));
+    let link=null;
+    for(const room of wing){for(const host of rooms.filter(r=>reachable.has(r)&&r.unit!==unitId)){
+      const edge=contactForOpening(room.poly,host.poly);if(edge){link={room,host,edge};break;}
+    }if(link)break;}
+    if(!link)continue;
+    const moved=fpUnionAll(wing.map(r=>r.poly));
+    const donor=cand.units.find(u=>u.id===unitId),recipient=cand.units.find(u=>u.id===link.host.unit);
+    if(!recipient)continue;
+    if(donor){donor.poly=fpDiff(donor.poly,moved)||donor.poly;donor.area=fpArea(donor.poly);}
+    recipient.poly=fpUnion(recipient.poly,moved);recipient.area=fpArea(recipient.poly);
+    wing.forEach(r=>{r.unit=link.host.unit;});
+    const e=link.edge;doors.push({c:e.m,dir:e.t,into:e.into,w:.95,roomA:link.room,roomB:link.host});
+    reachable.add(link.room);
+    for(let pass=0;pass<rooms.length;pass++)for(const d of doors)if(reachable.has(d.roomA)||reachable.has(d.roomB)){if(d.roomA)reachable.add(d.roomA);if(d.roomB)reachable.add(d.roomB);}
+  }
+  return rooms.filter(room=>!reachable.has(room)).length;
+}
+
 function fpDetailPlan(ctx, cand) {
   const { frame, plateXY, coreXY, corridor, mode, shell, coreLL } = ctx;
   const { rooms, doors, units } = cand;
-  const out = { rooms: [], units: [], corridors: [], walls: [], wallsFallback: false, doors: [], entrances: [], separators: [], furniture: [], windows: [], windowLines: [], graphNodes: [], graphEdges: [], labels: [], fails: [] };
+  rooms.forEach((room, i) => { room.semanticId = `room-${i}`; });
+  fpRepairConnectivity(ctx, cand);
+  const out = { rooms: [], units: [], corridors: [], walls: [], wallsFallback: false, openings: [], doors: [], entrances: [], separators: [], furniture: [], windows: [], windowLines: [], graphNodes: [], graphEdges: [], labels: [], fails: [] };
   const toLL = (f, props) => fpToLL(f, frame, props);
   const lineLL = (pts, props = {}) => fpFeature({ type: 'LineString', coordinates: pts.map(frame.toLL) }, props);
   const ptLL = (p, props = {}) => fpFeature({ type: 'Point', coordinates: frame.toLL(p) }, props);
@@ -7597,7 +7742,7 @@ function fpDetailPlan(ctx, cand) {
       else if (other.kind === 'room') {
         if (openPair(room, other.room) && (other.room.unit === room.unit || mode === 'office')) {
           const k = key(p, q);
-          if (!seen.has(`sep${k}`)) { seen.add(`sep${k}`); out.separators.push(lineLL([p, q])); }
+          if (!seen.has(`sep${k}`)) { seen.add(`sep${k}`); out.separators.push(lineLL([p, q], {roomA:room.semanticId,roomB:other.room?.semanticId,passage:true})); }
           cls = null;
         } else if (other.room.unit !== room.unit) cls = 'party';
       }
@@ -7664,8 +7809,10 @@ function fpDetailPlan(ctx, cand) {
     out.windowLines.push(lineLL([fpAdd(a, inward, th * 0.5), fpAdd(b, inward, th * 0.5)]));
   });
 
+  out.separators.forEach((f,i) => out.openings.push({ ...f, properties: { ...f.properties, id: `passage-${i}`, width: turf.length(f,{units:'meters'}), passage:true } }));
   /* doors: leaf + quarter swing; entrances flagged with a solid triangle */
-  doors.forEach(d => {
+  doors.forEach((d, index) => {
+    out.openings.push(lineLL([fpAdd(d.c, d.dir, -d.w / 2), fpAdd(d.c, d.dir, d.w / 2)], { id: `door-${index}`, width: d.w, roomA: d.roomA?.semanticId || 'circulation', roomB: d.roomB?.semanticId || 'circulation', entry: Boolean(d.entry) }));
     const g = fpDoorGeometry(d);
     out.doors.push(lineLL(g.leaf));
     out.doors.push(lineLL(g.arc));
@@ -7677,22 +7824,44 @@ function fpDetailPlan(ctx, cand) {
   });
   out.entrances = out.entrances.map(f => toLL(f, {}));
 
+  /* Keep a 0.9 m route from each door to a clear standing point. */
+  rooms.forEach(room => { room.pole = fpPole(room.poly, 8).p; });
   /* furniture (hairline objects) with clearance to doors */
   rooms.forEach(room => {
     if (!room.rec || !room.fr) return;
+    const accepted=[];
     fpFurnishRoom(room.rec, room.fr, doors, (poly, kind) => {
       const corners = fpPolysOf(poly)[0][0];
       if (!corners.every(c => fpPointInPoly(c, room.poly))) return;
+      const outside = fpDiff(poly, room.poly);
+      if (outside && fpArea(outside) > .02) return;
+      if (!['pillow','sink','hob'].includes(kind) && doors.some(d => (d.roomA === room || d.roomB === room) && fpArea(fpInt(poly, fpFeature({type:'Polygon',coordinates:[[...fpWallRect(d.c,room.pole,.9),fpWallRect(d.c,room.pole,.9)[0]]]}))) > .005)) return;
       if (doors.some(d => (d.roomA === room || d.roomB === room) && corners.some(c => fpLen(fpSub(c, d.c)) < d.w + 0.05))) return;
-      out.furniture.push(toLL(poly, { kind }));
+      const parent=['sink','hob'].includes(kind)?accepted.find(f=>f.kind==='counter'&&fpArea(fpInt(f.poly,poly))>=fpArea(poly)-.001):null;
+      if(['sink','hob'].includes(kind)&&!parent)return false;
+      if(kind==='fridge'&&accepted.some(f=>f.kind==='counter'&&fpArea(fpInt(f.poly,poly))>.001))return false;
+      const world = toLL(poly, {});
+      const objectPosition = turf.centroid(world).geometry.coordinates;
+      const objectOrientation = turf.bearing(turf.point(world.geometry.coordinates[0][0]),turf.point(world.geometry.coordinates[0][1]));
+      const objectId=`${room.semanticId}-object-${out.furniture.length}`;
+      out.furniture.push(toLL(poly, { position:objectPosition, orientation:objectOrientation, clearance: .9, reverse: kind==='bed'&&room.rec.headAtX0===false, kind, roomId: room.semanticId, objectId, parentObjectId:parent?.id, materialFamily: /bed|sofa|chair/.test(kind) ? 'upholstery' : 'wood' }));
+      accepted.push({poly,kind,id:objectId});return true;
     });
   });
+
+  for(const object of out.furniture){
+    const kind=object.properties.kind;
+    if(!['chair','armchair','sofa'].includes(kind))continue;
+    const targets=out.furniture.filter(f=>f.properties.roomId===object.properties.roomId&&(kind==='chair'?['desk','table']:['coffee_table','table']).includes(f.properties.kind));
+    targets.sort((a,b)=>turf.distance(turf.point(object.properties.position),turf.point(a.properties.position))-turf.distance(turf.point(object.properties.position),turf.point(b.properties.position)));
+    if(targets.length)object.properties.facing=turf.bearing(turf.point(object.properties.position),turf.point(targets[0].properties.position));
+  }
 
   /* labels + room/door graph (rooms and openings as nodes, hallway as hub) */
   rooms.forEach(room => {
     room.pole = fpPole(room.poly, 8).p;
     const style = FP_ROOM_STYLE[room.type] || { name: room.type, fill: '#efefef' };
-    out.rooms.push(toLL(room.poly, { roomType: room.type, fill: style.fill, unit: room.unit, area: Number(room.area.toFixed(1)), fail: room.fails && room.fails.length ? room.fails.join(', ') : '' }));
+    out.rooms.push(toLL(room.poly, { roomId: room.semanticId, roomType: room.type, fill: style.fill, unit: room.unit, area: Number(room.area.toFixed(1)), fail: room.fails && room.fails.length ? room.fails.join(', ') : '' }));
     if (room.fails && room.fails.length) out.fails.push(toLL(room.poly, { reason: room.fails.join(', ') }));
     out.graphNodes.push(ptLL(room.pole, { node: 'room', roomType: room.type }));
     if (room.area >= 2.5) out.labels.push(ptLL(room.pole, { text: `${style.name.toUpperCase()}\n${room.area.toFixed(1)} m²`, level: 'room' }));
@@ -7731,7 +7900,9 @@ function generateUnitFloorplan(shell, floorIndex, o, stairwell, elevatorZones, c
       ];
   const candidates = variants.map((variant, i) => safe(() => fpPlanCandidate(ctx, o, baseSeed + i * 7919, variant), `fp candidate ${i}`)).filter(Boolean);
   if (!candidates.length) return null;
-  const best = candidates.reduce((a, b) => (b.scores.total > a.scores.total ? b : a));
+  candidates.forEach(candidate => { candidate.unreachableRooms = fpRepairConnectivity(ctx,candidate); });
+  const missingEntries = candidate => candidate.units.filter(unit => !unit.hasEntry).length;
+  const best = candidates.reduce((a, b) => a.unreachableRooms !== b.unreachableRooms ? (b.unreachableRooms < a.unreachableRooms ? b : a) : missingEntries(a) !== missingEntries(b) ? (missingEntries(b) < missingEntries(a) ? b : a) : (b.scores.total > a.scores.total ? b : a));
   const out = fpDetailPlan(ctx, best);
   const mix = {};
   best.units.forEach(u => { mix[u.kind.label] = (mix[u.kind.label] || 0) + 1; });
@@ -12252,7 +12423,7 @@ function buildArContextBuildings(site) {
   return turf.featureCollection(candidates.slice(0, AR_CONTEXT_MAX_FEATURES).map(item => item.feature));
 }
 
-function buildCurrentArPayload(site, cfgSnapshot) {
+async function buildCurrentArPayload(site, cfgSnapshot) {
   const config = safe(
     () => JSON.parse(JSON.stringify(cfgSnapshot || {})),
     'AR config snapshot'
@@ -12266,54 +12437,142 @@ function buildCurrentArPayload(site, cfgSnapshot) {
     styles: getExportLayerStyles(config),
     geometry: buildArGeometrySubset(lastGeo),
     context: buildArContextBuildings(site),
-    interior: buildArInteriorPayload(config)
+    interior: await buildArInteriorPayload(config)
   };
 }
 
-/* Typical-floor unit plan for the AR viewer's "Exterior + interior" mode, with the
-   base heights of every floor whose plate matches the planned (representative) plate. */
-function buildArInteriorPayload(cfgSnapshot) {
-  return safe(() => {
-    if (!lastPoly) return null;
-    const footprints = Array.isArray(lastPoly) ? lastPoly : [lastPoly];
-    const o = floorplanOverlayConfig(applyEnvelopeGuards({ ...cfgSnapshot }));
-    const plan = buildTypicalFloorplanSlice(footprints, o);
-    const summary = (plan.summaries || []).find(item => item.metrics);
-    if (!summary || !plan.rooms.features.length) return null;
-    const factors = getEnvelopeScaleSeries(o).factors;
-    const repFactor = factors[clamp(summary.floorIndex, 0, factors.length - 1)];
-    const podium = totalPodiumHeightFor(o);
-    /* every floor plate is a planar scaling of one base plate about the taper origin,
-       so the planned floor is re-used on every floor with its scale ratio */
-    const rep = footprints.map(fp => chooseRepresentativeShell(fp, o)).filter(Boolean).sort((a, b) => b.area - a.area)[0];
-    const fam = rep && rep.shell && rep.shell.geometry ? shellFamilyCache.get(rep.shell.geometry) : null;
-    const origin = fam ? fam.family.origin : null;
-    const floors = [];
-    for (let i = 0; i < o.floors; i++) {
-      const k = factors[Math.min(i, factors.length - 1)] / repFactor;
-      if (k < 0.82 || k > 1.2) continue;
-      floors.push({ base: Number((podium + towerFloorOffset(o, i)).toFixed(3)), scale: Number(k.toFixed(5)) });
+/* Plan each distinct real plate for AR, sharing only geometrically identical
+   layouts. Floor descriptors own elevation and identity; furniture stays in metres. */
+async function buildArInteriorPayload(cfgSnapshot) {
+  if (!lastPoly) return null;
+  const footprints = Array.isArray(lastPoly) ? lastPoly : [lastPoly];
+  const o = floorplanOverlayConfig(applyEnvelopeGuards({ ...cfgSnapshot }));
+  const descriptors = interiorFloorDescriptors(footprints, o);
+  const plans = {}, cache = new Map();
+  const planner = createInteriorPlanner(planInteriorFloor);
+  try {
+    for (const floor of descriptors.filter(f => !f.roof)) {
+      const shellKey = JSON.stringify(floor.plates.map(p => p.geometry));
+      let planId = cache.get(shellKey);
+      if (!planId) {
+        planId = `plate-${cache.size}`;
+        plans[planId] = await planner.plan(floor, o);
+        cache.set(shellKey, planId);
+      }
+      floor.planId = planId;
     }
-    const strip = (fc, keys) => fc.features.map(f => ({
-      type: 'Feature',
-      geometry: f.geometry,
-      properties: Object.fromEntries(keys.filter(k => f.properties && f.properties[k] !== undefined).map(k => [k, f.properties[k]]))
-    }));
-    return {
-      floorHeight: o.F,
-      origin,
-      floors,
-      program: summary.metrics.program,
-      rooms: strip(plan.rooms, ['roomType', 'fill']),
-      /* partitions only: the outer wall ring would sit on the glass line and hide the rooms */
-      walls: strip(turf.featureCollection(plan.planWalls.features.map(f => {
-        const inner = rep && rep.shell ? safeBuf(rep.shell, -0.5, 'AR interior wall clip') : null;
-        const clipped = inner && inner.geometry ? safeInt(f, inner, 'AR interior walls') : f;
-        return clipped && clipped.geometry ? turf.feature(clipped.geometry, f.properties) : null;
-      }).filter(Boolean)), ['wallClass']),
-      furniture: strip(plan.furniture, ['kind'])
-    };
-  }, 'AR interior payload');
+  } finally { planner.dispose(); }
+  return { schema: 2, planningBackend: planner.backend, settings: migrateSettings(interiorSettings), floors: descriptors, plans, slabThickness: o.slabThick || .2 };
+}
+
+function planInteriorFloor(floor, o) {
+  const all = { rooms: [], walls: [], skirtings: [], furniture: [], openings: [], corridors: [], elevators: [], windows: [], finishPlates: [] };
+      for (const shell of floor.plates) {
+        const stairs = o.enableStairs ? getStairwellPolygon(shell, o, floor.towerIndex || 0) : null;
+        const lifts = o.enableElevators ? getElevatorZones(shell, o, floor.towerIndex || 0, stairs) : [];
+        const core = buildServiceCoreEnvelope(shell, o, stairs, lifts);
+      let finishPlate=shell;
+      for(const hole of [stairs,...lifts].filter(Boolean))finishPlate=safeDiff(finishPlate,hole,'interior floor shaft opening')||finishPlate;
+      all.finishPlates.push(finishPlate);
+        const plan = generateUnitFloorplan(shell, floor.towerIndex || 0, o, stairs, lifts, core);
+        if (!plan) continue;
+        const prefix = `part-${all.rooms.length}-`;
+        const roomId = id => id === 'circulation' ? id : prefix + id;
+        plan.rooms.forEach(r => { r.properties.roomId = roomId(r.properties.roomId); });
+        plan.furniture.forEach(f => { f.properties.roomId = roomId(f.properties.roomId); f.properties.objectId = prefix + f.properties.objectId; if(f.properties.parentObjectId)f.properties.parentObjectId=prefix+f.properties.parentObjectId; });
+        (plan.openings || []).forEach(d => { d.properties.roomA = roomId(d.properties.roomA); d.properties.roomB = roomId(d.properties.roomB); });
+        decorateInteriorRooms(plan);
+        for (const key of ['rooms','furniture','openings','corridors']) all[key].push(...(plan[key] || []));
+      carveInteriorLiftLandings(plan, lifts);
+      carveInteriorWindows(plan);
+      all.skirtings.push(...plan.walls.filter(w=>w.properties?.wallClass!=='window-lintel').map(w=>safeBuf(w,.008,'interior skirting thickness')).filter(Boolean));
+      all.windows.push(...(plan.windows || []));
+      all.walls.push(...plan.walls); all.elevators.push(...lifts);
+      }
+  return all;
+}
+
+function carveInteriorWindows(plan) {
+  if (!plan.windows?.length) return;
+  const openings = turf.combine(turf.featureCollection(plan.windows));
+  const walls = [];
+  for (const wall of plan.walls) {
+    const aperture = safeInt(wall, openings, 'interior glazing aperture');
+    if (!aperture) { walls.push(wall); continue; }
+    const rest = safeDiff(wall, openings, 'interior glazing wall');
+    if (rest) walls.push(rest);
+    walls.push(turf.feature(aperture.geometry,{wallClass:'window-sill'}));
+    walls.push(turf.feature(aperture.geometry,{wallClass:'window-lintel'}));
+  }
+  plan.walls = walls;
+}
+
+function decorateInteriorRooms(plan) {
+  const add = (feature, room, kind) => { feature.properties = { kind, roomId:room.properties.roomId, objectId:`${room.properties.roomId}-${kind}`, position:turf.centroid(feature).geometry.coordinates, orientation:0, clearance:['pendant','ceiling_light'].includes(kind)?0:.9 }; plan.furniture.push(feature); };
+  for(const room of plan.rooms) {
+    if(!/living|bedroom|meeting|workspace|reception/.test(room.properties.roomType)) continue;
+    const furniture=plan.furniture.filter(f=>f.properties.roomId===room.properties.roomId);
+    const overhead=furniture.find(f=>['table','round_table','bed'].includes(f.properties.kind));
+    const center=overhead?turf.centroid(overhead):turf.centerOfMass(room);
+    const light=turf.buffer(center,.21,{units:'meters',steps:8});
+    if(turf.booleanWithin(light,room))add(light,room,overhead?'pendant':'ceiling_light');
+    const corners=room.geometry.type==='Polygon'?room.geometry.coordinates[0]:room.geometry.coordinates[0][0];
+    for(const [index,corner] of corners.slice(0,4).entries()){
+      const towards=turf.bearing(turf.point(corner),turf.centerOfMass(room));
+      const point=turf.destination(turf.point(corner),index===0?.75:.48,towards,{units:'meters'});
+      const footprint=turf.buffer(point,index===0?.29:.17,{units:'meters',steps:8});
+      if(!turf.booleanWithin(footprint,room)||plan.furniture.some(f=>!['pendant','ceiling_light'].includes(f.properties.kind)&&turf.booleanIntersects(f,footprint)))continue;
+      if((plan.openings||[]).some(d=>turf.pointToLineDistance(point,d,{units:'meters'})<1.2))continue;
+      if(index===0)add(footprint,room,'plant');
+      else if(/living|bedroom/.test(room.properties.roomType)){add(footprint,room,'lamp');break;}
+    }
+    const anchor=furniture.find(f=>['sofa','bed'].includes(f.properties.kind));
+    if(anchor){
+      const coffee=furniture.find(f=>f.properties.kind==='coffee_table');
+      const zone=coffee?turf.bboxPolygon(turf.bbox(turf.featureCollection([anchor,coffee]))):anchor;
+      const rug=safeInt(safeBuf(zone,.15,'interior rug edge')||zone,room,'interior rug fit');
+      if(rug)add(rug,room,'rug');
+    }
+  }
+}
+
+function carveInteriorLiftLandings(plan, lifts) {
+  for (const lift of lifts) {
+    const center = turf.centroid(lift); let nearest = null, distance = Infinity;
+    for (const corridor of plan.corridors || []) {
+      const line = turf.polygonToLine(corridor);
+      const lines = line.type === 'FeatureCollection' ? line.features : [line];
+      for (const edge of lines) {
+        const point = safe(() => turf.nearestPointOnLine(edge, center, {units:'meters'}), 'lift landing');
+        const d = point ? turf.distance(center,point,{units:'meters'}) : Infinity;
+        if (d < distance) { nearest = point; distance = d; }
+      }
+    }
+    if (!nearest || distance > 15) continue;
+    const bearing = turf.bearing(center, nearest);
+    const end = turf.destination(nearest,.7,bearing,{units:'meters'});
+    const path = turf.lineString([center.geometry.coordinates,end.geometry.coordinates]);
+    const opening = turf.buffer(path,.6,{units:'meters',steps:2});
+    plan.walls = plan.walls.map(w => safeDiff(w,opening,'lift clear opening')).filter(Boolean);
+    lift.properties = { ...lift.properties, doorTarget: end.geometry.coordinates };
+  }
+}
+
+function interiorFloorDescriptors(footprints, o) {
+  const floors = []; let base = plinthHeightFor(o);
+  const pod = Math.max(0, Math.round(o.podF || 0));
+  for (let i = 0; i < pod; i++) {
+    const height = i === 0 && o.podiumSpecialGroundFloor ? clamp(+o.podiumGroundFlrHt || 5, 2.8, 10) : clamp(+o.podiumUpperFloorHt || o.F, 2.4, 8);
+    const plates = footprints.map(fp => scale(safeBuf(fp, Math.max(0, +o.podOut || 0), 'interior podium') || fp, o, -1)).filter(Boolean);
+    floors.push({ id: `floor-${floors.length}`, index: floors.length, base, height, podium: true, plates }); base += height;
+  }
+  for (let i = 0; i < o.floors; i++) {
+    floors.push({ id: `floor-${floors.length}`, index: floors.length, towerIndex: i, base: totalPodiumHeightFor(o) + towerFloorOffset(o,i), height: towerFloorHeight(o,i),
+      setback: Boolean(getMassingContext(footprints[0],o).tiers.find(t => t.floor-1 === i)), plant: +o.mechEvery >= 3 && i > 1 && i < o.floors - 1 && (i + 1) % +o.mechEvery === 0,
+      plates: footprints.map(fp => floorShell(fp,o,i)).filter(Boolean) });
+  }
+  const top = floors.at(-1); floors.push({ id:'roof', index:floors.length, roof:true, base:top.base+top.height, height:0, plates:top.plates });
+  return floors;
 }
 
 function cleanupArPayloadCacheLocalStorage(maxEntries = 10) {
@@ -12438,26 +12697,34 @@ async function openCurrentBuildingInAr() {
   }
 
   const cfgSnapshot = lastCfgSnapshot || cfg();
-  const payload = buildCurrentArPayload(site, cfgSnapshot);
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  // Reserve the desktop tab inside the click gesture, before async planning.
+  // noopener window.open() returns null even after opening a tab; treating that
+  // as a blocked popup had started a second AR renderer in the editor tab.
+  const arWindow = isMobile ? null : window.open('about:blank', '_blank');
+  if (arWindow) arWindow.opener = null;
   try {
+    setBuildingLoader(true, 'Planning interiors', 'Preparing actual floor plates and room layouts');
+    cfgSnapshot.interiorSettings = migrateSettings(interiorSettings);
+    const payload = await buildCurrentArPayload(site, cfgSnapshot);
     const payloadKey = await stageArPayloadObject(payload);
 
     const arUrl = new URL('ar.html', window.location.href);
     arUrl.searchParams.set('k', payloadKey);
     const targetHref = arUrl.toString();
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    setBuildingLoader(false);
     saveSessionNow();
-    if (isMobile) {
+    if (isMobile || !arWindow || arWindow.closed) {
       markIntentionalNavigation();
       window.location.href = targetHref;
       return;
     }
-    const win = window.open(targetHref, '_blank', 'noopener,noreferrer');
-    if (!win) window.location.href = targetHref;
+    arWindow.location.replace(targetHref);
   } catch (err) {
+    arWindow?.close();
     console.error(err);
     alert(err && err.message ? err.message : 'Could not stage AR payload in browser storage.');
-  }
+  } finally { setBuildingLoader(false); }
 }
 
 function localMetersProjector(centerLng, centerLat) {
@@ -12886,6 +13153,7 @@ function saveSessionNow() {
       camera: { center: [c.lng, c.lat], zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing() },
       style: activeBaseStyle,
       controls: readSessionControls(),
+      interiorSettings: migrateSettings(interiorSettings),
       multi: multiBuildMode,
       poly: lastPoly,
       groups: selectedBuildingGroups,
@@ -12936,8 +13204,14 @@ function startFreshSession() {
   clearSelectionAndContextVisibility();
 }
 
+function restoreInteriorSiteSettings() {
+  const site=getArSiteTargetFromLastPoly();const key=interiorStorageKey(site);if(!key)return;
+  try{const value=JSON.parse(localStorage.getItem(key)||'null');if(value?.settings)interiorSettings=migrateSettings(value.settings);}catch{}
+}
+
 function restoreSession(s) {
   if (!s) return false;
+  interiorSettings = migrateSettings(s.interiorSettings);
   writeSessionControls(s.controls);
   updateExteriorControlVisibility();
   multiBuildMode = Boolean(s.multi);
@@ -12947,6 +13221,7 @@ function restoreSession(s) {
   const polys = s.poly ? (Array.isArray(s.poly) ? s.poly : [s.poly]).filter(f => f && f.geometry) : [];
   lastPoly = polys.length ? (polys.length === 1 ? polys[0] : polys) : null;
   lastFootprintSource = lastPoly ? (s.source || 'restored') : 'none';
+  restoreInteriorSiteSettings();
   if (lastPoly) pid++;
   updateContextFilter();
   updateFloorplanButtonState();
@@ -12974,6 +13249,7 @@ document.addEventListener('visibilitychange', () => {
 /* Back from ar.html via the bfcache: the page is intact but WebGL may need a nudge. */
 window.addEventListener('pageshow', e => {
   if (!e.persisted) return;
+  restoreInteriorSiteSettings();
   map.resize();
   map.triggerRepaint();
 });

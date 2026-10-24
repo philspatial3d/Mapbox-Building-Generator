@@ -1,0 +1,6 @@
+### Result
+{"p50":16.700000000000728,"p95":16.700000000000728,"loadMs":232,"roomLoadMs":185.40000000596046,"estimatedMaterialTextureMiB":25.979166666666657,"floors":2,"drawCalls":65,"triangles":361630,"geometries":79,"textures":18,"assetFailures":[],"decoderWorkers":2,"residentRooms":[{"id":"part-0-room-0","detail":"high"}],"frameIntervalP50":16.600000008940697,"frameIntervalP95":18.100000008940697}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.screenshot({path:"/tmp/mbg-interior-evidence/office-latest.png"});return await page.evaluate(async()=>{const a=[];let p=performance.now();for(let n=0;n<300;n++){await new Promise(requestAnimationFrame);const t=performance.now();if(n>=120)a.push(t-p);p=t;}a.sort((a,b)=>a-b);return {...window.__arDebug.interior.telemetry(),frameIntervalP50:a[90],frameIntervalP95:a[171]};});})(page);
+```
