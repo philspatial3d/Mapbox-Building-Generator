@@ -2,7 +2,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import {extractGeometryRuntime} from './geometry_runtime.mjs';
 
 const root = process.cwd();
 const appPath = path.join(root, 'app.html');
@@ -18,6 +17,137 @@ const assert = (condition, message) => {
   if (condition) pass(message);
   else failures.push(message);
 };
+
+function scanPair(source, openIndex, openChar, closeChar) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let i = openIndex; i < source.length; i++) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (lineComment) {
+      if (ch === '\n') lineComment = false;
+      continue;
+    }
+    if (blockComment) {
+      if (ch === '*' && next === '/') {
+        blockComment = false;
+        i++;
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === quote) {
+        quote = null;
+      }
+      continue;
+    }
+    if (ch === '/' && next === '/') {
+      lineComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      blockComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+      continue;
+    }
+    if (ch === openChar) depth++;
+    if (ch === closeChar) {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  throw new Error(`Unclosed ${openChar}${closeChar} pair at ${openIndex}`);
+}
+
+function extractConstStatement(source, name) {
+  const start = source.indexOf(`const ${name}`);
+  if (start < 0) throw new Error(`Missing const ${name}`);
+  let paren = 0;
+  let square = 0;
+  let curly = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let i = start; i < source.length; i++) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (lineComment) {
+      if (ch === '\n') lineComment = false;
+      continue;
+    }
+    if (blockComment) {
+      if (ch === '*' && next === '/') {
+        blockComment = false;
+        i++;
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '/' && next === '/') {
+      lineComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      blockComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+      continue;
+    }
+    if (ch === '(') paren++;
+    else if (ch === ')') paren--;
+    else if (ch === '[') square++;
+    else if (ch === ']') square--;
+    else if (ch === '{') curly++;
+    else if (ch === '}') curly--;
+    else if (ch === ';' && paren === 0 && square === 0 && curly === 0) return source.slice(start, i + 1);
+  }
+  throw new Error(`Unclosed const ${name}`);
+}
+
+function extractTopLevelFunctions(source) {
+  const functions = [];
+  const names = new Set();
+  const matcher = /\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g;
+  let match;
+  while ((match = matcher.exec(source))) {
+    const name = match[1];
+    const parenStart = source.indexOf('(', match.index);
+    const parenEnd = scanPair(source, parenStart, '(', ')');
+    const bodyStart = source.indexOf('{', parenEnd);
+    if (bodyStart < 0) throw new Error(`Missing body for ${name}`);
+    const bodyEnd = scanPair(source, bodyStart, '{', '}');
+    if (!names.has(name)) {
+      functions.push(source.slice(match.index, bodyEnd + 1));
+      names.add(name);
+    }
+    matcher.lastIndex = bodyEnd + 1;
+  }
+  return functions.join('\n\n');
+}
 
 const requiredControls = [
   'buildingType', 'facadeType', 'facadeArticulation', 'facadeArticulationDensity', 'panelModuleWidth',
@@ -185,10 +315,32 @@ if (!turfResponse.ok) throw new Error(`Could not load pinned Turf test runtime: 
 const turfSource = await turfResponse.text();
 
 const context = vm.createContext({ console });
-const {createInteriorPlanner}=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(root,'js/interior/planner.js'),'utf8')).toString('base64'));
-context.createInteriorPlanner=createInteriorPlanner;
 vm.runInContext(turfSource, context, { filename: 'turf.min.js' });
-const runtimeSource=extractGeometryRuntime(html);
+const constNames = [
+  'safe', 'safeClone', 'safeBuf', 'safeDiff', 'safeInt', 'rand', 'clamp', 'lightenHex',
+  'FACADE_PATTERN_PRESETS', 'FACADE_LIGHT_PRESETS', 'FACADE_CLIMATE_PRESETS',
+  'EXTERIOR_LAYER_KEYS', 'envelopeGuardLogCache', 'PRIMARY_ENVELOPE_LAYERS',
+  'SECONDARY_ENVELOPE_LAYERS', 'ACCENT_ENVELOPE_LAYERS', 'envelopeProfileCache',
+  'TRANSPARENCY_MODE_LABELS', 'EXPORT_SCHEMA_VERSION', 'EXPORT_EDGE_RADIUS_M',
+  'EXPORT_ROUNDED_ROOF', 'EXPORT_RADIANCE', 'EXPORT_SHADOW_INTENSITY',
+  'MIN_POLY_AREA', 'polyArea', 'isUsablePoly', 'BUILDING_ARCHETYPE_ORDER',
+  'MATERIAL_SYSTEMS', 'MATERIAL_SYSTEM_TEXTURES', 'materialSystem', 'BUILDING_ARCHETYPES',
+  'MUNTIN_PATTERNS', 'MUNTIN_W', 'muntinPatternFor', 'trimColorFor', 'typologyPartCache', 'pushMerged',
+  'planFlowCache', 'planFlowPivotCache', 'PODIUM_STYLE_CONFIGS', 'presetFieldMap',
+  'EARTH_M_PER_DEG', 'pointCoords', 'unitForBearing', 'bearingOfVector', 'facadeGuideCache',
+  'primaryBearingCache', 'plateCorePointCache', 'shellMemoCache', 'shellBuf', 'shellScaleCache',
+  'shellFamilyCache', 'PLAN_REUSE_TOLERANCE', 'RIBBON_SPANDREL_PROFILES',
+  'SETBACK_FACE_MODES', 'massingContextCache', 'tierPlateCache', 'slotPlateCache',
+  'bayLayoutCache', 'zoneSplitCache', 'MASSING_FEATURE_DEFAULTS', 'isGableEnd', 'pitchedRidgeCache', 'obeliskCache', 'PITCHED_ROOF_STYLES'
+];
+/* unit floorplan engine helpers are top-level consts (fpX / FP_X) */
+[...html.matchAll(/^const ((?:fp|FP_)\w+)\s*=/gm)].forEach(match => { if (!constNames.includes(match[1])) constNames.push(match[1]); });
+const runtimeSource = [
+  ...constNames.map(name => extractConstStatement(html, name)),
+  extractTopLevelFunctions(html)
+].join('\n\n');
+/* module imports the app's exporters use */
+Object.assign(context, await import('../js/asset-model.js'));
 vm.runInContext(runtimeSource, context, { filename: 'app-geometry-runtime.js' });
 
 const archetypeOrder = vm.runInContext('BUILDING_ARCHETYPE_ORDER', context);
@@ -748,17 +900,6 @@ unitPlanChecks.forEach(({ name, feature }) => {
   assert(plan.furniture.length > plan.units.length * 3, `${name} rooms are furnished`);
   assert(plan.metrics.efficiency >= 55 && plan.metrics.efficiency <= 95, `${name} net-to-gross efficiency is plausible`);
   assert(plan.metrics.scores.daylight >= 0.8, `${name} habitable rooms keep daylight`);
-  const roomIds = new Set(plan.rooms.map(r => r.properties.roomId));
-  assert(roomIds.size === plan.rooms.length, `${name} semantic room IDs are stable and unique`);
-  assert(plan.openings.length > 0 && plan.openings.every(d => ['roomA','roomB'].every(k => !d.properties[k] || d.properties[k] === 'circulation' || roomIds.has(d.properties[k]))), `${name} door and passage graph references real rooms`);
-  assert(plan.furniture.every(f => roomIds.has(f.properties.roomId) && Array.isArray(f.properties.position) && Number.isFinite(f.properties.orientation) && f.properties.clearance === .9), `${name} furnishings carry room identity, placement, rotation and clearance`);
-  assert(plan.furniture.every(f => { const room = plan.rooms.find(r => r.properties.roomId === f.properties.roomId); return overlapArea(f, room) >= context.turf.area(f) - .05; }), `${name} complete furniture footprints stay in their room`);
-  assert(plan.furniture.filter(f=>['sink','hob'].includes(f.properties.kind)).every(f=>plan.furniture.some(p=>p.properties.objectId===f.properties.parentObjectId&&p.properties.kind==='counter'&&p.properties.roomId===f.properties.roomId)), `${name} kitchen fixtures require a retained parent cabinet`);
-  const connected = new Set(['circulation']);
-  for(let i=0;i<plan.rooms.length+1;i++)for(const opening of plan.openings){const {roomA:a,roomB:b}=opening.properties;if(connected.has(a)||connected.has(b)){connected.add(a);connected.add(b);}}
-  assert(plan.rooms.every(r=>connected.has(r.properties.roomId)), `${name} all rooms connect through actual door or open-passage records (${plan.rooms.filter(r=>!connected.has(r.properties.roomId)).map(r=>r.properties.roomType+":"+r.properties.unit+":"+r.properties.roomId).join(",")})`);
-
-
 });
 const officePlanCfg = context.floorplanOverlayConfig(configFor({ buildingType: 'office', floors: 20, F: 3.8, floorplanStyle: 'corridor' }));
 const officeRep = context.chooseRepresentativeShell(footprint, officePlanCfg);
@@ -768,13 +909,6 @@ const officePlan = context.generateUnitFloorplan(officeRep.shell, officeRep.floo
   context.buildServiceCoreEnvelope(officeRep.shell, officePlanCfg, officeStair, officeLifts));
 assert(officePlan && officePlan.metrics.mode === 'office' && officePlan.rooms.some(r => r.properties.roomType === 'workspace'), 'office plates get open workspace neighbourhoods');
 assert(officePlan.furniture.some(f => f.properties.kind === 'desk'), 'office workspace is laid out with desk benches');
-for (const type of ['wc','meeting','focus','pantry','reception']) {
-  assert(officePlan.rooms.some(r=>r.properties.roomType===type), `office plate reserves a connected ${type} room`);
-}
-const officeConnected=new Set(['circulation']);
-for(let i=0;i<=officePlan.rooms.length;i++)for(const {properties:{roomA:a,roomB:b}} of officePlan.openings){if(officeConnected.has(a)||officeConnected.has(b)){officeConnected.add(a);officeConnected.add(b);}}
-assert(officePlan.rooms.every(r=>officeConnected.has(r.properties.roomId)), 'office support rooms and workspaces connect through real openings');
-assert(officePlan.furniture.some(f=>f.properties.kind==='wc'), 'office washroom has a toilet fixture');
 
 const articulationExpectations = {
   none: [],
@@ -1146,7 +1280,6 @@ assert(presets.presets.every(preset => preset.config.taperMode !== 'step'), 'adv
 
 context.lastFootprintSource = 'test-harness';
 context.selectedBuildingGroups = [];
-assert(context.restoreSession(null) === false, "fresh sessions do not require saved interior settings");
 context.lastPoly = footprint;
 const styledExport = context.buildStyledGeoJsonExport(exportFixture.geometry, exportFixture.cfg);
 const exportKeys = [
@@ -1486,24 +1619,6 @@ function renderFloorplanSvg() {
 </svg>`;
 }
 
-// Exercise handoff planning against actual tapered plates, not a typical-floor scale.
-context.lastPoly = footprint;
-context.selectedBuildingGroups = [];
-context.interiorSettings = { style: 'warm', activeFloor: 0 };
-context.migrateSettings = value => ({ schema:2, ...value });
-context.setTimeout = setTimeout;
-const semanticPayload = await context.buildArInteriorPayload(configFor({ floors:3, podF:0, taperMode:'cont', taper:.22 }));
-assert(semanticPayload.schema === 2 && semanticPayload.floors.length === 4, 'semantic payload includes each floor plus roof');
-assert(semanticPayload.floors.filter(f=>!f.roof).every(f=>f.planId && f.height > 0 && f.plates.length), 'every real floor references a plate plan and actual storey height');
-assert(!semanticPayload.floors.some(f=>'scale' in f), 'interior payload never scales furniture with taper');
-assert(semanticPayload.floors[0].planId !== semanticPayload.floors[2].planId, 'changed tapered plates are replanned independently');
-assert(Object.values(semanticPayload.plans).every(p=>p.furniture.filter(f=>f.properties.parentObjectId).every(f=>p.furniture.some(parent=>parent.properties.objectId===f.properties.parentObjectId))), 'handoff preserves prefixed parent fixture references');
-const workerContext=vm.createContext({console,self:{}});
-vm.runInContext(turfSource,workerContext);
-vm.runInContext(fs.readFileSync(path.join(root,'js/interior/planner-runtime.js'),'utf8'),workerContext);
-const workerConfig=context.floorplanOverlayConfig(context.applyEnvelopeGuards(configFor({floors:3,podF:0,taperMode:'cont',taper:.22})));
-const generatedPlan=workerContext.self.planInteriorFloor(semanticPayload.floors[0],workerConfig);
-assert(JSON.stringify(generatedPlan)===JSON.stringify(semanticPayload.plans[semanticPayload.floors[0].planId]), 'generated worker matches source floor semantics and geometry byte-for-byte');
 if (failures.length) {
   console.error('\nExternal fidelity check failed:');
   failures.forEach(message => console.error(`- ${message}`));

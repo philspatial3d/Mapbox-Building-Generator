@@ -272,6 +272,27 @@ body.interior-walk.panel-collapsed #panel {
 body.interior-walk #focusFrame {
   display: none;
 }
+/* Names the room and level as the visitor walks in, then fades. */
+.interior-room-label {
+  position: fixed;
+  left: 50%;
+  top: max(72px, calc(env(safe-area-inset-top) + 64px));
+  transform: translate(-50%, -6px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(20, 29, 33, 0.82);
+  color: #f3f1ea;
+  font: 600 14px/1.3 system-ui;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.interior-room-label.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
 @media (max-width: 600px) {
   #panel {
     left: 12px;
@@ -329,4 +350,230 @@ body.interior-walk #focusFrame {
     transition: none;
     scroll-behavior: auto;
   }
+}
+
+/* ---------- Camera dock, walk pad, toasts (BG-098) ----------
+   The dock never hides: camera mode, reset and the interior switch are one tap away.
+   The floor picker sits above it while interiors are on. */
+#quickDock {
+  position: fixed;
+  z-index: 6;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 24px));
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--ar-line-strong);
+  border-radius: 16px;
+  background: rgba(15, 21, 26, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px #0005;
+  pointer-events: auto;
+}
+#quickDock .viewModes,
+#quickDock .dockActions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+#quickDock .viewModes {
+  padding: 3px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.06);
+}
+#quickDock button {
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ar-ink);
+  font: 600 12px/1.15 system-ui;
+  white-space: nowrap;
+}
+#quickDock .dockActions button {
+  border-color: var(--ar-line);
+  background: rgba(31, 42, 50, 0.92);
+}
+#quickDock [data-view][aria-checked="true"] {
+  background: #d9e5df;
+  color: #12251e;
+}
+#quickDock #dockInterior[aria-pressed="true"] {
+  background: #bfd9c8;
+  border-color: #bfd9c8;
+  color: #12251e;
+}
+#quickDock #quickLock.is-locked {
+  background: var(--ar-good);
+  border-color: var(--ar-good);
+  color: #071018;
+}
+#quickDock button:disabled { opacity: 0.4; }
+#quickDock [hidden] { display: none; }
+
+#walkPad {
+  position: fixed;
+  z-index: 6;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 84px);
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(2, 52px);
+  grid-template-areas: ". forward ." "left back right";
+  gap: 6px;
+  pointer-events: auto;
+  touch-action: none;
+}
+#walkPad[hidden] { display: none; }
+#walkPad button {
+  border-radius: 12px;
+  border: 1px solid var(--ar-line-strong);
+  background: rgba(15, 21, 26, 0.88);
+  color: var(--ar-ink);
+  font-size: 18px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#walkPad button:active { background: #d9e5df; color: #12251e; }
+#walkPad [data-move="forward"] { grid-area: forward; }
+#walkPad [data-move="left"] { grid-area: left; }
+#walkPad [data-move="back"] { grid-area: back; }
+#walkPad [data-move="right"] { grid-area: right; }
+
+#toast {
+  position: fixed;
+  z-index: 8;
+  top: max(64px, calc(env(safe-area-inset-top) + 58px));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(460px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(15, 21, 26, 0.94);
+  border: 1px solid var(--ar-line-strong);
+  color: var(--ar-ink);
+  font: 500 13px/1.35 system-ui;
+  text-align: center;
+  pointer-events: none;
+}
+#toast[hidden] { display: none; }
+#motionPrompt {
+  position: fixed;
+  z-index: 7;
+  top: max(64px, calc(env(safe-area-inset-top) + 58px));
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 22px;
+  border: 0;
+  background: #75b7d6;
+  color: #071018;
+  font: 700 13px/1 system-ui;
+  pointer-events: auto;
+}
+#motionPrompt[hidden] { display: none; }
+#toast:not([hidden]) ~ #motionPrompt { top: max(118px, calc(env(safe-area-inset-top) + 112px)); }
+
+/* Virtual views draw their own sky; the camera feed and its framing guides step aside. */
+body.virtual-view #cameraFeed,
+body.virtual-view #focusFrame { visibility: hidden; }
+
+/* Floor picker and walkthrough controls only while interiors are on or being walked. */
+body:not(.interior-on):not(.interior-walk) #arInteriorControls { display: none; }
+#arInteriorControls {
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 84px);
+}
+body.interior-walk #quickDock .viewModes { opacity: 0.5; }
+
+/* ---------- Controls panel: one section per job ---------- */
+#panel details.arSection > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 600 14px/1.3 system-ui;
+}
+#panel details.arSection > summary::-webkit-details-marker { display: none; }
+#panel details.arSection > summary::after {
+  content: "▾";
+  color: var(--ar-muted);
+  transition: transform 0.15s ease;
+}
+#panel details.arSection:not([open]) > summary::after { transform: rotate(-90deg); }
+#panel .settingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+#panel .settingGrid .toggleRow { grid-column: 1 / -1; }
+#panel .toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--ar-ink);
+  font: 500 13px/1.3 system-ui;
+}
+#panel .toggleRow input {
+  width: 20px;
+  height: 20px;
+  accent-color: #b8d7c6;
+  flex: none;
+}
+#panel .sectionNote {
+  margin: 0 0 10px;
+  color: var(--ar-muted);
+  font: 12px/1.4 system-ui;
+}
+#panel #stepsNote { margin: 10px 0 0; }
+#panel .viewerSetting {
+  display: grid;
+  gap: 5px;
+  color: var(--ar-muted);
+  font: 500 11px/1.3 system-ui;
+}
+#panel #enableSensors { width: 100%; margin-top: 4px; }
+#panel #interiorSection .interior-tools { margin-top: 8px; }
+#panel .bindTools { margin-top: 10px; }
+#panel #panelBody { max-height: calc(100dvh - 210px); }
+
+@media (max-width: 600px) {
+  #quickDock {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 6px;
+  }
+  #quickDock button { font-size: 12px; }
+  #panel { max-height: calc(100dvh - 200px); }
+  #panel #panelBody { max-height: calc(100dvh - 280px); }
+  #arInteriorControls,
+  #walkPad { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 124px); }
+}
+/* With interiors on, the walk pad rises clear of the floor picker. */
+body.interior-on #walkPad { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 200px); }
+@media (max-width: 600px) {
+  body.interior-on #walkPad { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 240px); }
+}
+/* The open panel always stops above the dock. */
+#panel { max-height: calc(100dvh - 72px - 96px - env(safe-area-inset-bottom)); }
+#panel #panelBody { max-height: calc(100dvh - 72px - 96px - 72px - env(safe-area-inset-bottom)); }
+@media (max-height: 520px) and (min-width: 601px) {
+  #panel { max-height: calc(100dvh - 64px - 84px); }
+  #panel #panelBody { max-height: calc(100dvh - 64px - 84px - 64px); }
+  body:not(.panel-collapsed) #arInteriorControls,
+  body:not(.panel-collapsed) #walkPad { display: none; }
+}
+/* Phones: the open panel owns the screen down to the dock. */
+@media (max-width: 600px) {
+  body:not(.panel-collapsed) #arInteriorControls,
+  body:not(.panel-collapsed) #walkPad { display: none; }
+  #panel { max-height: calc(100dvh - 72px - 136px - env(safe-area-inset-bottom)); }
+  #panel #panelBody { max-height: calc(100dvh - 72px - 136px - 70px - env(safe-area-inset-bottom)); }
 }

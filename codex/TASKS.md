@@ -2297,3 +2297,142 @@ Status: Substantial local review build; automated and desktop checks pass. **Vis
 - `assets/interior/README.md`, per-model and aggregate manifests
 - `codex/evidence/bg-093/`
 - Run `node scripts/check_interior.mjs`, `node scripts/check_external_fidelity.mjs`, `node scripts/check_ar_fidelity.mjs`.
+
+## BG-094 — Interior design pass: designed, lit and dressed rooms
+
+Goal: rooms that read as staged, marketable spaces from the walkthrough and from the street, instead of sparse grey boxes.
+
+- [x] Windows: fixed the planner's glazing carve (`turf.combine()` returned a FeatureCollection, so `safeInt` silently skipped every window), buffered it 5 cm to clear the hairline skin, and widened windows to 70% of the wall. Sill and head heights follow the room: full height in living rooms and offices, above the worktop in kitchens, privacy height in bathrooms. Black frames, mullions and glass sit in the reveal.
+- [x] Light: two warm room lights follow the visitor (fixed count, no recompiles), interior exposure while walking, brighter self-lit ceilings, daylight pools under every window, contact darkening at the wall base, stronger contact shadows and a sky outside the glazing.
+- [x] Four designed palettes: feature-wall colour, two accent textiles, throw, brass, felt, ceiling, office carpet. Office buildings open in Contemporary Workplace until someone picks a style (`styleChosen`).
+- [x] Contemporary bed (channel-stitched headboard, duvet, throw, cushions), sofa and oval stone coffee table. The Gothic bed, tufted sofa and inlaid table are kept for Classic only; changing to or from Classic rebuilds the floor.
+- [x] Room dressing (`js/interior/dressing.js`) reads real wall faces, windows, doors and furniture: feature wall and art over the bed, lamps on nightstands, dresser and mirror; art above the sofa, media wall opposite, shelving, corner plants; console and mirror in halls; towel rail, and a vanity, WC and bath or shower where the planner left a bathroom empty.
+- [x] Fitted kitchens where the planner placed none: base run with sink and hob, splashback, wall cabinets, tall fridge, island with stools and pendants when the room is deep enough.
+- [x] Workplace: felt rafts with linear lights, carpet tiles, styled desks, felt panels, whiteboards and planters; meeting-room screen and credenza; boardroom table; reception slat wall with a lit mark; reading corner in private offices; coffee station in pantries.
+- [x] Architecture: door leaves that swing clear of furniture, downlight grids, curtains on tracks in homes and blinds elsewhere, wall tile in wet rooms, textured rugs.
+- [x] Street section: from street or balcony angles, the facade half facing the viewer opens above the active slab, and interior walls in the nearest 35% of the plan are cut at 1.05 m. From above, the original top cut applies.
+- [x] Arrival framing: stand with clearance, back from the focal piece, with the longest view across the room; 72° walkthrough FOV; the room and level are named on entry.
+- [x] Budgets: neighbouring floors are hidden while walking, and ceilings and fittings are merged per floor. Measured 82–148 draw calls and up to 470k triangles per walkthrough view (desktop, 1100 × 700).
+- [x] `check_interior`, `check_ar_fidelity`, committed `check_external_fidelity` (37 presets) and `build_interior_planner --check` pass. Classic style switch has no console errors.
+- [ ] Phone testing for frame rate and thermals with the added dressing.
+
+Evidence: `codex/evidence/bg-094/` (before and after views, street section, Classic bedroom).
+
+## BG-095 — One finish per building component (AR viewer)
+
+Goal: each of the 37 components gets the single cue that most separates it from a flat extrusion. Implemented as `COMPONENT_FINISHES` in `ar.html`: material parameters plus define-driven shader features (`FACES`, `STREAKS`, `COURSES`, `TIES`, `CELLS`, `MOTTLE`, `LOUVRE`, `PERF`, `PANES`, `DOWNLIGHTS`, `WASH`, `FLOORAO`). Finishes scale the chosen colours and never replace them. A per-feature `mbgCell` attribute makes the variation follow real windows, panels and fins.
+
+- [x] Glass: blinds and lit rooms grouped by room (about 4.2 m per floor), lit from the ceiling and fading at grazing angles. Lit shopfronts, lobby glow through the doors, lit lift cars. Glass balustrades stay clear. Disabled in the see-through interior mode.
+- [x] Envelope: weathering streaks on walls, rusticated podium, ashlar piers, satin reveals, bleached sills, shadow lines under belt courses, cornices, caps and balcony soffits, coping highlights, rainscreen tone variation, true shadow gaps, glazed terracotta fins, gloss exoskeleton, patinated accents, anodised mullions and frames, powder-coated rails.
+- [x] Roofscape: ponding on flat roofs, slate courses on mansards, timber decking, perforated screens (holes fade into an even screen at distance to avoid shimmer), louvred equipment and plant rooms, mixed sedum, reflective crown glazing, polished spires.
+- [x] Structure: polished slabs, form-tie columns, skirting shadow on interior walls, blockwork shafts, contrasting stair nosings, brushed stainless rails.
+- [x] At most 16 shader programs on the busiest preset; draw calls unchanged (about 60). `check_ar_fidelity` and `check_interior` pass, with no console errors across 12 presets.
+- [ ] The Mapbox editor view and the GLB export keep their existing materials.
+- [ ] Phone check of first-load shader compilation time.
+
+Evidence: `codex/evidence/bg-095/` (before and after for presets 8, 26, 32, 36; after for preset 33).
+
+## BG-096 — Component finishes in the Mapbox editor view (matches BG-095)
+
+Same one-finish-per-component goal as the AR viewer, rebuilt for Mapbox GL JS 3.9.3, which has no custom shaders. `MAP_FINISHES` in `app.html` uses what the renderer offers: per-feature colour and emissive expressions, flood light, ambient occlusion, and procedural pattern images.
+
+- [x] Seeds (`sd` feature, `ck` bay column, `rm` room per floor in 4.2 m cells) are stamped on a copy of the features; the generated geometry and every export are unchanged. A texture the user picked for a layer always wins over a finish pattern.
+- [x] Windows, shopfronts, doors and lifts: blinds and lit rooms per room. Lit panes go to a separate glowing layer (`-lit`), the base layer filters them out so nothing z-fights. Ribbon glazing is cut into room-wide panes. Balustrade glass stays clear. Warm flood light under shopfronts, canopies and lobbies.
+- [x] Procedural patterns: ashlar (podium, piers), slate (mansard roofs), deck boards (terraces), louvres (plant), perforated screens, blockwork (shafts), form-tie concrete (columns).
+- [x] Colour finishes: weathering streaks, panel and fin tone variation, patina on accents, sedum mottle, sheen on metals and sky reflection on spires, stair tread contrast, lobby warmth.
+- [x] Occlusion lines under cornices, belt courses, balconies, sills, caps and canopies.
+- [x] `check_external_fidelity` (37 presets), `check_ar_fidelity`, `check_interior`, planner parity pass. No console errors across 8 presets.
+- [x] `?debug=1` exposes `window.__map` for tests.
+- [ ] Limits: Mapbox has no per-face or metallic control, so sill bleaching, soffit shading and metal glint are approximated with occlusion, emissive strength and tone. The perforated screen is a dark dot pattern, not see-through.
+- [ ] Some presets show whole-floor blind bands where glazing is not a simple rectangle.
+
+Evidence: `codex/evidence/bg-096/`.
+
+## BG-097 — Mapbox view fixes: steady lighting, full cladding at every zoom, real-scale textures, draw tool
+
+- [x] Removed the random lit and blinded panes (windows, shopfronts) and the `-lit` layers. Glass keeps a faint pane-to-pane tone shift. Lobby doors and lift cars glow evenly. `splitLongQuads` and the `rm` seed are gone with them.
+- [x] Cladding partly vanishing at mid zoom: Mapbox's fill-extrusion shader (`FAUX_AO`) pulls depth toward the camera in proportion to each extrusion's base and height whenever AO intensity is above 0. Glass with AO beat the diagrid (no AO) from about z18 down, upper floors first; the pull is several metres at z17. AO is now 0 on every generated layer, and the BG-096 shadow lines are colour darkening instead.
+- [x] Textures at real size: Mapbox draws a pattern at one screen size per whole zoom, so one image was a 26 m tile at z18.5 and aliased into broad bands. `zoomScaledPattern` gives each texture a real width (`TEXTURE_TILE_M`, finish `metres`) and registers one pre-filtered image per zoom 14 to 22 behind a `step` expression.
+- [x] Draw tool in the Custom Footprint panel: Draw footprint / Undo / Finish / Remove. Click corners, then double-click, Enter or click the first corner to close; Backspace undoes, Esc cancels. Limits 30 m² to 4 ha, 400 m across, 40 corners, no crossing edges, with a live area readout. Basemap buildings under the shape are hidden. Shares `buildFromFootprintGeoJSON` with the GeoJSON upload.
+- [x] `#topBar` no longer swallows map clicks in the empty band beside the site menu.
+- [x] `check_external_fidelity` (37 presets), `check_ar_fidelity`, `check_interior`, `check_variation_levers`, planner parity pass. No console errors on presets 8, 12, 21, 26, 29, 31, 33, 36.
+- [ ] Draw tool is desktop only, like upload: the site menu is hidden below 900 px.
+
+Evidence: `codex/evidence/bg-097/`.
+
+## BG-098 — 25 uploadable famous-building presets
+
+`scripts/build_famous_presets.mjs` writes `presets/famous/*.json`, one importable file per building (Editor menu > Presets > Import preset). Each spec starts from the closest library preset, so every file carries the full configuration, then applies a one-palette colour set and the overrides that make the building recognisable. Footprints still come from the map; each description names the site shape that suits it.
+
+- [x] Skyscrapers (10): Empire State, Chrysler, Seagram, Taipei 101, Shanghai Tower, Petronas, John Hancock Center, Transamerica, The Shard, 432 Park Avenue.
+- [x] Low- and mid-rise (15): Flatiron, The Dakota, Unité d'Habitation, Bauhaus Dessau, Chilehaus, Lloyd's Building, Centre Pompidou, Royal Crescent, Herengracht canal house, Casa Milà, Barbican, Karl-Marx-Hof, Wainwright, Villa Savoye, The Ritz London.
+- [x] Every file imports and builds in a fresh browser with no console errors; keys and colours validated against the library contract.
+- [ ] Approximations the generator cannot express: Taipei 101's outward-flaring segments (stepped instead), Shanghai's 120° twist (90° maximum), Pompidou's colour-coded ducts (accent panels), Casa Milà's free-form plan (rounded bands).
+
+## BG-099 — AR viewer: camera modes, walking, permissions on load, interiors on every floor
+
+- [x] Menu overhaul: an always-visible dock (Live AR · Orbit · Walk, Reset view, Interior, Lock) and a Controls panel in five sections: Camera, Interior, Placement & alignment, Display, Status & permissions. Errors surface as a toast even with the panel closed.
+- [x] Camera modes: Live AR (camera feed + sensors), Orbit (OrbitControls: drag, pinch, pan) and Walk (virtual street view: arrows, W A S D, drag to look, or the phone's orientation). Virtual views draw a sky and ground and are lit by the sun model, not tinted by the camera.
+- [x] Walking moves the view: step detection on DeviceMotion (a lone peak never moves; the second step within 1.6 s starts a walk, 0.72 m a step) in Live AR and Walk. GPS only corrects walked drift that exceeds the fix's own accuracy. WebXR keeps its own 6DoF tracking.
+- [x] Permissions on load: camera, location and motion are requested independently at start-up; the start sheet is gone. iOS motion, which needs a tap, shows a single "Tap to enable motion" button. Retry lives under Status.
+- [x] Interior bug, top half disappearing: "Cut away above" was on by default and clipped the exterior above the active floor. It is now opt-in ("Cut away floors above").
+- [x] Empty floors: `js/interior/occupancy.js` instances one merged mesh per floor plan (room finishes, partitions, furniture blocks) at every floor; the active floor keeps the detailed stream, its neighbours keep detailed walls. The active floor's furniture cap rose from 24 to 160 (48 in Performance).
+- [x] Canvas follows rotation and resizes (it kept its first size).
+- [x] `check_ar_fidelity` (camera-mode contract added), `check_interior`, planner parity pass; phone, desktop and landscape layouts checked; no console errors.
+- [ ] Not tested on a real phone: step detection thresholds, iOS motion prompt, WebXR session start.
+- [ ] `js/interior/permissions.js` is no longer used.
+
+Evidence: `codex/evidence/bg-098/`, `codex/evidence/bg-099/`.
+
+## BG-100 — Standalone architectural assets: identities, provenance, IFC4, integrity, benchmark
+
+Generated buildings become exportable assets with stable component identities and provenance. The click/upload → preset → refine → export workflow is unchanged. No library or famous preset was replaced. A diff of every preset's output against the previous `app.html` (62 presets on 3 footprints) found differences only in pitched-roof presets: their roofs now use finer courses, at the same heights.
+
+- [x] Asset model (`js/asset-model.js`, [docs/ASSET_MODEL.md](../docs/ASSET_MODEL.md)):
+  - stable component ids (`<layer>-L<level>-<hash>`), IFC class and type, level, and basis (footprint-derived or procedural);
+  - a provenance block that separates source facts from inferred values;
+  - a local ENU frame and UTM georeference.
+- [x] Exports carry the same ids. The GeoJSON gets `mbg_*` properties. The GLB groups meshes Building → Level → class/material, with ids in `extras`. The new IFC4 export (`js/ifc-export.js`) writes storeys, spatial containment, materials, styles, `Pset_*Common`, `Pset_MBG_*` and `IfcMapConversion`. An on-page note says what is surveyed and what is generated.
+- [x] Interoperability, [docs/INTEROPERABILITY.md](../docs/INTEROPERABILITY.md): IFC4 validated with IfcOpenShell 0.9 (schema, EXPRESS rules, geometry, containment, georeference within 0.014 m). The GLB passes the Khronos validator with 0 errors and 0 warnings. GLB is documented as a visual asset, not an editable Revit model.
+- [x] Composition:
+  - entrance on the street-facing face (Mapbox Streets roads within 90 m, falling back to the longest face);
+  - podium entrance only on faces wide enough for it;
+  - canopy seated on its header;
+  - barrel-vault roof;
+  - adaptive roof course size;
+  - plant room capped at 450 m² on roofs over 2,000 m² only;
+  - no base zone on buildings no taller than it.
+- [x] Geographic integrity: holes, multipart, L-shapes, slivers and wedges generate and export (`scripts/check_asset_export.mjs`).
+- [x] Geometry integrity (`scripts/check_geometry_integrity.mjs`): no floating components, envelope gaps or duplicates across 62 presets and 3 footprints. It found and fixed a floating canopy, detached blade-crown ribs and a rail shoe doubling the terrace deck.
+- [x] Budgets (`scripts/check_budgets.mjs`, `scripts/budgets.json`): component, vertex and solid counts per preset, with 15% headroom.
+- [x] Performance baseline: [docs/PERFORMANCE.md](../docs/PERFORMANCE.md) (`scripts/measure_performance.py`).
+- [x] Workflow in a real browser (`scripts/check_workflow_browser.py`): click a mapped building, then export GLB, IFC and GeoJSON on desktop and at 390 px touch, with 0 console errors.
+- [x] Benchmark, [docs/BENCHMARK.md](../docs/BENCHMARK.md), harness in `scripts/benchmark/`:
+  - 7 openly licensed BIM references, matched views, the rubric, and objective metrics (footprint IoU 0.99 or better; height within 9% on every case);
+  - provisional AI scores: average 69.9, range 60–76.
+- [ ] **Benchmark target not met**: average 69.9 against the target of 80; smiley (69), Schependomlaan (65) and clinic (60) are below 70. The gaps are podium and facade (grouped openings, entrance bays, front gables). Next generator work is listed in BENCHMARK.md.
+- [ ] Human expert review: reviewers R2 and R3 are not yet nominated. The R1 scores are an AI estimate.
+- [ ] No tall reference: no openly licensed tower model with clear terms was found, so towers are covered only by the integrity and budget checks.
+- [ ] Revit not tested: the IFC import into Revit, ArchiCAD or BIMcollab and the round trip are untested. Only IfcOpenShell validation was run.
+- [ ] No real-device performance or AR test. The phone numbers come from Chromium emulation.
+- [ ] No geometric LOD: the Mapbox view and GLB carry one level of detail. Texture LOD exists (per-zoom patterns).
+
+- [ ] Known and unchanged from before this pass: on the L-shaped budget footprint, `buildSetbackTerrace` logs one caught turf error each for Spiral Setback Supertall and Stepped Garden Terraces. The previous `app.html` logs the same errors.
+
+Checks run, all passing:
+- integrity (62 presets);
+- budgets;
+- generation time (62 presets, max 222 ms);
+- external fidelity (37 presets);
+- AR fidelity;
+- interior;
+- planner parity `--check`;
+- asset export;
+- IFC validation (7 files, 0 issues);
+- glTF validation;
+- browser workflow on desktop and phone;
+- benchmark harness rerun from the repo.
+
+Upload to hosting: `app.html`, `js/asset-model.js`, `js/ifc-export.js` (plus the BG-099 AR files). Docs and `scripts/` are not needed on the server.
+
+Evidence: `codex/evidence/bg-100/`.

@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Benchmark viewer</title>
+<style>html,body{margin:0;background:#dfe3e6;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.185.1","three/addons/":"https://esm.sh/three@0.185.1/examples/jsm/"}}</script></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+/* Renders one model (?m=url, &zup=1 for IFC-derived meshes) from fixed views with a fixed
+   ground-centred framing, so reference and generated assets compare at matched scale. */
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 900, H = +q.get('h') || 700;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#dfe3e6');
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight('#fff4e6', 2.2); sun.position.set(-60, 90, 40); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); scene.add(sun, new THREE.HemisphereLight('#dfe9f2', '#7a756d', 0.7));
+const ground = new THREE.Mesh(new THREE.CircleGeometry(400, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#c9ccc6', roughness: 1 }));
+ground.receiveShadow = true; scene.add(ground);
+const camera = new THREE.PerspectiveCamera(30, W / H, 0.1, 5000);
+const gltf = await new GLTFLoader().loadAsync(q.get('m'));
+const root = gltf.scene;
+if (q.get('zup')) root.rotation.x = -Math.PI / 2;
+if (q.get('mirror')) root.scale.z = -1;
+root.updateMatrixWorld(true);
+const box = new THREE.Box3().setFromObject(root);
+const c = box.getCenter(new THREE.Vector3());
+/* optional explicit plan centre (reference footprint centroid) keeps both models on one origin */
+const cx = q.has('cx') ? +q.get('cx') : c.x, cz = q.has('cz') ? +q.get('cz') : c.z;
+/* gy: the model's ground level (storey 0 world elevation), so foundations sit below grade */
+const gy = q.has('gy') ? +q.get('gy') : box.min.y;
+root.position.set(-cx, -gy, -cz);
+root.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; const m = o.material; if (m && m.transparent && m.opacity < 0.2) m.opacity = 0.35; } });
+scene.add(root);
+const size = box.getSize(new THREE.Vector3());
+const R = +q.get('r') || Math.max(size.x, size.z, size.y) ;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -R * 1.5; sun.shadow.camera.right = sun.shadow.camera.top = R * 1.5; sun.shadow.camera.far = 600; sun.shadow.camera.updateProjectionMatrix();
+const VIEWS = { se: [1, 0.55, 1], nw: [-1, 0.55, -1], s: [0, 0.18, 1.4], e: [1.4, 0.18, 0], top: [0.001, 2.2, 0.001], sw: [-1, 0.55, 1], ne: [1, 0.55, -1] };
+const ty = +q.get('ty') || Math.max((box.max.y - gy) * 0.42, 2);
+window.shoot = name => {
+  const v = VIEWS[name];
+  const d = R * 1.9;
+  camera.position.set(v[0] * d, v[1] * d + ty * 0.4, v[2] * d);
+  camera.lookAt(0, ty, 0);
+  renderer.render(scene, camera);
+  return renderer.domElement.toDataURL('image/png');
+};
+window.info = { size: size.toArray(), R, center: [cx, cz], min: box.min.toArray() };
+window.ready = true;
+</script></body></html>

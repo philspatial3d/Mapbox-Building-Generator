@@ -268,13 +268,14 @@ export function createFixture(kind, w, d, m, lowDetail = false, features = []) {
   } else if (/table|nightstand/.test(kind)) {
     const h =
       kind === "coffee_table" ? 0.38 : kind === "nightstand" ? 0.52 : 0.74;
-    if (kind === "table" && w > 2.4) {
-      for (const x of [-w * 0.27, w * 0.27]) {
-        box(x, 0.35, 0, 0.15, 0.7, d * 0.58, m.metal, 0.012);
-        box(x, 0.025, 0, 0.55, 0.045, d * 0.72, m.metal, 0.012);
-      }
+    if (kind === "table" && w > 1.6) {
+      // Boardroom table: slab legs, a recessed shadow gap and a power module.
+      for (const x of [-w * 0.32, w * 0.32])
+        box(x, (h - 0.05) / 2, 0, 0.07, h - 0.05, d * 0.62, m.wood, 0.01);
+      box(0, h - 0.045, 0, w - 0.14, 0.035, d - 0.14, m.dark, 0.006);
+      box(0, h + 0.026, 0, Math.min(0.32, w * 0.15), 0.008, 0.11, m.metal, 0.003);
     } else legs(h - 0.06);
-    box(0, h, 0, w, 0.045, d, m.wood, 0.018);
+    box(0, h, 0, w, kind === "table" && w > 1.6 ? 0.05 : 0.045, d, m.wood, 0.018);
   } else if (kind === "pillow") {
     return root;
   } else if (kind === "rug") box(0, 0.012, 0, w, 0.02, d, m.textile, 0.008);

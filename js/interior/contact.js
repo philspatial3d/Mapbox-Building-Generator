@@ -8,7 +8,7 @@ export function createContactMaterial() {
       const i = (y * size + x) * 4,
         r = Math.hypot(((x + 0.5) / size) * 2 - 1, ((y + 0.5) / size) * 2 - 1);
       data[i] = data[i + 1] = data[i + 2] = 28;
-      data[i + 3] = Math.round(Math.pow(Math.max(0, 1 - r), 1.3) * 80);
+      data[i + 3] = Math.round(Math.pow(Math.max(0, 1 - r), 1.2) * 118);
     }
   const map = new THREE.DataTexture(data, size, size);
   map.colorSpace = THREE.SRGBColorSpace;

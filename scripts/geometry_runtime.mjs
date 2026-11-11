@@ -199,6 +199,7 @@ export function extractGeometryRuntime(html, roots = null) {
     "isGableEnd",
     "pitchedRidgeCache",
     "obeliskCache",
+    "PITCHED_ROOF_STYLES",
   ];
   /* unit floorplan engine helpers are top-level consts (fpX / FP_X) */
   [...html.matchAll(/^const ((?:fp|FP_)\w+)\s*=/gm)].forEach((match) => {

@@ -458,6 +458,12 @@
     background:#2f7158 !important;
     border-color:#2f7158 !important;
   }
+  #exportProvenanceNote{
+    margin:6px 0 8px;
+    color:var(--ui-ink-soft);
+    font-size:10px;
+    line-height:1.4;
+  }
   #exportBulkRow{
     display:grid;
     grid-template-columns:repeat(2, minmax(0, 1fr));
@@ -597,7 +603,10 @@
     grid-template-columns:minmax(220px, 250px) minmax(0, 1fr);
     gap:10px;
     align-items:start;
+    /* the grid row is as tall as the site menu; the empty band beside it is map */
+    pointer-events:none;
   }
+  #topBarLeft > *, #topBarRight > *{pointer-events:auto;}
 
   #topBarLeft{
     display:block;
@@ -852,6 +861,40 @@
     background:#fff;
     border-color:var(--ui-accent);
   }
+
+  #drawPanel{
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid rgba(143,160,177,.4);
+  }
+  #drawPanel .draw-actions{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:6px;
+  }
+  #drawPanel #drawStart{grid-column:1 / -1;}
+  #drawPanel button{
+    border:2px solid var(--ui-line-strong);
+    background:#fff;
+    color:var(--ui-ink);
+    font:700 11px/1.1 "IBM Plex Sans","Avenir Next",Arial,sans-serif;
+    padding:5px 7px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  #drawPanel button:hover:not(:disabled){border-color:var(--ui-accent);}
+  #drawPanel button:disabled{opacity:.45;cursor:default;}
+  #drawPanel #drawStart[aria-pressed="true"]{
+    background:var(--ui-accent);
+    border-color:var(--ui-accent);
+    color:#fff;
+  }
+  #drawStatus{
+    font-size:10px;
+    color:var(--ui-ink-soft);
+    margin-top:6px;
+  }
+  #drawStatus.error{color:#b00020;}
 
   #uploadStatus{
     font-size:10px;
@@ -1231,6 +1274,15 @@
         <div id="uploadPanel">
           <div class="panel-header"><span class="toggle-icon">▾</span>Custom Footprint</div>
           <div class="panel-content">
+            <div id="drawPanel">
+              <div class="draw-actions">
+                <button id="drawStart" type="button" aria-pressed="false">Draw footprint</button>
+                <button id="drawUndo" type="button" disabled>Undo</button>
+                <button id="drawFinish" type="button" disabled>Finish</button>
+                <button id="drawClear" type="button" disabled>Remove</button>
+              </div>
+              <div id="drawStatus" role="status" aria-live="polite">Click corners on the map; double-click or click the first corner to finish.</div>
+            </div>
             <label>Upload GeoJSON (≤ 1 MB)
               <input type="file" id="geoUpload" accept=".geojson,.json,application/geo+json,application/json">
             </label>
@@ -1615,6 +1667,7 @@
     <option value="gable">Pitched: gable</option>
     <option value="hip">Pitched: hip</option>
     <option value="mansard">Mansard with dormers</option>
+    <option value="vault">Barrel vault</option>
   </select>
 </td></tr>
 <tr><td>Crown Style</td><td><select id="crownStyle">
@@ -1783,6 +1836,7 @@
   <div id="export3dRow">
     <select id="export3dFormat" aria-label="3D export format">
       <option value="glb">GLB (.glb)</option>
+      <option value="ifc">IFC4 (.ifc, for BIM tools)</option>
       <option value="usdz">USDZ (.usdz)</option>
       <option value="gltf">GLTF (.gltf)</option>
       <option value="obj">OBJ (.obj)</option>
@@ -1790,6 +1844,7 @@
     </select>
     <button id="download3D" type="button">Export 3D</button>
   </div>
+  <p id="exportProvenanceNote">Footprint and location are from your source. Heights, storeys, entrance, materials and details are generated, not surveyed; GeoJSON, GLB and IFC exports label which is which.</p>
   <div id="exportBulkRow">
     <button id="downloadBulkGeo" type="button">Bulk GeoJSON</button>
     <button id="downloadBulk3D" type="button">Bulk GLB</button>
@@ -1821,6 +1876,8 @@ import { OBJExporter } from 'https://esm.sh/three@0.160.0/examples/jsm/exporters
 import { STLExporter } from 'https://esm.sh/three@0.160.0/examples/jsm/exporters/STLExporter.js';
 import { USDZExporter } from 'https://esm.sh/three@0.160.0/examples/jsm/exporters/USDZExporter.js';
 import { mergeGeometries, mergeVertices } from 'https://esm.sh/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js';
+import { buildAssetManifest, componentTypeFor } from './js/asset-model.js';
+import { buildIfc } from './js/ifc-export.js';
 // FBX Exporter is not available in standard Three.js distribution
 // import { FBXExporter } from 'https://esm.sh/three@0.160.0/examples/jsm/exporters/FBXExporter.js';
 /* ---------- map & patterns ---------- */
@@ -1882,6 +1939,7 @@ const map=new mapboxgl.Map({container:'map',style:getBaseStyleSpec(activeBaseSty
   zoom:BOOT_CAMERA && Number.isFinite(BOOT_CAMERA.zoom) ? BOOT_CAMERA.zoom : 15.5,
   pitch:BOOT_CAMERA && Number.isFinite(BOOT_CAMERA.pitch) ? BOOT_CAMERA.pitch : LOAD_PITCH,
   bearing:BOOT_CAMERA && Number.isFinite(BOOT_CAMERA.bearing) ? BOOT_CAMERA.bearing : 20});
+if (new URLSearchParams(location.search).has('debug')) window.__map = map;   /* test hook: ?debug=1 */
 
 /* geocoder */
 /* flyTo:false: the app flies itself (the plugin's own fly made the camera move twice).
@@ -1996,6 +2054,9 @@ const normalizeTextureChoice = value => {
 let lastGeo = null;            // holds the full geometry tree
 let lastPoly = null;
 let lastCfgSnapshot = null;
+let lastAssetFootprints = [];
+/* what the source said about the selected building, kept apart from what was generated */
+let lastSourceFacts = {};
 let lastFootprintSource = 'none';
 const MAX_MULTI_BUILDINGS = 5;
 let multiBuildMode = false;
@@ -2172,27 +2233,247 @@ function loadPatternTextures() {
 
 const textureSourceImages = new Map();
 
+/* Mapbox draws a pattern at one screen size per whole zoom level, so a single image that
+   is a 2 m tile at z18 becomes 8 m at z16 and shimmers with moire when it is minified.
+   Each texture gets a real-world width, and one pre-filtered image per zoom level keeps
+   it at that size from street level to the skyline view. */
+const PATTERN_MIN_ZOOM = 14;
+const PATTERN_MAX_ZOOM = 22;
+const TEXTURE_TILE_M = {
+  'facade-glass-grid': 1.5,
+  'facade-glass-frost': 0.4,
+  'wall-brick-red': 0.9,
+  'wall-brick-charcoal': 0.8,
+  'accent-timber-plank': 2.4,
+  'roof-sheet-metal': 2.4
+};
+const textureTileMetres = (name, widthPx) => TEXTURE_TILE_M[name] || clamp(widthPx * 0.01, 0.2, 4);
+/* makeTile draws one repeat of the texture; it only runs when a zoom image is missing. */
+function zoomScaledPattern(imageId, makeTile, tileMetres) {
+  const lat = map.getCenter().lat;
+  const latBand = Math.round(lat / 5) * 5;
+  const metresPerPx = z => 78271.517 * Math.cos(latBand * Math.PI / 180) / Math.pow(2, z);
+  const ids = [];
+  let tile = null;
+  for (let z = PATTERN_MIN_ZOOM; z <= PATTERN_MAX_ZOOM; z++) {
+    const id = `${imageId}-z${z}-l${latBand}`;
+    ids.push(id);
+    if (map.hasImage(id)) continue;
+    tile = tile || makeTile();
+    if (!tile) return null;
+    const metres = typeof tileMetres === 'function' ? tileMetres(tile) : tileMetres;
+    const cssW = metres / metresPerPx(z);
+    const w = clamp(Math.round(cssW * TEXTURE_PIXEL_RATIO), 2, 256);
+    const h = clamp(Math.round(w * tile.height / tile.width), 2, 256);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const g = canvas.getContext('2d', { alpha: false });
+    if (!g) return null;
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(tile, 0, 0, w, h);
+    map.addImage(id, g.getImageData(0, 0, w, h), { pixelRatio: w / cssW });
+  }
+  const expr = ['step', ['zoom'], ids[0]];
+  for (let i = 1; i < ids.length; i++) expr.push(PATTERN_MIN_ZOOM + i, ids[i]);
+  return expr;
+}
+
 function ensureOpaquePatternImage(name, backgroundColor) {
   const source = textureSourceImages.get(name);
   if (!source) return null;
   const color = /^#[0-9a-f]{6}$/i.test(String(backgroundColor || '')) ? backgroundColor : '#b8c2c8';
   const imageId = `${name}-opaque-${color.slice(1).toLowerCase()}`;
-  if (map.hasImage(imageId)) return imageId;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, source.width || 64);
-  canvas.height = Math.max(1, source.height || 64);
-  const ctx = canvas.getContext('2d', { alpha: false });
-  if (!ctx) return null;
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 0.34;
-  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 1;
-  map.addImage(imageId, ctx.getImageData(0, 0, canvas.width, canvas.height), { pixelRatio: TEXTURE_PIXEL_RATIO });
-  return imageId;
+  return zoomScaledPattern(imageId, () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, source.width || 64);
+    canvas.height = Math.max(1, source.height || 64);
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) return null;
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 0.34;
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+    return canvas;
+  }, tile => textureTileMetres(name, tile.width));
 }
 
+/* ---------- component finishes (Mapbox GL JS) ----------
+   One deliberate finish per building component, matching the AR viewer. Mapbox has no
+   custom shaders, so each finish is built from what the renderer does offer: per-feature
+   colour and glow expressions driven by seeds stamped on a copy of the features
+   (sd: this feature, ck: this bay column), procedural pattern images, flood light and
+   emissive strength.
+   No ambient occlusion on generated layers: Mapbox's AO shader pulls each extrusion's
+   depth toward the camera in proportion to its base and height, so a layer with AO
+   draws over a layer without it (glass over the diagrid, upper floors first) at mid and
+   far zoom. Shadow lines are carried in colour instead.
+   Finishes scale the component's chosen colour and never replace it, and a texture the
+   user picked for a layer always wins over a finish pattern. */
+const FINISH_CELL_M = 4.2;
+const finishHash = (a, b = 0, c = 0) => {
+  const v = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453123;
+  return v - Math.floor(v);
+};
+const MAP_FINISHES = {
+  /* envelope */
+  core:         { cue: 'rain-washed weathering streaks', tone: { amp: 0.05, key: 'sd' }, streak: true },
+  podium:       { cue: 'rusticated base courses', pattern: 'ashlar' },
+  podiumCap:    { cue: 'drip-shadowed precast band', darken: 0.1 },
+  piers:        { cue: 'ashlar stone coursing', pattern: 'ashlar-fine' },
+  borders:      { cue: 'satin-painted reveals that catch the light', emissive: 0.02 },
+  windowSills:  { cue: 'weathered sills, each a slightly different tone', tone: { amp: 0.06, key: 'sd' } },
+  seps:         { cue: 'belt courses and slab edges that read as a shadow line', darken: 0.12 },
+  cornices:     { cue: 'a projection held in its own shadow', darken: 0.1 },
+  parapets:     { cue: 'coping that catches the sky', emissive: 0.06 },
+  facadePanels: { cue: 'panel-to-panel tone variation', tone: { amp: 0.14, key: 'sd' } },
+  facadeJoints: { cue: 'true shadow gaps', darken: 0.45, emissive: 0 },
+  verticalRibs: { cue: 'glazed terracotta fins, each fired slightly differently', tone: { amp: 0.14, key: 'sd' }, emissive: 0.04 },
+  exoskeleton:  { cue: 'gloss-painted structural steel', emissive: 0.0, sheen: true },
+  accentPanels: { cue: 'weathered patina', mottle: { a: [0.72, 0.62, 0.5], b: [1.14, 1.08, 0.94] } },
+  mullions:     { cue: 'anodised aluminium glint', emissive: 0.0, sheen: true },
+  windows:      { cue: 'glass that picks up the sky, pane by pane', glass: { amp: 0.04 } },
+  balconies:    { cue: 'slab edges a shade darker than the wall', darken: 0.08 },
+  railings:     { cue: 'powder-coat sheen along the rails', emissive: 0.03, sheen: true },
+  /* street level */
+  podiumGlass:  { cue: 'warm light spilling from the shopfronts', glass: { amp: 0.04 }, flood: { color: '#ffc27a', intensity: 0.55, wall: 7, ground: 0 } },
+  podiumFrames: { cue: 'bronze-anodised frames', emissive: 0.0, sheen: true },
+  podiumDoors:  { cue: 'a lit lobby seen through the doors', glow: { color: '#ffe6bc', emissive: 0.85 } },
+  podiumCanopies: { cue: 'recessed downlights in the soffit', flood: { color: '#ffd9a6', intensity: 0.7, wall: 0, ground: 4 } },
+  podiumLobby:  { cue: 'warm lobby lighting', warm: 0.12, emissive: 0.7, flood: { color: '#ffc98a', intensity: 0.5, wall: 5, ground: 3 } },
+  /* roofscape */
+  roof:         { cue: 'ballast and ponding variation', tone: { amp: 0.14, key: 'sd' }, patternParts: { 'mansard|dormer|slate|pitched': 'slate' } },
+  roofTerraces: { cue: 'timber deck boards', pattern: 'deck' },
+  roofScreens:  { cue: 'perforated metal', pattern: 'perf' },
+  roofEquipment: { cue: 'louvred grilles', pattern: 'louvre' },
+  roofPlanting: { cue: 'mixed sedum colour', mottle: { a: [1.12, 0.96, 0.72], b: [0.88, 1.1, 0.82] } },
+  rooftopStructures: { cue: 'louvred plant rooms, reflective crown glazing', patternParts: { 'plant|louvre|bulkhead|lantern_tier|lantern_cap': 'louvre' }, glassParts: { 'glass': { emissive: 0.0, sheen: true } } },
+  spires:       { cue: 'polished stainless steel', emissive: 0.0, sky: true },
+  /* structure */
+  floorSlabs:   { cue: 'polished concrete topping', tone: { amp: 0.05, key: 'sd' } },
+  pillars:      { cue: 'fair-faced concrete with form-tie holes', pattern: 'formties' },
+  elevatorShafts: { cue: 'concrete blockwork coursing', pattern: 'blockwork' },
+  elevators:    { cue: 'lit lift cars', glow: { color: '#ffe6bc', emissive: 0.9 } },
+  stairs:       { cue: 'contrasting tread nosings', tone: { amp: 0.2, key: 'sd' } },
+  stairRailings: { cue: 'brushed stainless', emissive: 0.0, sheen: true }
+};
+/* metres: the real width of one tile (ashlar courses 0.6 m, deck boards 0.15 m, ...) */
+const FINISH_PATTERN_SPECS = {
+  'ashlar':      { metres: 2.4, rows: 4, blocks: 2, joint: 2, jointTone: 0.62, var: 0.1, stagger: true },
+  'ashlar-fine': { metres: 2.4, rows: 8, blocks: 4, joint: 1.5, jointTone: 0.72, var: 0.07, stagger: true },
+  'slate':       { metres: 2.5, rows: 10, blocks: 5, joint: 1.5, jointTone: 0.5, var: 0.16, stagger: true, shadow: true },
+  'deck':        { metres: 1.2, rows: 8, blocks: 1, joint: 1.5, jointTone: 0.5, var: 0.2, stagger: true },
+  'blockwork':   { metres: 1.6, rows: 8, blocks: 4, joint: 1.5, jointTone: 0.72, var: 0.06, stagger: true },
+  'formties':    { metres: 1.2, rows: 1, blocks: 1, joint: 2, jointTone: 0.82, var: 0.0, stagger: false, ties: true },
+  'louvre':      { metres: 1.2, louvre: true },
+  'perf':        { metres: 1.0, perf: true }
+};
+function ensureFinishPattern(kind, color) {
+  const spec = FINISH_PATTERN_SPECS[kind];
+  if (!spec) return null;
+  const base = /^#[0-9a-f]{6}$/i.test(String(color || '')) ? color : '#b8c2c8';
+  return zoomScaledPattern(`finish-${kind}-${base.slice(1).toLowerCase()}`, () => drawFinishTile(kind, spec, base), spec.metres);
+}
+function drawFinishTile(kind, spec, base) {
+  const N = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = N;
+  const g = canvas.getContext('2d', { alpha: false });
+  if (!g) return null;
+  g.fillStyle = base;
+  g.fillRect(0, 0, N, N);
+  const dark = (pct) => darkenHex(base, pct);
+  if (spec.louvre) {
+    const slat = N / 8;
+    for (let r = 0; r < 8; r++) {
+      g.fillStyle = lightenHex(base, 0.06);
+      g.fillRect(0, r * slat, N, slat * 0.55);
+      g.fillStyle = dark(0.55);
+      g.fillRect(0, r * slat + slat * 0.62, N, slat * 0.38);
+    }
+  } else if (spec.perf) {
+    const step = N / 8;
+    g.fillStyle = dark(0.62);
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      g.beginPath();
+      g.arc((c + 0.5 + (r % 2 ? 0.5 : 0)) * step, (r + 0.5) * step, step * 0.27, 0, Math.PI * 2);
+      g.fill();
+    }
+  } else {
+    const rowH = N / spec.rows, blockW = N / spec.blocks;
+    for (let r = 0; r < spec.rows; r++) {
+      const shift = spec.stagger && r % 2 ? blockW / 2 : 0;
+      for (let b = -1; b <= spec.blocks; b++) {
+        const x = b * blockW + shift;
+        const tone = (finishHash(r * 3.1 + b, kind.length, 5) - 0.5) * 2 * spec.var;
+        g.fillStyle = tone >= 0 ? lightenHex(base, tone) : darkenHex(base, -tone);
+        g.fillRect(x, r * rowH, blockW, rowH);
+        if (spec.shadow) {
+          g.fillStyle = dark(0.35);
+          g.globalAlpha = 0.55;
+          g.fillRect(x, r * rowH + rowH - 3, blockW, 3);
+          g.globalAlpha = 1;
+        }
+        g.fillStyle = dark(1 - spec.jointTone);
+        g.fillRect(x, r * rowH, spec.joint, rowH);
+      }
+      g.fillStyle = dark(1 - spec.jointTone);
+      g.fillRect(0, r * rowH, N, spec.joint);
+    }
+    if (spec.ties) {
+      g.fillStyle = dark(0.5);
+      for (const [x, y] of [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]]) {
+        g.beginPath(); g.arc(x * N, y * N, 3.2, 0, Math.PI * 2); g.fill();
+      }
+    }
+  }
+  return canvas;
+}
+/* The pattern a feature of this layer and part should carry, unless the user chose one. */
+function finishPatternFor(layerKey, part) {
+  const f = MAP_FINISHES[layerKey];
+  if (!f) return null;
+  if (f.patternParts) {
+    const key = Object.keys(f.patternParts).find(re => new RegExp(re).test(part || ''));
+    if (key) return f.patternParts[key];
+  }
+  return f.pattern || null;
+}
+/* Copies the features with the seeds the finish expressions read; the generated
+   geometry (and every export of it) is left untouched. */
+function annotateForFinish(fc, layerKey, layerPattern = 'none') {
+  const f = MAP_FINISHES[layerKey];
+  if (!f || !fc || !fc.features) return fc;
+  const features = fc.features.map(feat => {
+    const props = feat.properties || {};
+    const ring = feat.geometry && (feat.geometry.type === 'Polygon' ? feat.geometry.coordinates[0] : (feat.geometry.coordinates && feat.geometry.coordinates[0] && feat.geometry.coordinates[0][0]));
+    if (!ring || !ring.length) return feat;
+    let cx = 0, cy = 0;
+    ring.forEach(pt => { cx += pt[0]; cy += pt[1]; });
+    cx /= ring.length; cy /= ring.length;
+    const mx = Math.round(cx * 111320 * Math.cos(cy * Math.PI / 180)), my = Math.round(cy * 110540);
+    const next = Object.assign({}, props, {
+      sd: finishHash(mx * 0.37, my * 0.53, Number(props.b) || 0),
+      ck: finishHash(Math.floor(mx / FINISH_CELL_M), Math.floor(my / FINISH_CELL_M), 3)
+    });
+    const pattern = typeof props.p !== 'string' && (!layerPattern || layerPattern === 'none') ? finishPatternFor(layerKey, props.part) : null;
+    if (pattern) next.p = `finish:${pattern}`;
+    return { type: 'Feature', geometry: feat.geometry, properties: next };
+  });
+  return { type: 'FeatureCollection', features };
+}
+/* Multiplies a colour expression's channels; tone is a number expression, tint three. */
+function finishScaleColor(base, tone, tint = null) {
+  /* colour stops written as hex strings only coerce at the paint-property level, not inside to-color */
+  const typed = e => (Array.isArray(e) && e[0] === 'interpolate'
+    ? e.map((part, i) => (i >= 4 && i % 2 === 0 && typeof part === 'string' ? ['to-color', part] : part))
+    : e);
+  base = typed(base);
+  const ch = i => ['min', 255, ['*', ['at', i, ['var', 'c']], tint ? ['*', tint[i], ['var', 't']] : ['var', 't']]];
+  return ['let', 'c', ['to-rgba', ['to-color', base]], 't', tone, ['rgb', ch(0), ch(1), ch(2)]];
+}
 function applyMapTheme() {
   const style = map.getStyle();
   if (!style || !Array.isArray(style.layers)) return;
@@ -2357,6 +2638,8 @@ const safeDiff=(a,b, context = "difference")=> (a && b && a.geometry && b.geomet
 const safeInt=(a,b, context = "intersect")=> (a && b && a.geometry && b.geometry) ? safe(()=>turf.intersect(a,b), context) : null;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+/* declared with the utilities: the editor reads it while syncing controls at start-up */
+const PITCHED_ROOF_STYLES = ['gable', 'hip', 'mansard', 'vault'];
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
 const lightenHex = (hex, pct = 0.2) => {
     let h = hex.replace('#','');
@@ -4486,6 +4769,7 @@ $('roofProfile').addEventListener('change', e => {
 updateExteriorControlVisibility();
 
 map.on('click', async e => {
+  if (drawTool.active) return;
   if (!multiBuildMode && pointHitsActiveBuilding(e.point, e.lngLat)) {
     await renderWithLoader(lastPoly, cfg(), 'Updating Building', 'Rebuilding the active parcel with current parameters');
     return;
@@ -4597,6 +4881,14 @@ map.on('click', async e => {
   }
   updateMultiBuildUI();
   lastFootprintSource = multiBuildMode ? 'map-click-multi' : 'map-click';
+  const fp = f.properties || {};
+  lastSourceFacts = {
+    dataset: 'Mapbox Streets v8 building layer',
+    id: f.id ?? null,
+    height: Number.isFinite(Number(fp.height)) ? Number(fp.height) : null,
+    minHeight: Number.isFinite(Number(fp.min_height)) ? Number(fp.min_height) : null,
+    type: fp.type || null
+  };
   await renderWithLoader(lastPoly, cfg(), 'Generating Building', multiBuildMode
     ? 'Stacking selected parcels into one build/export set'
     : 'Deriving footprint and stacking layers');
@@ -4604,6 +4896,40 @@ map.on('click', async e => {
     setBuildingLoader(false);
   }
 });
+
+/* The level table every export shares: podium storeys, then tower storeys, then the roof,
+   at the elevations the geometry is actually built on. A raised plinth belongs to Level 00. */
+function assetLevelsFor(o) {
+  const levels = [];
+  const push = (elevation, height, zone) => {
+    const index = levels.length;
+    levels.push({ index, name: zone === 'roof' ? 'Roof' : `Level ${String(index).padStart(2, '0')}`, elevation, height, zone });
+  };
+  const plinth = plinthHeightFor(o);
+  let z = plinth;
+  const podiumFloors = Math.max(0, Math.floor(Number(o.podF) || 0));
+  const upper = clamp(Number(o.podiumUpperFloorHt) || Number(o.F) || 3.6, 2.4, 8);
+  for (let j = 0; j < podiumFloors; j++) {
+    const h = (j === 0 && o.podiumSpecialGroundFloor) ? o.podiumGroundFlrHt : upper;
+    push(z, h, 'podium');
+    z += h;
+  }
+  const podiumTop = totalPodiumHeightFor(o);
+  const floors = Math.max(0, Math.round(Number(o.floors) || 0));
+  let top = podiumTop;
+  for (let i = 0; i < floors; i++) {
+    const base = podiumTop + towerFloorOffset(o, i);
+    const h = towerFloorHeight(o, i);
+    push(base, h, 'tower');
+    top = base + h;
+  }
+  if (levels.length) {
+    levels[0].height += levels[0].elevation;
+    levels[0].elevation = 0;
+  }
+  push(top, 0, 'roof');
+  return levels;
+}
 
 function totalPodiumHeightFor(o) {
   let total = plinthHeightFor(o);
@@ -5071,7 +5397,37 @@ function syncAppInteriorPicker(footprints, o) {
   });
   const style = document.createElement('select'); style.id = 'interiorStyle'; style.setAttribute('aria-label','Building interior style');
   Object.entries(STYLES).forEach(([id,s]) => style.add(new Option(s.name,id)));
-  style.value = interiorSettings.style; style.onchange = () => { interiorSettings.style = style.value; scheduleSessionSave(); }; host.append(style);
+  style.value = interiorSettings.style; style.onchange = () => { interiorSettings.style = style.value; interiorSettings.styleChosen = true; scheduleSessionSave(); }; host.append(style);
+}
+
+/* Street frontage for Auto entrances: the mapped road nearest the footprint, major roads
+   weighted ahead of lanes, read from the basemap's own street data. Returns nothing when
+   no road is loaded within 90 m, and the entrance then takes the widest suitable face. */
+const STREET_CLASS_WEIGHT = { motorway: 0.6, trunk: 0.7, primary: 1.6, secondary: 1.5, tertiary: 1.35, street: 1.2, street_limited: 1, pedestrian: 0.9, service: 0.55 };
+function inferStreetFrontage(footprints, o) {
+  if ((o.podiumEntranceSide || 'auto') !== 'auto') return { __entranceBasis: 'chosen in the editor' };
+  const anchor = safe(() => turf.centroid(turf.featureCollection(footprints)), 'street anchor');
+  const roads = safe(() => map.querySourceFeatures('composite', { sourceLayer: 'road' }), 'street query') || [];
+  let best = null;
+  for (const road of roads) {
+    const cls = road.properties && road.properties.class;
+    const weight = STREET_CLASS_WEIGHT[cls];
+    if (!weight || !road.geometry || !/LineString/.test(road.geometry.type)) continue;
+    const lines = road.geometry.type === 'LineString' ? [road.geometry.coordinates] : road.geometry.coordinates;
+    for (const coords of lines) {
+      if (!Array.isArray(coords) || coords.length < 2) continue;
+      const line = turf.lineString(coords);
+      const near = safe(() => turf.nearestPointOnLine(line, anchor, { units: 'meters' }), 'street nearest');
+      if (!near || !(near.properties.dist <= 90)) continue;
+      const score = near.properties.dist / weight;
+      if (!best || score < best.score) best = { score, near, cls, name: road.properties.name || '' };
+    }
+  }
+  if (!best) return { __streetBearing: null, __entranceBasis: 'widest suitable facade (no mapped street within 90 m)' };
+  return {
+    __streetBearing: turf.bearing(anchor, best.near),
+    __entranceBasis: `faces the nearest mapped street${best.name ? ` (${best.name})` : ''}, ${best.cls}, ${Math.round(best.near.properties.dist)} m`
+  };
 }
 
 /* ---------- render ---------- */
@@ -5089,9 +5445,11 @@ function render(poly,o){
     return;
   }
 
+  Object.assign(o, inferStreetFrontage(footprints, o));
   const g = buildMerged(footprints, o);
   if (!g) return;
   lastGeo = g;                   // ← remember for download
+  lastAssetFootprints = footprints;
   lastCfgSnapshot = safe(() => JSON.parse(JSON.stringify(guardedCfg)), 'clone cfg snapshot') || guardedCfg;
   updateMultiBuildUI();
   syncAppInteriorPicker(footprints, o);
@@ -5157,7 +5515,8 @@ function render(poly,o){
   L.forEach(([k, c, a, p]) => {
     if (!g[k] || !g[k].features.length) return;
     const groups = new Map();
-    g[k].features.forEach(feat => {
+    const finishFeatures = annotateForFinish(g[k], k, p).features;
+    finishFeatures.forEach(feat => {
       const props = feat.properties || {};
       const own = typeof props.p === 'string' ? props.p : null;
       const pattern = own !== null ? own : p;
@@ -5206,9 +5565,12 @@ function render(poly,o){
       : clamp(a, 0, 1);
     const layerOpacity = getLayerPresentationOpacity(k, baseLayerOpacity, o);
     if (layerOpacity <= 0.01) return;
-    const opaquePattern = fallbackPattern !== 'none' && PATTERN_ENABLED_LAYERS.has(k)
-      ? ensureOpaquePatternImage(fallbackPattern, baseColor)
-      : null;
+    const finishKind = typeof p === 'string' && p.startsWith('finish:') ? p.slice(7) : null;
+    const opaquePattern = finishKind
+      ? ensureFinishPattern(finishKind, baseColor)
+      : (fallbackPattern !== 'none' && PATTERN_ENABLED_LAYERS.has(k)
+        ? ensureOpaquePatternImage(fallbackPattern, baseColor)
+        : null);
     const layerRadiance = clamp(lightPreset.radiance + (hierarchy === 'primary' ? 0.06 : hierarchy === 'accent' ? 0.02 : 0), 0.2, 0.92);
     const layerShadow = clamp(lightPreset.shadow + (hierarchy === 'accent' ? 0.04 : 0), 0.14, 0.72);
     const layerEmissive = ['windows', 'podiumGlass', 'podiumDoors'].includes(k)
@@ -5229,11 +5591,9 @@ function render(poly,o){
       'fill-extrusion-rounded-roof': true,         // ✨ gently domed roof
       'fill-extrusion-radiance'   : layerRadiance, // ✨ façade catches the sun
       'fill-extrusion-shadow-intensity': layerShadow,
-      /* Contact occlusion where masses meet the ground and each other (podium/tower junction,
-         setback terraces). Trim stays out: AO on 5 cm members only reads as dirt. */
-      'fill-extrusion-ambient-occlusion-intensity': hierarchy === 'primary' ? 0.32 : (hierarchy === 'secondary' ? 0.18 : 0),
-      'fill-extrusion-ambient-occlusion-wall-radius': 2.2,
-      'fill-extrusion-ambient-occlusion-ground-radius': hierarchy === 'primary' ? 9 : 3,
+      /* Off on every generated layer: AO's depth bias lets one layer draw over another
+         (see the component finishes note). */
+      'fill-extrusion-ambient-occlusion-intensity': 0,
       /* Per-extrusion vertical gradient darkens the foot of every floor slice, which striped
          the whole tower; light and AO now do the shading. */
       'fill-extrusion-vertical-gradient': false
@@ -5253,6 +5613,50 @@ function render(poly,o){
         : baseColor;
     }
     basePaint['fill-extrusion-emissive-strength'] = layerEmissive;
+
+    /* component finish: one cue per component, built from per-feature colour/glow expressions,
+       flood light and occlusion (see MAP_FINISHES) */
+    const finish = MAP_FINISHES[k] || null;
+    if (finish) {
+      const topH = fc.features.reduce((m, feat) => Math.max(m, Number(feat && feat.properties && feat.properties.h) || 0), 1);
+      if (finish.emissive !== undefined) basePaint['fill-extrusion-emissive-strength'] = Math.min(layerEmissive, finish.emissive);
+      if (finish.flood) {
+        basePaint['fill-extrusion-flood-light-color'] = finish.flood.color;
+        basePaint['fill-extrusion-flood-light-intensity'] = finish.flood.intensity;
+        basePaint['fill-extrusion-flood-light-wall-radius'] = finish.flood.wall;
+        basePaint['fill-extrusion-flood-light-ground-radius'] = finish.flood.ground;
+      }
+      const colorBase = basePaint['fill-extrusion-color'];
+      if (colorBase !== undefined && !opaquePattern) {
+        const sd = ['get', 'sd'];
+        let tone = null, tint = null;
+        if (finish.tone) tone = ['+', 1, ['*', ['-', sd, 0.5], finish.tone.amp * 2]];
+        if (finish.streak) {
+          const streak = ['case', ['>', ['get', 'ck'], 0.72], 0.88, ['>', ['get', 'ck'], 0.55], 0.95, 1];
+          tone = tone ? ['*', tone, streak] : streak;
+        }
+        if (finish.sheen) tone = ['+', 0.88, ['*', 0.12, sd], ['*', 0.14, ['/', ['get', 'b'], topH]]];
+        if (finish.sky) tone = ['+', 0.7, ['*', 0.5, ['/', ['get', 'b'], topH]]];
+        if (finish.darken) tone = 1 - finish.darken;
+        if (finish.mottle) {
+          tint = [0, 1, 2].map(i => ['case', ['<', sd, 0.33], finish.mottle.a[i], ['>', sd, 0.66], finish.mottle.b[i], 1]);
+          tone = tone || 1;
+        }
+        if (finish.warm) {
+          tint = [1 + finish.warm, 1, 1 - finish.warm];
+          tone = tone || 1;
+        }
+        if (finish.glow) {
+          basePaint['fill-extrusion-color'] = finish.glow.color;
+          basePaint['fill-extrusion-emissive-strength'] = finish.glow.emissive;
+        } else if (finish.glass) {
+          /* a faint pane-to-pane shift; nothing switches on or off between panes */
+          basePaint['fill-extrusion-color'] = finishScaleColor(colorBase, ['+', 1 - finish.glass.amp, ['*', finish.glass.amp * 2, sd]]);
+        } else if (tone !== null) {
+          basePaint['fill-extrusion-color'] = finishScaleColor(colorBase, tone, tint);
+        }
+      }
+    }
 
     const baseId = `${srcId}-col`;
     map.addLayer({ id: baseId, type: 'fill-extrusion', source: srcId, paint: basePaint });
@@ -5744,18 +6148,28 @@ function buildLocalAxisRect(centerPoint, bearingDeg, alongMin, alongMax, acrossM
   return turf.polygon([[p1, p2, p3, p4, p1]]);
 }
 
-function selectPodiumEntranceSegment(segments, mode = 'auto') {
+function selectPodiumEntranceSegment(segments, mode = 'auto', o = null) {
   if (!Array.isArray(segments) || !segments.length) return null;
-  const viable = segments.filter(seg => Number(seg.len) >= 2.4);
-  const candidates = viable.length ? viable : segments;
-  if (['north', 'east', 'south', 'west'].includes(mode)) {
-    const target = { north: 0, east: 90, south: 180, west: -90 }[mode];
-    return candidates.slice().sort((a, b) => {
-      const delta = bearingDeltaDeg(a.outwardBearing, target) - bearingDeltaDeg(b.outwardBearing, target);
-      return Math.abs(delta) > 0.001 ? delta : b.len - a.len;
-    })[0];
+  /* An entrance needs its opening plus a pier either side; a narrower face only takes it
+     when the plan has nothing wider. */
+  const needed = Math.max(4, (Number(o && o.podiumEntranceWidth) || 6.2) + 2);
+  const wide = segments.filter(seg => Number(seg.len) >= needed);
+  const usable = segments.filter(seg => Number(seg.len) >= 2.4);
+  const candidates = wide.length ? wide : (usable.length ? usable : segments);
+  const byDelta = target => candidates.slice().sort((a, b) => {
+    const delta = bearingDeltaDeg(a.outwardBearing, target) - bearingDeltaDeg(b.outwardBearing, target);
+    return Math.abs(delta) > 0.001 ? delta : b.len - a.len;
+  });
+  if (['north', 'east', 'south', 'west'].includes(mode)) return byDelta({ north: 0, east: 90, south: 180, west: -90 }[mode])[0];
+  const longest = candidates.slice().sort((a, b) => b.len - a.len)[0];
+  /* Auto: face the nearest mapped street when one is known; the widest face that looks at
+     it, else the face that looks closest to it. */
+  const street = o && Number.isFinite(o.__streetBearing) ? o.__streetBearing : null;
+  if (mode === 'auto' && street !== null) {
+    const facing = candidates.filter(seg => bearingDeltaDeg(seg.outwardBearing, street) <= 60);
+    return facing.length ? facing.sort((a, b) => b.len - a.len)[0] : byDelta(street)[0];
   }
-  return candidates.slice().sort((a, b) => b.len - a.len)[0];
+  return longest;
 }
 
 function facadePointAt(seg, distance, label = 'facade point') {
@@ -5823,7 +6237,7 @@ function buildPodiumSystem(footprintPoly, o, out) {
       return { ...seg, a: a.geometry.coordinates, b: b.geometry.coordinates, line };
     });
   }
-  const entranceSeg = selectPodiumEntranceSegment(segments, o.podiumEntranceSide || 'auto');
+  const entranceSeg = selectPodiumEntranceSegment(segments, o.podiumEntranceSide || 'auto', o);
   const entranceSegIndex = entranceSeg ? segments.indexOf(entranceSeg) : -1;
   const entranceMode = o.podiumEntranceSide || 'auto';
   const entryPosition = entranceMode === 'corner'
@@ -6085,7 +6499,8 @@ function buildPodiumSystem(footprintPoly, o, out) {
         const canopyWidth = entranceWidth + (canopyStyle === 'deep-soffit' ? 2.4 : 1.2);
         const canopy = buildOrientedRect(canopyCenter.geometry.coordinates, canopyWidth, canopyDepth, entranceSeg.bearing);
         const canopyBase = clamp(
-          canopyStyle === 'deep-soffit' ? entranceHeight - 0.35 : entranceHeight + 0.08,
+          /* seated on the entrance header, so the canopy is carried, not hovering above it */
+          canopyStyle === 'deep-soffit' ? entranceHeight - 0.35 : entranceHeight - 0.04,
           doorHeight + 0.16,
           groundFloorHeight - canopyThickness - 0.06
         );
@@ -7798,7 +8213,7 @@ function fpDetailPlan(ctx, cand) {
 
   /* windows: glazing breaks in the outer wall of daylit rooms */
   exteriorEdges.forEach(({ p, t, len }) => {
-    const ww = clamp(len * 0.58, 0.9, len - 0.5);
+    const ww = clamp(len * 0.7, 0.9, len - 0.6);
     if (ww < 0.8) return;
     const a = fpAdd(p, t, (len - ww) / 2);
     const b = fpAdd(a, t, ww);
@@ -9308,7 +9723,9 @@ function bayVerticalProfile(o, i, base, top) {
 function elevationZoneFor(o, floorIndex) {
   if (!o.zoneEnable) return 'shaft';
   const floors = Math.max(1, Math.round(Number(o.floors) || 1));
-  const baseFloors = clamp(Math.round(Number(o.zoneBaseFloors) || 0), 0, floors);
+  /* A base needs something above it: when the base would take every storey (a one-storey
+     house under a two-storey base setting) the whole building keeps its wall material. */
+  const baseFloors = floors > Math.round(Number(o.zoneBaseFloors) || 0) ? Math.max(0, Math.round(Number(o.zoneBaseFloors) || 0)) : 0;
   const topFloors = clamp(Math.round(Number(o.zoneTopFloors) || 0), 0, floors);
   if (floorIndex < baseFloors) return 'base';
   if (floorIndex >= floors - topFloors) return 'top';
@@ -9435,7 +9852,9 @@ function stackContinuousExtrusions(features) {
 function exportMaterialProfile(layerKey, pattern) {
   const pat = String(pattern || 'none');
   if (['windows', 'podiumGlass', 'podiumDoors'].includes(layerKey)) {
-    return { kind: 'glass', roughness: 0.05, metalness: 0.08, transmission: 0.7, ior: 1.52, thickness: 0.02 };
+    /* Exports have no interiors behind the panes: low transmission reads as dark, reflective
+       glass in any viewer instead of see-through boxes. */
+    return { kind: 'glass', roughness: 0.05, metalness: 0.08, transmission: 0.3, ior: 1.52, thickness: 0.02 };
   }
   if (['mullions', 'borders', 'railings', 'stairRailings', 'exoskeleton', 'podiumFrames', 'podiumCanopies', 'roofScreens', 'spires', 'facadeJoints'].includes(layerKey)) {
     return { kind: 'metal', roughness: 0.34, metalness: 0.82 };
@@ -10032,15 +10451,15 @@ const isGableEnd = (ends, seg) => ends.some(e => bearingDeltaDeg(e.bearing, seg.
 
 const pitchedRidgeCache = new WeakMap();
 
-/* Gable, hip and mansard roofs as 0.14 m courses (fill-extrusions have no slopes).
-   Gable ends get a thin wall-coloured skin so the triangle reads as masonry under
-   a roof-coloured rake; dormers follow the facade bays below. */
+/* Gable, hip, mansard and barrel-vault roofs as stacked courses (fill-extrusions have no
+   slopes). Gable and vault ends get a thin wall-coloured skin so the end reads as masonry
+   under a roof-coloured rake; dormers follow the facade bays below. */
 function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
   const fr = roofFrame(topShell);
   if (!fr) return roofBase;
   const style = o.roofProfile;
+  const gableLike = style === 'gable' || style === 'vault';
   const F = Number(o.F) || 3.2;
-  const step = 0.14;
   const ov = clamp(Number(o.roofOverhang) || 0, 0, 1.2);
   const pitchDeg = clamp(Number(o.roofPitch) || 35, 10, 65);
   const eave = ov > 0 ? (safeBuf(topShell, ov, 'roof eave') || topShell) : topShell;
@@ -10062,15 +10481,28 @@ function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
   const maxRise = Math.min(style === 'mansard'
     ? clamp(F * 0.88, 2.2, 3.6) + 1.4
     : (pitchDeg >= 50 ? clamp(F * 5, 8, 26) : clamp(F * 1.8, 3.2, 7.5)), clamp(roofBase * 0.75, 3.2, 26));
-  const capped = () => z - roofBase >= maxRise;
+  /* A barrel vault rises as a circular segment across the short span; its rise follows the
+     pitch control (35 degrees gives about 0.38 of the half-span). */
+  const halfSpan = Math.max(1, fr.ext.acrossSpan / 2 + ov);
+  const vaultRise = clamp(halfSpan * clamp(Math.tan((pitchDeg * Math.PI) / 180) * 0.55, 0.12, 0.6), 0.8, maxRise);
+  const roofRise = style === 'vault' ? vaultRise : maxRise;
+  /* About 40 courses per roof: fine enough that a house's rake reads as a slope, not a
+     staircase, without multiplying the course count on deep plans. */
+  const step = clamp(roofRise / 40, 0.06, 0.14);
+  const capped = () => z - roofBase >= roofRise;
   let deckPlate = null;
   let lastSlice = null;
-  if (style === 'gable') {
+  if (gableLike) {
     /* Each wing's short end stays a vertical gable wall and every other edge pitches.
        Pushing the gable ends far outward before insetting makes the inward buffer bite
        only from the sloped eaves, so an L or T plan gets one ridge per wing with
        valleys where the wings meet, instead of one ridge across the whole lot. */
     const r = run(pitchDeg);
+    const vaultR = (halfSpan * halfSpan + vaultRise * vaultRise) / (2 * vaultRise);
+    /* inset at which the roof reaches height h above the eave: d(h) for a vault, h/tan(pitch) for a gable */
+    const insetAt = (k, h) => (style === 'vault'
+      ? halfSpan - Math.sqrt(Math.max(0, vaultR * vaultR - (Math.min(h, vaultRise) + vaultR - vaultRise) ** 2))
+      : (k + 1) * r);
     const ends = gableEndSegments(topShell);
     let extruded = eave;
     let verge = eave;
@@ -10085,8 +10517,8 @@ function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
     });
     let slice = verge;
     for (let k = 0; k < 160 && slice && slice.geometry && polyArea(slice) > 0.05; k++) {
-      if (capped()) { deckPlate = slice; break; }
-      const inset = safeBuf(extruded, -(k + 1) * r, 'gable course inset');
+      if (capped()) { deckPlate = style === 'vault' ? null : slice; if (style === 'vault') { lastSlice = slice; pushSlice(slice, 'vault_roof_course'); } break; }
+      const inset = safeBuf(extruded, -Math.max(0.02, insetAt(k, z + step - roofBase - 0.2)), 'gable course inset');
       const next = inset && inset.geometry ? safeInt(verge, inset, 'gable course') : null;
       /* Gable-end skin 6-9 cm proud of the slices, one course narrower, so the wall
          triangle reads as masonry under a roof-coloured rake. */
@@ -10099,7 +10531,7 @@ function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
         out.core.push(turf.feature(segLocalPolygon(seg, [[span[0], 0.065], [span[1], 0.065], [span[1], 0.095], [span[0], 0.095]]).geometry, { b: z, h: z + step + 0.01, part: 'gable_end_wall' }));
       });
       lastSlice = slice;
-      pushSlice(slice, 'gable_roof_course');
+      pushSlice(slice, style === 'vault' ? 'vault_roof_course' : 'gable_roof_course');
       slice = next && next.geometry && polyArea(next) > 0.05 ? next : null;
     }
   } else {
@@ -10139,12 +10571,12 @@ function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
     const faces = [];
     const glass = [];
     const caps = [];
-    const gableEnds = style === 'gable' ? gableEndSegments(topShell) : [];
+    const gableEnds = gableLike ? gableEndSegments(topShell) : [];
     /* Dormer faces sit back on the slope, behind the eave line, never proud of the wall. */
     const sb = style === 'mansard' ? 0.25 : 0.4;
     layout.segments.forEach(entry => {
       const { seg, zone } = entry;
-      if (style === 'gable' && isGableEnd(gableEnds, seg)) return;
+      if (gableLike && isGableEnd(gableEnds, seg)) return;
       if (seg.len < 3) return;
       entry.bays.forEach((bay, k) => {
         if (style !== 'mansard' && k % 2 === 1 && entry.bays.length > 2) return;
@@ -10173,13 +10605,13 @@ function buildPitchedRoof(topShell, o, roofBase, out, refShell) {
 function buildChimneys(shell, o, roofBase, roofTop, out) {
   const count = clamp(Math.round(Number(o.chimneyCount) || 0), 0, 6);
   /* Gable chimneys stand on the ridge, which on an L plan is no longer the lot's axis. */
-  const ridge = o.roofProfile === 'gable' ? pitchedRidgeCache.get(shell.geometry) : null;
+  const ridge = (o.roofProfile === 'gable' || o.roofProfile === 'vault') ? pitchedRidgeCache.get(shell.geometry) : null;
   const host = ridge && ridge.geometry ? (safeBuf(ridge, 0.6, 'chimney ridge reach') || shell) : shell;
   const fr = count ? roofFrame(ridge && ridge.geometry ? ridge : shell) : null;
   if (!fr) return;
   const { anchor, bearing, ext, acrossMid } = fr;
   const trim = trimColorFor(o);
-  const pitched = ['gable', 'hip', 'mansard'].includes(o.roofProfile);
+  const pitched = PITCHED_ROOF_STYLES.includes(o.roofProfile);
   const top = pitched ? roofTop + 0.9 : roofTop + 1.7;
   const slots = [0.12, 0.88, 0.5, 0.32, 0.68, 0.22];
   for (let k = 0; k < count; k++) {
@@ -10402,11 +10834,12 @@ function railPickets(band, spacing = 0.42, size = 0.035) {
 
 function emitIronRail(out, band, deck, railH, o) {
   const top = deck + railH;
-  out.railings.push(turf.feature(band.geometry, { b: deck, h: deck + 0.06, part: 'iron_rail_shoe' }));
-  out.railings.push(turf.feature(band.geometry, { b: deck + 0.14, h: deck + 0.18, part: 'iron_bottom_rail' }));
+  /* the shoe sits on the 6 cm deck, not in it: a narrow terrace band is the deck outline itself */
+  out.railings.push(turf.feature(band.geometry, { b: deck + 0.05, h: deck + 0.11, part: 'iron_rail_shoe' }));
+  out.railings.push(turf.feature(band.geometry, { b: deck + 0.18, h: deck + 0.22, part: 'iron_bottom_rail' }));
   out.railings.push(turf.feature(band.geometry, { b: top - 0.06, h: top, part: 'iron_handrail' }));
   const pickets = railPickets(band);
-  if (pickets) out.railings.push(turf.feature(pickets.geometry, { b: deck + 0.06, h: top - 0.06, part: 'iron_pickets' }));
+  if (pickets) out.railings.push(turf.feature(pickets.geometry, { b: deck + 0.11, h: top - 0.06, part: 'iron_pickets' }));
 }
 
 /* Dubai sail crown: a glazed screen wall rises past the roof, and an open blade frame
@@ -10428,13 +10861,18 @@ function buildBladeCrown(topShell, o, roofTop, out) {
   const L0 = ext.alongSpan * 0.9;
   const a0 = ext.alongMin + ext.alongSpan * 0.05;
   const n = 32;
+  let prevBackStart = Infinity;
   for (let k = 0; k < n; k++) {
     const t = (k + 0.5) / n;
     const len = L0 * Math.sqrt(Math.max(0, 1 - t * t));
     if (len < 0.5) break;
     const w = w0 * (1 - 0.4 * t);
     const rib = Math.min(1.4, len / 2);
-    const spans = len > 4 ? [[a0, a0 + rib], [a0 + len - rib, a0 + len]] : [[a0, a0 + len]];
+    /* Near the top the sail edge steps in faster than a rib is wide; each back rib reaches
+       out over the one below, so the edge stays one continuous member, not loose pieces. */
+    const backEnd = Number.isFinite(prevBackStart) ? Math.max(a0 + len, prevBackStart + 0.12) : a0 + len;
+    const spans = len > 4 ? [[a0, a0 + rib], [a0 + len - rib, backEnd]] : [[a0, Math.max(a0 + len, Number.isFinite(prevBackStart) ? prevBackStart + 0.12 : a0 + len)]];
+    prevBackStart = a0 + len - rib;
     if (k === 0) spans.splice(0, spans.length, [a0, a0 + len]);
     spans.forEach(([s0, s1]) => out.spires.push(turf.feature(
       buildLocalAxisRect(anchor, bearing, s0, s1, acrossMid - w / 2, acrossMid + w / 2).geometry,
@@ -11022,7 +11460,7 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
         crown && crown.geometry && out.cornices.push(turf.feature(crown.geometry, {b: crownBase, h: mainRoofBase, part: 'cornice_crown'}));
     }
 
-    const pitchedRoof = ['gable', 'hip', 'mansard'].includes(o.roofProfile);
+    const pitchedRoof = PITCHED_ROOF_STYLES.includes(o.roofProfile);
     out.roof.push(turf.feature(topFloorShell.geometry,{b:mainRoofBase,h:mainRoofBase+o.roofSlabH,part:'main_roof_slab'}));
     const mainRoofTop = mainRoofBase + o.roofSlabH;
     let roofCapTop = mainRoofTop;
@@ -11044,10 +11482,20 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
         coping && coping.geometry && out.parapets.push(turf.feature(coping.geometry, {b: mainRoofTop + o.parapetH, h: mainRoofTop + o.parapetH + copingH, part: 'parapet_coping'}));
     }
 
-    if (!['tapered', 'terraced', 'crown', 'gable', 'hip', 'mansard'].includes(o.roofProfile) && o.penthouseF > 0 && o.penthouseScale > 0) {
+    if (!['tapered', 'terraced', 'crown', ...PITCHED_ROOF_STYLES].includes(o.roofProfile) && o.penthouseF > 0 && o.penthouseScale > 0) {
         const penthouseBasePolyUnscaled = floorShell(footprintPoly,o,o.floors);
         if (penthouseBasePolyUnscaled && penthouseBasePolyUnscaled.geometry) {
-            const penthouseBasePoly = insetPlate(penthouseBasePolyUnscaled, o.penthouseScale, "Penthouse inset");
+            /* A plant room or lift overrun, not a second building. Tower and block plates keep
+               the preset's own proportion exactly; only roofs over 2,000 m2 (a clinic or a
+               campus wing) cap the enclosure at 450 m2, held 3 m clear of the roof edge. */
+            const roofArea = polyArea(penthouseBasePolyUnscaled);
+            const scaledArea = roofArea * o.penthouseScale * o.penthouseScale;
+            const capped = roofArea > 2000 && scaledArea > 450;
+            const insetCandidate = insetPlate(penthouseBasePolyUnscaled, capped ? Math.sqrt(450 / roofArea) : o.penthouseScale, "Penthouse inset");
+            const clearRoof = capped ? safeBuf(penthouseBasePolyUnscaled, -3, 'Penthouse edge clearance') : null;
+            const penthouseBasePoly = clearRoof && clearRoof.geometry && insetCandidate && insetCandidate.geometry
+              ? (safeInt(insetCandidate, clearRoof, 'Penthouse inside clearance') || insetCandidate)
+              : insetCandidate;
             if (penthouseBasePoly && penthouseBasePoly.geometry) {
                 const penthouseWallBase = mainRoofTop;
                 const penthouseWallTop = penthouseWallBase + o.penthouseF * F;
@@ -11702,7 +12150,7 @@ function updateExteriorControlVisibility() {
   ['penthouseFloors', 'penthouseScale', 'penthouseColor']
     .forEach(id => setControlRowVisible(id, ['standard', 'mechanical', 'green'].includes(roofStyle)));
 
-  const pitchedRoof = ['gable', 'hip', 'mansard'].includes(roofStyle);
+  const pitchedRoof = PITCHED_ROOF_STYLES.includes(roofStyle);
   ['roofOverhang', 'dormers'].forEach(id => setControlRowVisible(id, pitchedRoof));
   setControlRowVisible('roofPitch', pitchedRoof || (roofStyle === 'crown' && $('crownStyle') && $('crownStyle').value === 'raked'));
   const rhythmOn = Number($('tierEvery') && $('tierEvery').value) > 0;
@@ -11998,24 +12446,11 @@ function handleGeoUpload(e) {
       try { parsed = JSON.parse(ev.target.result); }
       catch(err) { setUploadStatus('Invalid JSON. Please upload GeoJSON.', true); return; }
 
-      const prepared = prepareFootprints(parsed);
-      const deduped = dedupeFootprints(prepared);
-      const anchor = chooseLargestPolygon(deduped) || deduped[0];
-      const clustered = connectedFootprintCluster(deduped, anchor);
-      const footprints = clustered.length ? dedupeFootprints(clustered) : deduped;
-      if (!footprints.length) {
+      const footprints = await buildFromFootprintGeoJSON(parsed, 'upload', [], 'Preparing uploaded parcel geometry');
+      if (!footprints) {
         setUploadStatus('No usable Polygon/MultiPolygon found in file.', true);
         return;
       }
-      selectedBuildingGroups = [{
-        signature: footprintSignature(footprints),
-        footprints,
-        hiddenIds: []
-      }];
-      setActiveFootprints(footprints, false);
-      lastFootprintSource = 'upload';
-      updateMultiBuildUI();
-      await renderWithLoader(lastPoly, cfg(), 'Loading Footprint', 'Preparing uploaded parcel geometry');
       const polyCount = footprints.length;
       const polyLabel = polyCount === 1 ? 'polygon' : 'polygons';
       setUploadStatus(`Loaded ${file.name} · ${polyCount} ${polyLabel} · ${Math.ceil(file.size/1024)} KB`);
@@ -12026,6 +12461,198 @@ function handleGeoUpload(e) {
   reader.onerror = () => setUploadStatus('Could not read file.', true);
   reader.readAsText(file);
 }
+
+/* Shared by upload and draw: the same footprint preparation a map click gets, then a build. */
+async function buildFromFootprintGeoJSON(geojson, source, hiddenIds, detail) {
+  const deduped = dedupeFootprints(prepareFootprints(geojson));
+  const anchor = chooseLargestPolygon(deduped) || deduped[0];
+  const clustered = connectedFootprintCluster(deduped, anchor);
+  const footprints = clustered.length ? dedupeFootprints(clustered) : deduped;
+  if (!footprints.length) return null;
+  const props = (geojson && geojson.type === 'FeatureCollection' ? (geojson.features[0] || {}).properties : geojson && geojson.properties) || {};
+  const numberOf = key => (Number.isFinite(Number(props[key])) ? Number(props[key]) : null);
+  lastSourceFacts = source === 'draw'
+    ? { dataset: 'drawn in the editor' }
+    : { dataset: 'uploaded GeoJSON', id: props.id ?? null, height: numberOf('height'), minHeight: numberOf('min_height'), levels: numberOf('building:levels') ?? numberOf('levels') };
+  selectedBuildingGroups = [{ signature: footprintSignature(footprints), footprints, hiddenIds }];
+  setActiveFootprints(footprints, false);
+  lastFootprintSource = source;
+  updateMultiBuildUI();
+  await renderWithLoader(lastPoly, cfg(), 'Loading Footprint', detail);
+  return footprints;
+}
+
+/* ---------- Draw a footprint ----------
+   Click corners on the map; double-click, Enter or a click on the first corner closes the
+   shape and builds on it. Limits keep a drawn site to one building's worth of plot. */
+const DRAW_MIN_AREA_M2 = 30;
+const DRAW_MAX_AREA_M2 = 40000;       // 4 ha, about 200 x 200 m
+const DRAW_MAX_SPAN_M = 400;
+const DRAW_MAX_CORNERS = 40;
+const DRAW_SOURCE_ID = 'mbg-draw';
+const drawTool = { active: false, points: [], hover: null, frame: 0 };
+const drawStartBtn = $('drawStart');
+const drawUndoBtn = $('drawUndo');
+const drawFinishBtn = $('drawFinish');
+const drawClearBtn = $('drawClear');
+const drawStatusEl = $('drawStatus');
+const DRAW_HINT = 'Click corners on the map; double-click or click the first corner to finish.';
+
+const setDrawStatus = (msg, isError = false) => {
+  if (!drawStatusEl) return;
+  drawStatusEl.textContent = msg;
+  drawStatusEl.classList.toggle('error', Boolean(isError));
+};
+const formatArea = m2 => (m2 >= 10000 ? `${(m2 / 10000).toFixed(2)} ha` : `${Math.round(m2).toLocaleString()} m²`);
+
+function ensureDrawLayers() {
+  if (map.getSource(DRAW_SOURCE_ID)) return;
+  map.addSource(DRAW_SOURCE_ID, { type: 'geojson', data: turf.featureCollection([]) });
+  const color = ['case', ['get', 'invalid'], '#b00020', '#245f8e'];
+  map.addLayer({ id: 'mbg-draw-fill', type: 'fill', source: DRAW_SOURCE_ID, filter: ['==', ['geometry-type'], 'Polygon'],
+    paint: { 'fill-color': color, 'fill-opacity': 0.18, 'fill-emissive-strength': 1 } });
+  map.addLayer({ id: 'mbg-draw-line', type: 'line', source: DRAW_SOURCE_ID, filter: ['==', ['geometry-type'], 'LineString'],
+    paint: { 'line-color': color, 'line-width': 2.5, 'line-dasharray': [2, 1], 'line-emissive-strength': 1 } });
+  map.addLayer({ id: 'mbg-draw-points', type: 'circle', source: DRAW_SOURCE_ID, filter: ['==', ['geometry-type'], 'Point'],
+    paint: { 'circle-radius': ['case', ['get', 'first'], 6, 4], 'circle-color': '#fff', 'circle-stroke-width': 2,
+      'circle-stroke-color': color, 'circle-emissive-strength': 1 } });
+}
+
+/* Area, span and self-crossing of the ring the points make; null until there is a shape. */
+function measureDrawing(raw) {
+  /* the hover point sits on the last corner until the mouse moves; a zero-length edge reads as a crossing */
+  const same = (a, b) => Math.abs(a[0] - b[0]) < 5e-7 && Math.abs(a[1] - b[1]) < 5e-7;
+  const points = raw.filter((pt, i) => i === 0 || !same(pt, raw[i - 1]));
+  if (points.length > 1 && same(points[0], points[points.length - 1])) points.pop();
+  if (points.length < 3) return null;
+  const poly = safe(() => turf.polygon([[...points, points[0]]]), 'draw polygon');
+  if (!poly) return null;
+  const area = safe(() => turf.area(poly), 'draw area') || 0;
+  const bbox = turf.bbox(poly);
+  const span = safe(() => turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], { units: 'meters' }), 'draw span') || 0;
+  const crossing = (safe(() => turf.kinks(poly), 'draw kinks') || { features: [] }).features.length > 0;
+  let problem = null;
+  if (crossing) problem = 'Edges cross. Undo the last corner or redraw.';
+  else if (area < DRAW_MIN_AREA_M2) problem = `Too small: at least ${DRAW_MIN_AREA_M2} m².`;
+  else if (area > DRAW_MAX_AREA_M2) problem = `Too large: ${formatArea(area)}, limit ${formatArea(DRAW_MAX_AREA_M2)}.`;
+  else if (span > DRAW_MAX_SPAN_M) problem = `Too long: ${Math.round(span)} m across, limit ${DRAW_MAX_SPAN_M} m.`;
+  return { poly, area, problem };
+}
+
+function refreshDrawing() {
+  drawTool.frame = 0;
+  if (!map.getStyle()) return;
+  ensureDrawLayers();
+  const pts = drawTool.points;
+  const ring = drawTool.active && drawTool.hover ? [...pts, drawTool.hover] : pts;
+  const measure = measureDrawing(ring);
+  const invalid = Boolean(measure && measure.problem);
+  const features = [];
+  if (ring.length >= 3) features.push(turf.polygon([[...ring, ring[0]]], { invalid }));
+  if (ring.length >= 2) features.push(turf.lineString(drawTool.active ? ring : [...ring, ring[0]], { invalid }));
+  pts.forEach((pt, i) => features.push(turf.point(pt, { invalid, first: i === 0 })));
+  map.getSource(DRAW_SOURCE_ID).setData(turf.featureCollection(features));
+
+  drawUndoBtn.disabled = !drawTool.active || !pts.length;
+  drawFinishBtn.disabled = !drawTool.active || pts.length < 3;
+  drawClearBtn.disabled = drawTool.active ? !pts.length : !(pts.length || lastFootprintSource === 'draw');
+  if (!drawTool.active) return;
+  if (!pts.length) setDrawStatus(DRAW_HINT);
+  else if (measure) setDrawStatus(measure.problem || `${formatArea(measure.area)} · ${pts.length} corner${pts.length === 1 ? '' : 's'}`, invalid);
+  else setDrawStatus(`${pts.length} corner${pts.length === 1 ? '' : 's'} · keep clicking`);
+}
+const scheduleDrawRefresh = () => { if (!drawTool.frame) drawTool.frame = requestAnimationFrame(refreshDrawing); };
+
+function setDrawActive(active) {
+  drawTool.active = active;
+  drawTool.hover = null;
+  if (active) drawTool.points = [];
+  drawStartBtn.textContent = active ? 'Cancel' : 'Draw footprint';
+  drawStartBtn.setAttribute('aria-pressed', String(active));
+  map.getCanvas().style.cursor = active ? 'crosshair' : '';
+  if (active) map.doubleClickZoom.disable(); else map.doubleClickZoom.enable();
+  refreshDrawing();
+}
+
+async function finishDrawing() {
+  if (!drawTool.active) return;
+  const measure = measureDrawing(drawTool.points);
+  if (!measure) { setDrawStatus('Place at least three corners.', true); return; }
+  if (measure.problem) { setDrawStatus(measure.problem, true); return; }
+  setDrawActive(false);
+  /* hide the basemap buildings the new one stands on */
+  const hiddenIds = [];
+  const inset = safeBuf(measure.poly, -0.5, 'draw inset') || measure.poly;
+  const contextSource = map.getSource('composite') ? 'composite' : null;
+  if (contextSource) {
+    (safe(() => map.querySourceFeatures(contextSource, { sourceLayer: 'building' }), 'draw context query') || []).forEach(sf => {
+      if (!sf || sf.id === undefined || sf.id === null || removedIds.has(sf.id)) return;
+      const fp = prepareFootprint(sf);
+      if (fp && safe(() => turf.booleanIntersects(fp, inset), 'draw context overlap')) {
+        removedIds.add(sf.id);
+        hiddenIds.push(sf.id);
+      }
+    });
+    if (hiddenIds.length) updateContextFilter();
+  }
+  const built = await buildFromFootprintGeoJSON(measure.poly, 'draw', hiddenIds, 'Building on the drawn footprint');
+  if (!built) {
+    hiddenIds.forEach(id => removedIds.delete(id));
+    updateContextFilter();
+    setDrawStatus('That shape could not be used as a footprint. Try a simpler outline.', true);
+    refreshDrawing();
+    return;
+  }
+  drawTool.points = [];
+  refreshDrawing();
+  setDrawStatus(`Built on a drawn ${formatArea(measure.area)} footprint. Remove clears it.`);
+}
+
+function clearDrawing() {
+  if (drawTool.active) {
+    setDrawActive(true);
+    return;
+  }
+  drawTool.points = [];
+  if (lastFootprintSource === 'draw') clearSelectionAndContextVisibility();
+  refreshDrawing();
+  setDrawStatus(DRAW_HINT);
+}
+
+drawStartBtn.addEventListener('click', () => setDrawActive(!drawTool.active));
+drawUndoBtn.addEventListener('click', () => { drawTool.points.pop(); refreshDrawing(); });
+drawFinishBtn.addEventListener('click', () => { void finishDrawing(); });
+drawClearBtn.addEventListener('click', clearDrawing);
+
+map.on('click', e => {
+  if (!drawTool.active) return;
+  const pts = drawTool.points;
+  const at = map.project(e.lngLat);
+  const near = pt => { const p = map.project(pt); return Math.hypot(p.x - at.x, p.y - at.y); };
+  if (pts.length >= 3 && near(pts[0]) < 12) { void finishDrawing(); return; }
+  /* the two clicks of a double-click land on the same spot */
+  if (pts.length && near(pts[pts.length - 1]) < 5) return;
+  if (pts.length >= DRAW_MAX_CORNERS) { setDrawStatus(`Up to ${DRAW_MAX_CORNERS} corners. Finish or undo.`, true); return; }
+  pts.push([e.lngLat.lng, e.lngLat.lat]);
+  refreshDrawing();
+});
+map.on('dblclick', e => {
+  if (!drawTool.active) return;
+  e.preventDefault();
+  void finishDrawing();
+});
+map.on('mousemove', e => {
+  if (!drawTool.active || !drawTool.points.length) return;
+  drawTool.hover = [e.lngLat.lng, e.lngLat.lat];
+  scheduleDrawRefresh();
+});
+map.on('style.load', () => { if (drawTool.points.length) refreshDrawing(); });
+document.addEventListener('keydown', e => {
+  if (!drawTool.active || /^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || '')) return;
+  if (e.key === 'Escape') { setDrawActive(false); setDrawStatus(DRAW_HINT); }
+  else if (e.key === 'Enter') { e.preventDefault(); void finishDrawing(); }
+  else if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); drawTool.points.pop(); refreshDrawing(); }
+});
 
 /* ---------- UI Collapsibles ---------- */
 document.querySelectorAll('.collapsible-header').forEach(header => {
@@ -12167,9 +12794,49 @@ function summarizeExportLayers(features) {
   }, {});
 }
 
+/* One manifest per export: components, levels, georeference and provenance for the
+   building as generated. The origin is the source footprint centroid at ground level. */
+function currentAssetManifest(geometryTree, cfgSnapshot) {
+  /* the UI state is absent when headless checks build without a map or a session */
+  const kept = typeof lastAssetFootprints !== 'undefined' ? lastAssetFootprints : null;
+  const footprints = Array.isArray(kept) && kept.length ? kept : [];
+  const coords = gatherAllCoordinates(footprints.length ? footprints : Object.values(geometryTree || {}).flatMap(fc => (fc && fc.features) || []));
+  const lng = coords.reduce((s, p) => s + p[0], 0) / Math.max(1, coords.length);
+  const lat = coords.reduce((s, p) => s + p[1], 0) / Math.max(1, coords.length);
+  const centroid = footprints.length ? safe(() => turf.centroid(turf.featureCollection(footprints)).geometry.coordinates, 'asset origin') : null;
+  const origin = { lng: centroid ? centroid[0] : lng, lat: centroid ? centroid[1] : lat, elevation: null };
+  const liveMap = typeof map !== 'undefined' ? map : null;
+  const terrainElevation = liveMap && liveMap.getTerrain && liveMap.getTerrain()
+    ? safe(() => liveMap.queryTerrainElevation([origin.lng, origin.lat], { exaggerated: false }), 'asset elevation')
+    : null;
+  if (Number.isFinite(terrainElevation)) { origin.elevation = terrainElevation; origin.elevationSource = 'Mapbox terrain-DEM v1 at the origin'; }
+  const select = typeof presetSelect !== 'undefined' ? presetSelect : null;
+  const presetName = select && typeof getPresetByValue === 'function' ? ((getPresetByValue(select.value) || {}).name || null) : null;
+  return buildAssetManifest({
+    geo: geometryTree,
+    cfg: { ...cfgSnapshot, presetName },
+    levels: assetLevelsFor(cfgSnapshot),
+    origin,
+    source: {
+      type: (typeof lastFootprintSource !== 'undefined' && lastFootprintSource) || 'unknown',
+      footprints,
+      facts: (typeof lastSourceFacts !== 'undefined' && lastSourceFacts) || {}
+    }
+  });
+}
+function componentLookup(manifest) {
+  return new Map(manifest.components.map(c => [`${c.layer}#${c.ordinal}`, c]));
+}
+function manifestHeader(manifest) {
+  const { components, ...rest } = manifest;
+  return rest;
+}
+
 function buildStyledGeoJsonExport(geometryTree, cfgSnapshot) {
   const styleByLayer = getExportLayerStyles(cfgSnapshot);
   const features = [];
+  const assetManifest = currentAssetManifest(geometryTree, cfgSnapshot);
+  const components = componentLookup(assetManifest);
 
   Object.entries(geometryTree || {}).forEach(([layerKey, collection]) => {
     if (!collection || !Array.isArray(collection.features)) return;
@@ -12197,8 +12864,15 @@ function buildStyledGeoJsonExport(geometryTree, cfgSnapshot) {
       const baseM = Number(featProps.b);
       const topM = Number(featProps.h);
       const heightM = Number.isFinite(baseM) && Number.isFinite(topM) ? Math.max(0, topM - baseM) : null;
+      const component = components.get(`${layerKey}#${idx}`);
       const props = {
         ...featProps,
+        mbg_id: component ? component.id : null,
+        mbg_ifc_class: component ? component.ifc : null,
+        mbg_ifc_type: component ? component.predefinedType : null,
+        mbg_component: component ? component.name : null,
+        mbg_level: component ? component.level : null,
+        mbg_basis: component ? component.basis : null,
         mbg_building_type: cfgSnapshot && cfgSnapshot.buildingType ? cfgSnapshot.buildingType : 'office',
         mbg_facade_type: cfgSnapshot && cfgSnapshot.facadeType ? cfgSnapshot.facadeType : 'curtain-wall',
         mbg_facade_articulation: cfgSnapshot && cfgSnapshot.facadeArticulation ? cfgSnapshot.facadeArticulation : 'none',
@@ -12254,6 +12928,7 @@ function buildStyledGeoJsonExport(geometryTree, cfgSnapshot) {
         selectedBuildingCount: selectedBuildingGroups.length || (lastPoly ? 1 : 0)
       },
       styleByLayer,
+      asset: manifestHeader(assetManifest),
       config: cfgSnapshot,
       envelope: {
         facadePatternMode: cfgSnapshot && cfgSnapshot.facadePatternMode ? cfgSnapshot.facadePatternMode : 'calm',
@@ -12494,7 +13169,10 @@ function planInteriorFloor(floor, o) {
 
 function carveInteriorWindows(plan) {
   if (!plan.windows?.length) return;
-  const openings = turf.combine(turf.featureCollection(plan.windows));
+  // combine() returns a FeatureCollection; safeInt needs the feature itself, or every carve silently fails.
+  // The 5 cm buffer clears the hairline the exterior ring leaves at the inner face.
+  const combined = turf.combine(turf.featureCollection(plan.windows)).features[0];
+  const openings = safeBuf(combined, .05, 'interior glazing aperture margin') || combined;
   const walls = [];
   for (const wall of plan.walls) {
     const aperture = safeInt(wall, openings, 'interior glazing aperture');
@@ -12805,14 +13483,33 @@ function polygonCoordinatesToMeshGeometry(polyCoords, project, depth, base) {
   return geo;
 }
 
+/* Export textures read the way the map shows them: a detail layer at 34% over white, so the
+   material colour carries the hue (the raw tiles are mid-grey and would darken every colour
+   by a third), tiled at the texture's real-world size rather than a fixed 8 m. */
 async function getThreeTexture(patternName) {
   if (!patternName || patternName === 'none' || !PAT[patternName]) return null;
   if (textureCache.has(patternName)) return textureCache.get(patternName);
-  const tex = await THREE_TEXTURE_LOADER.loadAsync(PAT[patternName]);
+  const source = textureSourceImages.get(patternName) || await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = PAT[patternName];
+  });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, source.width || 64);
+  canvas.height = Math.max(1, source.height || 64);
+  const g = canvas.getContext('2d', { alpha: false });
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  g.globalAlpha = 0.34;
+  g.drawImage(source, 0, 0, canvas.width, canvas.height);
+  const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.repeat.set(0.12, 0.12);
+  const metres = textureTileMetres(patternName, canvas.width);
+  tex.repeat.set(1 / metres, 1 / metres);
   textureCache.set(patternName, tex);
   return tex;
 }
@@ -12831,15 +13528,33 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
 
   const allCoords = gatherAllCoordinates(featuresFlat.map(f => f.feature));
   if (!allCoords.length) return null;
-  const centerLng = allCoords.reduce((acc, p) => acc + p[0], 0) / allCoords.length;
-  const centerLat = allCoords.reduce((acc, p) => acc + p[1], 0) / allCoords.length;
+  const assetManifest = currentAssetManifest(geometryTree, cfgSnapshot);
+  const [centerLng, centerLat] = assetManifest.georeference.originLngLat;
   const project = localMetersProjector(centerLng, centerLat);
+  const components = componentLookup(assetManifest);
 
+  /* Building > level > one merged mesh per component class and material. Merging keeps the
+     file compact (thousands of facade members would otherwise be thousands of nodes); the
+     node's extras still list every component id it holds, matching the IFC and GeoJSON. */
   const group = new THREE.Group();
+  group.name = 'Building';
+  group.userData = { mbg_asset: manifestHeader(assetManifest) };
+  const levelGroups = new Map();
+  const levelGroup = index => {
+    if (!levelGroups.has(index)) {
+      const level = assetManifest.levels.find(l => l.index === index) || { index, name: `Level ${index}`, elevation: 0 };
+      const g = new THREE.Group();
+      g.name = level.name;
+      g.userData = { mbg_level: level.index, elevation_m: level.elevation, height_m: level.height, zone: level.zone };
+      levelGroups.set(index, g);
+    }
+    return levelGroups.get(index);
+  };
   const materialCache = new Map();
-  /* One merged mesh per layer/material keeps exports compact (thousands of
-     facade members would otherwise become thousands of scene nodes). */
   const geometryBuckets = new Map();
+  const featureOrdinals = new Map();
+  Object.entries(geometryTree || {}).forEach(([layerKey, collection]) =>
+    (collection && collection.features || []).forEach((feat, ordinal) => featureOrdinals.set(feat, `${layerKey}#${ordinal}`)));
 
   for (const { layerKey, feature } of featuresFlat) {
     const props = feature.properties || {};
@@ -12872,7 +13587,10 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
       };
       /* Glass exports as transmissive PBR (KHR_materials_transmission / ior). */
       material = profile.kind === 'glass'
-        ? new THREE.MeshPhysicalMaterial({ ...common, transmission: profile.transmission, ior: profile.ior, thickness: profile.thickness, specularIntensity: 1 })
+        /* Panes are thin double-sided sheets (thickness 0). The exporter still writes
+           KHR_materials_volume for transmission, and three's default infinite attenuation
+           distance serialises as null, which the glTF validator rejects; 1 km is no attenuation. */
+        ? new THREE.MeshPhysicalMaterial({ ...common, transmission: profile.transmission, ior: profile.ior, thickness: 0, attenuationDistance: 1000, specularIntensity: 1 })
         : new THREE.MeshStandardMaterial(common);
       material.name = `${layerKey}-${profile.kind}`;
       const tex = await getThreeTexture(overridePattern);
@@ -12884,11 +13602,15 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     }
 
     const geom = feature.geometry;
+    const component = components.get(featureOrdinals.get(feature));
+    const bucketKey = `${component ? component.level : 0}|${component ? component.ifc : layerKey}|${matKey}`;
     const addPolygon = coords => {
       const geo = polygonCoordinatesToMeshGeometry(coords, project, depth, base);
       if (!geo) return;
-      if (!geometryBuckets.has(matKey)) geometryBuckets.set(matKey, { layerKey, material, geometries: [] });
-      geometryBuckets.get(matKey).geometries.push(geo);
+      if (!geometryBuckets.has(bucketKey)) geometryBuckets.set(bucketKey, { layerKey, material, component, geometries: [], ids: new Set() });
+      const bucket = geometryBuckets.get(bucketKey);
+      bucket.geometries.push(geo);
+      if (component) bucket.ids.add(component.id);
     };
 
     if (geom.type === 'Polygon') {
@@ -12898,7 +13620,7 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     }
   }
 
-  geometryBuckets.forEach(({ layerKey, material, geometries }) => {
+  geometryBuckets.forEach(({ layerKey, material, component, geometries, ids }) => {
     if (!material.map) geometries.forEach(geo => geo.deleteAttribute('uv'));
     const combined = geometries.length > 1 ? safe(() => mergeGeometries(geometries, false), `merge ${layerKey}`) : geometries[0];
     /* Weld coincident vertices (same position and normal) into an indexed mesh. */
@@ -12906,11 +13628,20 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     const parts = merged ? [merged] : geometries;
     parts.forEach(geo => {
       const mesh = new THREE.Mesh(geo, material);
-      mesh.name = `${layerKey}`;
-      group.add(mesh);
+      mesh.name = component ? `${component.name} (${layerKey})` : layerKey;
+      mesh.userData = component ? {
+        mbg_ifc_class: component.ifc,
+        mbg_ifc_type: component.predefinedType,
+        mbg_layer: layerKey,
+        mbg_level: component.level,
+        mbg_basis: component.basis,
+        mbg_component_ids: [...ids]
+      } : { mbg_layer: layerKey };
+      levelGroup(component ? component.level : 0).add(mesh);
     });
     if (merged && geometries.length > 1) geometries.forEach(geo => geo.dispose());
   });
+  [...levelGroups.keys()].sort((a, b) => a - b).forEach(index => group.add(levelGroups.get(index)));
 
   group.updateMatrixWorld(true);
   return group;
@@ -12937,6 +13668,21 @@ async function exportCurrentBuilding3D(format, baseName = 'building') {
   }
 
   const fileBase = sanitizeForExportName(baseName);
+
+  /* IFC4 exchange model: native IFC classes per component, storeys, materials, georeference
+     and provenance. Fixed geometry, not editable families (see docs/INTEROPERABILITY.md). */
+  if (format === 'ifc') {
+    const manifest = currentAssetManifest(lastGeo, cfgSnapshot);
+    const styles = getExportLayerStyles(cfgSnapshot);
+    const styleFor = (layerKey, props) => {
+      const s = styles[layerKey] || { fillColor: '#999999', fillOpacity: 1 };
+      return { color: typeof props.c === 'string' ? props.c : s.fillColor, opacity: s.fillOpacity, material: componentTypeFor(layerKey, props.part).name };
+    };
+    const presetName = (getPresetByValue(presetSelect ? presetSelect.value : '') || {}).name || 'Generated building';
+    const { text } = buildIfc({ manifest, geo: lastGeo, styleFor, sourceFootprints: lastAssetFootprints, name: presetName });
+    saveBlob(new Blob([text], { type: 'application/x-step' }), `${fileBase}.ifc`);
+    return;
+  }
 
   if (format === 'glb') {
     await new Promise((resolve, reject) => {

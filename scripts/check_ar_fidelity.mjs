@@ -57,7 +57,15 @@ includesAll(ar, [
 
 assert.doesNotMatch(ar, /DEFAULT_MODEL_VERTICAL_OFFSET_M = -12/, 'AR must not retain the hidden -12m baseline shift');
 assert.doesNotMatch(ar, /INITIAL_MODEL_PUSH_AWAY_M/, 'field placement must not retain an implicit camera-relative push');
-assert.match(ar, /option value="complete">Exterior \+ interior/, 'AR must expose the current interior systems intentionally');
+assert.match(ar, /id="interiorToggle"/, 'AR must expose the interior systems intentionally');
+assert.match(ar, /id="dockInterior"/, 'the interior switch must stay one tap away');
+/* Camera: live, orbit and walk views, a reset always on screen, steps that move the view. */
+includesAll(ar, [
+  'data-view="live"', 'data-view="orbit"', 'data-view="walk"', 'id="dockReset"',
+  'setViewMode', 'resetView', 'OrbitControls', 'detectStep', 'correctStepsFromGps',
+  'requestPermissionsOnLoad'
+], 'camera mode contract');
+assert.doesNotMatch(ar, /mountPermissionSheet/, 'permissions are requested on load, not behind a start sheet');
 assert.match(ar, /option value="high">High fidelity/, 'AR must expose an explicit high-fidelity mode');
 assert.match(ar, /powerPreference: 'high-performance'/, 'renderer must request the high-performance GPU path');
 assert.match(ar, /shadowMap\.type = THREE\.PCFSoftShadowMap/, 'AR must use filtered realtime shadows');

@@ -1040,76 +1040,81 @@
   <button id="contextChip" type="button" aria-label="Change how nearby buildings are shown">
     <span class="chipLabel">Context</span><span class="chipMode">Massing</span><span class="chipMeta">loading</span>
   </button>
+  <div id="toast" role="alert" hidden></div>
+  <button id="motionPrompt" type="button" hidden>Tap to enable motion</button>
+
+  <!-- Always on screen: how you look at the building, and the two things you reach for most. -->
+  <div id="quickDock" role="toolbar" aria-label="Camera and view">
+    <div class="viewModes" role="radiogroup" aria-label="Camera mode">
+      <button type="button" role="radio" data-view="live" aria-checked="false">Live AR</button>
+      <button type="button" role="radio" data-view="orbit" aria-checked="false">Orbit</button>
+      <button type="button" role="radio" data-view="walk" aria-checked="false">Walk</button>
+    </div>
+    <div class="dockActions">
+      <button type="button" id="dockReset">Reset view</button>
+      <button type="button" id="dockInterior" aria-pressed="false">Interior</button>
+      <button type="button" id="quickLock" title="Freeze the building exactly where it is now">Lock</button>
+    </div>
+  </div>
+  <div id="walkPad" role="group" aria-label="Walk" hidden>
+    <button type="button" data-move="forward" aria-label="Walk forward">▲</button>
+    <button type="button" data-move="left" aria-label="Step left">◀</button>
+    <button type="button" data-move="back" aria-label="Walk back">▼</button>
+    <button type="button" data-move="right" aria-label="Step right">▶</button>
+  </div>
+
   <div id="panel" role="region" aria-label="Building controls">
     <div id="panelHeader">
       <div class="panelTitle">
         <span class="eyebrow">Building AR</span>
-        <h1>Explore &amp; align</h1>
+        <h1>Controls</h1>
       </div>
       <div class="headerActions">
-        <button id="quickLock" class="primary" type="button" title="Freeze the building exactly where it is now">Lock</button>
         <button id="panelToggle" type="button" aria-label="Close controls">Close</button>
       </div>
     </div>
 
     <div id="panelBody">
-    <section class="arSection" id="interiorSection" aria-labelledby="interiorHeading">
-      <h2 id="interiorHeading">Interior studio</h2>
-      <div id="interiorToolsSlot"></div>
-    </section>
-    <details class="arSection" id="trackingDetails">
-    <summary>Camera &amp; alignment</summary>
-    <div class="row">
-      <div class="metric"><span class="k">Distance</span><span class="v" id="distanceMeters">-</span></div>
-      <div class="metric"><span class="k">Tracking</span><span class="v" id="anchorState">Waiting</span></div>
-      <div class="metric"><span class="k">Accuracy</span><span class="v" id="gpsAccuracy">-</span></div>
-      <div class="metric"><span class="k">Lighting</span><span class="v" id="lightingState">Studio</span></div>
-      <div class="metric"><span class="k">Context</span><span class="v" id="occlusionState">Loading</span></div>
-      <div class="metric"><span class="k">Performance</span><span class="v" id="performanceState">Auto</span></div>
-    </div>
-
-    <div class="controls">
-      <div class="primaryControls">
-        <button id="enableSensors">Enable Sensors</button>
-        <button id="startAr" class="primary">Start AR Session</button>
-        <button id="recenter">Reset Viewpoint</button>
-        <button id="calibrateGround" type="button" disabled>Set Ground</button>
-      </div>
-      <div class="secondaryControls">
-        <button id="toggleFixedPosition" class="primary">Re-aim (GPS + compass)</button>
-        <button id="toggleBindMode">Reposition Model</button>
-        <label class="viewerSetting" for="qualityMode">Quality
-          <select id="qualityMode">
-            <option value="auto" selected>Auto</option>
-            <option value="high">High fidelity</option>
-            <option value="performance">Performance</option>
-          </select>
-        </label>
-        <label class="viewerSetting" for="viewerLevel">Device height
+    <details class="arSection" id="cameraSection" open>
+      <summary>Camera</summary>
+      <p class="sectionNote" id="viewModeNote">Live AR overlays the building on your camera.</p>
+      <div class="settingGrid">
+        <button id="recenter" type="button">Reset view</button>
+        <button id="startAr" type="button" class="primary" hidden>Start full AR (WebXR)</button>
+        <label class="toggleRow" for="followSteps"><input type="checkbox" id="followSteps" checked> Move with my steps</label>
+        <label class="toggleRow" for="lookWithPhone"><input type="checkbox" id="lookWithPhone" checked> Look around by moving the phone (Walk)</label>
+        <label class="viewerSetting" for="viewerLevel">Eye height
           <select id="viewerLevel">
-            <option value="0" selected>Street level (device)</option>
-            <option value="3">Device +3 m</option>
-            <option value="6">Device +6 m</option>
-            <option value="9">Device +9 m</option>
-            <option value="15">Device +15 m</option>
-            <option value="30">Device +30 m</option>
+            <option value="0" selected>Street level</option>
+            <option value="3">+3 m</option>
+            <option value="6">+6 m</option>
+            <option value="9">+9 m</option>
+            <option value="15">+15 m</option>
+            <option value="30">+30 m</option>
           </select>
         </label>
-        <label class="viewerSetting" for="contextMode">Context
-          <select id="contextMode">
-            <option value="massing" selected>Massing (solid)</option>
-            <option value="ghost">Ghosted massing</option>
-            <option value="outlines">Outlines (align to street)</option>
-            <option value="occlusion">Occlusion only</option>
-            <option value="off">Off</option>
-          </select>
-        </label>
-        <label class="viewerSetting" for="detailMode">Model
-          <select id="detailMode">
-            <option value="exterior" selected>Exterior</option>
-            <option value="complete">Exterior + interior</option>
-          </select>
-        </label>
+        <div class="viewerSetting">Lens match <span id="lensTrimValue">0.0°</span>
+          <div class="adjustRow two">
+            <button id="lensNarrower" type="button">Narrower</button>
+            <button id="lensWider" type="button">Wider</button>
+          </div>
+        </div>
+      </div>
+      <p class="sectionNote" id="stepsNote">Steps: 0</p>
+    </details>
+
+    <details class="arSection" id="interiorSection" open>
+      <summary>Interior</summary>
+      <label class="toggleRow" for="interiorToggle"><input type="checkbox" id="interiorToggle"> Show interiors on every floor</label>
+      <div id="interiorToolsSlot"></div>
+    </details>
+
+    <details class="arSection" id="placementSection">
+      <summary>Placement &amp; alignment</summary>
+      <div class="settingGrid">
+        <button id="toggleFixedPosition" type="button">Re-aim (GPS + compass)</button>
+        <button id="toggleBindMode" type="button">Reposition model</button>
+        <button id="calibrateGround" type="button" disabled>Set ground (WebXR)</button>
       </div>
       <div class="bindTools">
         <div class="repositionPanel">
@@ -1139,20 +1144,50 @@
                 <button id="rotateLeft" class="repositionButton" type="button" aria-label="Rotate left">⟲<small>Rotate</small></button>
                 <button id="rotateRight" class="repositionButton" type="button" aria-label="Rotate right">⟳<small>Rotate</small></button>
               </div>
-              <div class="dialLabel"><span>Lens match</span><span id="lensTrimValue">0.0°</span></div>
-              <div class="adjustRow two">
-                <button id="lensNarrower" class="repositionButton" type="button">Lens −</button>
-                <button id="lensWider" class="repositionButton" type="button">Lens +</button>
-              </div>
-              <p class="contextTip">Pan the phone: if the model slides against the street, adjust Lens. With Context set to Outlines, nudge until the outlines sit on the real buildings; the model moves with them.</p>
+              <p class="contextTip">With Context set to Outlines, nudge until the outlines sit on the real buildings; the model moves with them.</p>
             </div>
           </div>
         </div>
       </div>
-        </div>
     </details>
-    <div id="status">Waiting for payload…</div>
-    <div id="error"></div>
+
+    <details class="arSection" id="displaySection">
+      <summary>Display</summary>
+      <div class="settingGrid">
+        <label class="viewerSetting" for="contextMode">Nearby buildings
+          <select id="contextMode">
+            <option value="massing" selected>Massing (solid)</option>
+            <option value="ghost">Ghosted massing</option>
+            <option value="outlines">Outlines (align to street)</option>
+            <option value="occlusion">Occlusion only</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+        <label class="viewerSetting" for="qualityMode">Quality
+          <select id="qualityMode">
+            <option value="auto" selected>Auto</option>
+            <option value="high">High fidelity</option>
+            <option value="performance">Performance</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <details class="arSection" id="trackingDetails">
+      <summary>Status &amp; permissions</summary>
+      <div class="row">
+        <div class="metric"><span class="k">Distance</span><span class="v" id="distanceMeters">-</span></div>
+        <div class="metric"><span class="k">Tracking</span><span class="v" id="anchorState">Waiting</span></div>
+        <div class="metric"><span class="k">Accuracy</span><span class="v" id="gpsAccuracy">-</span></div>
+        <div class="metric"><span class="k">Lighting</span><span class="v" id="lightingState">Studio</span></div>
+        <div class="metric"><span class="k">Context</span><span class="v" id="occlusionState">Loading</span></div>
+        <div class="metric"><span class="k">Performance</span><span class="v" id="performanceState">Auto</span></div>
+      </div>
+      <p class="sectionNote" id="permissionSummary">Permissions: requesting…</p>
+      <button id="enableSensors" type="button">Retry camera, location &amp; motion</button>
+      <div id="status">Waiting for payload…</div>
+      <div id="error"></div>
+    </details>
     </div>
   </div>
 </div>
@@ -1163,8 +1198,8 @@ import { mergeGeometries } from 'https://esm.sh/three@0.185.1/examples/jsm/utils
 import { XREstimatedLight } from 'https://esm.sh/three@0.185.1/examples/jsm/webxr/XREstimatedLight.js';
 
 import { createInteriorScene } from './js/interior/scene.js';
-import { mountPermissionSheet } from './js/interior/permissions.js';
-let interiorScene = null, permissionSheet = null;
+import { OrbitControls } from 'https://esm.sh/three@0.185.1/examples/jsm/controls/OrbitControls.js';
+let interiorScene = null;
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const toRad = deg => (deg * Math.PI) / 180;
@@ -1417,7 +1452,26 @@ const state = {
   interiorRoot: null,
   skyEnvKey: '',
   skyEnvLastMs: 0,
-  cameraPalette: null
+  cameraPalette: null,
+  /* camera modes: live (device camera + sensors), orbit and walk (virtual, no feed) */
+  viewMode: 'orbit',
+  freeCam: null,
+  orbit: null,
+  walkYaw: 0,
+  walkPitch: 0,
+  walkMove: new Set(),
+  virtualGround: null,
+  virtualSky: null,
+  virtualDistanceM: NaN,
+  /* step following: the viewer's walked displacement (east, north) from the anchor */
+  followSteps: true,
+  lookWithPhone: true,
+  stepOffsetM: { east: 0, north: 0 },
+  stepCount: 0,
+  stepSignal: 0,
+  stepArmed: true,
+  lastStepAtMs: 0,
+  xrSupported: false
 };
 
 const orientationEuler = new THREE.Euler();
@@ -1488,9 +1542,21 @@ function setStatus(msg) {
 
 function setError(msg) {
   const el = $('error');
+  if (el) {
+    el.style.display = msg ? 'block' : 'none';
+    el.textContent = msg || '';
+  }
+  if (msg) showToast(msg, 7000);
+}
+
+let toastTimer = 0;
+function showToast(msg, ms = 4000) {
+  const el = $('toast');
   if (!el) return;
-  el.style.display = msg ? 'block' : 'none';
-  el.textContent = msg || '';
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, ms);
 }
 
 function isCompactViewport() {
@@ -1513,7 +1579,27 @@ function syncUiState() {
   if (lockBtn) {
     lockBtn.textContent = state.positionFrozen ? 'Locked' : 'Lock';
     lockBtn.classList.toggle('is-locked', Boolean(state.positionFrozen));
+    lockBtn.hidden = state.viewMode !== 'live';
   }
+  document.querySelectorAll('#quickDock [data-view]').forEach(button => {
+    const on = button.dataset.view === state.viewMode;
+    button.setAttribute('aria-checked', String(on));
+    button.disabled = state.sessionActive && button.dataset.view !== 'live';
+  });
+  const interiorOn = state.detailMode === 'complete';
+  $('dockInterior')?.setAttribute('aria-pressed', String(interiorOn));
+  if ($('interiorToggle')) $('interiorToggle').checked = interiorOn;
+  if ($('walkPad')) $('walkPad').hidden = state.viewMode !== 'walk' || Boolean(interiorScene?.walking);
+  if ($('startAr')) $('startAr').hidden = !state.xrSupported || state.sessionActive || state.viewMode !== 'live';
+  if ($('stepsNote')) $('stepsNote').textContent = state.followSteps && state.motionTrackingReady
+    ? `Steps counted: ${state.stepCount} · ${Math.round(Math.hypot(state.stepOffsetM.east, state.stepOffsetM.north))} m walked from the anchor`
+    : (state.motionTrackingReady ? 'Step following is off.' : 'Step following starts once motion access is granted.');
+  const notes = {
+    live: state.sessionActive ? 'Full AR: the device tracks your position as you walk.' : 'Live AR overlays the building on your camera. Walk and the view moves with you.',
+    orbit: 'Orbit: drag to turn around the building, pinch or scroll to zoom, two fingers to pan.',
+    walk: 'Walk: a virtual street view. Use the arrows or W A S D, drag to look, or move the phone and walk.'
+  };
+  if ($('viewModeNote')) $('viewModeNote').textContent = notes[state.viewMode] || '';
   const bindBtn = $('toggleBindMode');
   if (bindBtn) bindBtn.textContent = state.bindMode ? 'Done Repositioning' : 'Reposition Model';
   if ($('headingTrimValue')) $('headingTrimValue').textContent = `${state.headingTrimDeg >= 0 ? '+' : ''}${state.headingTrimDeg.toFixed(1)}°`;
@@ -2171,18 +2257,230 @@ function createProceduralTextureSet(kind) {
   return set;
 }
 
-/* Soft ground-contact occlusion: facades darken gently over the first metres above
-   grade, which anchors the model in the photo instead of letting it float. */
-function addContactOcclusion(material) {
-  material.onBeforeCompile = shader => {
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying float vMbgHeight;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMbgHeight = position.y;');
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vMbgHeight;')
-      .replace('#include <aomap_fragment>', '#include <aomap_fragment>\nfloat mbgGroundAO = mix(0.62, 1.0, smoothstep(0.0, 4.5, vMbgHeight));\nreflectedLight.indirectDiffuse *= mbgGroundAO;\nreflectedLight.directDiffuse *= mix(0.85, 1.0, smoothstep(0.0, 2.5, vMbgHeight));');
+/* ---------- component finishes ----------
+   One deliberate finish per building component: the single cue that most separates
+   it from a flat extrusion. Finishes scale the component's chosen colour and never
+   replace it. Patterns run in building-local metres; per-feature seeds (the mbgCell
+   attribute) make variation follow real windows, panels and fins, not a grid.
+   u.face is [top, side, underside] brightness. */
+const FINISH_UNIFORMS = { uMbgSeeThrough: { value: 0 } };
+const COMPONENT_FINISHES = {
+  /* envelope */
+  core: { cue: 'rain-washed weathering streaks', defines: ['STREAKS'], u: { streak: 0.12 } },
+  podium: { cue: 'rusticated base courses', defines: ['COURSES'], u: { course: [1.2, 0.6], joint: 0.02, jointTone: 0.58, cellVar: 0.07, stagger: 1 } },
+  podiumCap: { cue: 'drip-shadowed precast band', defines: ['FACES'], u: { face: [1.12, 1.0, 0.48] } },
+  piers: { cue: 'ashlar stone coursing', defines: ['COURSES'], u: { course: [0.9, 0.45], joint: 0.008, jointTone: 0.76, cellVar: 0.08, stagger: 1 } },
+  borders: { cue: 'satin-painted reveals that catch the light', physical: true, params: { roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 0.55 } },
+  windowSills: { cue: 'sun-bleached top and shadowed drip edge', defines: ['FACES'], u: { face: [1.18, 0.92, 0.45] } },
+  seps: { cue: 'belt courses and slab edges that cast a shadow line', defines: ['FACES'], u: { face: [1.12, 1.0, 0.42] } },
+  cornices: { cue: 'deep shadow under the projection', defines: ['FACES'], u: { face: [1.12, 1.0, 0.4] } },
+  parapets: { cue: 'coping that catches the sky', defines: ['FACES'], u: { face: [1.24, 0.95, 0.6] } },
+  facadePanels: { cue: 'panel-to-panel tone variation', defines: ['CELLS'], u: { cellVar: 0.13 } },
+  facadeJoints: { cue: 'true shadow gaps', params: { roughness: 1, envMapIntensity: 0, colorScale: 0.32 } },
+  verticalRibs: { cue: 'glazed terracotta fins, each fired slightly differently', physical: true, params: { clearcoat: 0.5, clearcoatRoughness: 0.22 }, defines: ['CELLS'], u: { cellVar: 0.11 } },
+  exoskeleton: { cue: 'gloss-painted structural steel', physical: true, params: { roughness: 0.3, metalness: 0.15, clearcoat: 0.75, clearcoatRoughness: 0.1, envMapIntensity: 0.8 } },
+  accentPanels: { cue: 'weathered patina', defines: ['MOTTLE'], u: { mottle: 0.75, mottleScale: 0.6, tint: [0.7, 0.6, 0.5], tint2: [1.12, 1.06, 0.94] } },
+  mullions: { cue: 'anodised aluminium glint', params: { metalness: 0.92, roughness: 0.24, envMapIntensity: 1.15 } },
+  windows: { cue: 'blinds and lit rooms behind the glass', defines: ['PANES'], u: { lit: 0.42, litShare: 0.12, blind: 0.3 } },
+  'windows:balustrade': { cue: 'clear balustrade glass, pane-to-pane tint', defines: ['CELLS'], u: { cellVar: 0.12 } },
+  balconies: { cue: 'shaded soffits under each slab', defines: ['FACES'], u: { face: [1.06, 0.96, 0.62] } },
+  railings: { cue: 'powder-coat sheen along the rails', physical: true, params: { roughness: 0.34, metalness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.16, envMapIntensity: 0.9 } },
+  /* street level */
+  podiumGlass: { cue: 'lit shopfronts', defines: ['PANES'], u: { lit: 0.7, litShare: 0.7, blind: 0.1 } },
+  podiumFrames: { cue: 'bronze-anodised frames', params: { metalness: 0.92, roughness: 0.3, envMapIntensity: 1.05 } },
+  podiumDoors: { cue: 'a lit lobby seen through the doors', defines: ['PANES'], u: { lit: 0.85, litShare: 1, blind: 0 } },
+  podiumCanopies: { cue: 'recessed downlights in the soffit', defines: ['FACES', 'DOWNLIGHTS'], u: { face: [1.05, 1.0, 0.7], down: 3.2 } },
+  podiumLobby: { cue: 'warm lobby lighting', defines: ['WASH'], u: { wash: 0.55 } },
+  /* roofscape */
+  roof: { cue: 'ballast and ponding variation', defines: ['MOTTLE'], u: { mottle: 0.55, mottleScale: 0.22, tint: [0.78, 0.79, 0.82], tint2: [1.08, 1.06, 1.02] } },
+  'roof:mansard|dormer|slate|pitched': { cue: 'slate courses', defines: ['COURSES'], u: { course: [0.32, 0.24], joint: 0.012, jointTone: 0.55, cellVar: 0.16, stagger: 1 } },
+  roofTerraces: { cue: 'timber deck boards', defines: ['COURSES'], u: { course: [2.4, 0.145], joint: 0.008, jointTone: 0.42, cellVar: 0.2, stagger: 1 } },
+  roofScreens: { cue: 'perforated metal you can see through', defines: ['PERF'], u: { perf: [0.09, 0.3] } },
+  roofEquipment: { cue: 'louvred grilles', defines: ['LOUVRE'], u: { louvre: 0.15 } },
+  roofPlanting: { cue: 'mixed sedum colour', defines: ['MOTTLE'], u: { mottle: 0.9, mottleScale: 1.6, tint: [1.35, 0.85, 0.55], tint2: [1.15, 1.18, 0.7] } },
+  rooftopStructures: { cue: 'louvred plant-room screens', defines: ['LOUVRE'], u: { louvre: 0.2 } },
+  'rooftopStructures:glass': { cue: 'reflective crown glazing', physical: true, params: { roughness: 0.06, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.35 } },
+  spires: { cue: 'polished stainless steel', physical: true, params: { metalness: 1, roughness: 0.14, clearcoat: 0.3, envMapIntensity: 1.45 } },
+  /* structure seen in sections */
+  floorSlabs: { cue: 'polished concrete topping', physical: true, params: { roughness: 0.32, clearcoat: 0.45, clearcoatRoughness: 0.2 } },
+  pillars: { cue: 'fair-faced concrete with form-tie holes', defines: ['COURSES', 'TIES'], u: { course: [1.2, 1.2], joint: 0.005, jointTone: 0.84, cellVar: 0.05, stagger: 0 } },
+  interiorWalls: { cue: 'shadow at every skirting', defines: ['FLOORAO'] },
+  elevatorShafts: { cue: 'concrete blockwork coursing', defines: ['COURSES'], u: { course: [0.44, 0.215], joint: 0.008, jointTone: 0.7, cellVar: 0.06, stagger: 1 } },
+  elevators: { cue: 'lit lift cars', defines: ['PANES'], u: { lit: 0.9, litShare: 1, blind: 0 } },
+  stairs: { cue: 'contrasting tread nosings', defines: ['FACES'], u: { face: [1.16, 0.82, 0.6] } },
+  stairRailings: { cue: 'brushed stainless', params: { metalness: 0.95, roughness: 0.22, envMapIntensity: 1.1 } }
+};
+
+function finishFor(layerKey, part) {
+  const partKey = Object.keys(COMPONENT_FINISHES).find(key => {
+    const [layer, pattern] = key.split(':');
+    return pattern && layer === layerKey && new RegExp(pattern).test(part || '');
+  });
+  return COMPONENT_FINISHES[partKey || layerKey] || {};
+}
+
+const FINISH_GLSL = `
+varying vec3 vMbgPos;
+varying vec3 vMbgN;
+varying vec2 vMbgCell;
+uniform float uMbgSeeThrough;
+uniform float uFloorH;
+float mbgHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float mbgNoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mbgHash(i), mbgHash(i + vec2(1.0, 0.0)), u.x), mix(mbgHash(i + vec2(0.0, 1.0)), mbgHash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+/* along-facade and height on walls; plan coordinates on flat faces */
+vec2 mbgPlanar(vec3 n) {
+  if (abs(n.y) > 0.6) return vMbgPos.xz;
+  vec2 t = normalize(vec2(-n.z, n.x) + 1e-5);
+  return vec2(dot(vMbgPos.xz, t), vMbgPos.y);
+}
+`;
+
+/* Builds the shader for a component: ground-contact occlusion for the envelope
+   plus the component's own cue, all driven by defines so each layer compiles
+   only what it uses. */
+function applyComponentFinish(material, finish, contactAO, data) {
+  const u = finish.u || {};
+  const vec = (v, n) => (Array.isArray(v) ? v : Array(n).fill(v ?? 1));
+  const uniforms = {
+    uMbgSeeThrough: FINISH_UNIFORMS.uMbgSeeThrough,
+    uFloorH: { value: Number(data?.config?.F) || 3.3 },
+    uFace: { value: new THREE.Vector3(...vec(u.face, 3)) },
+    uStreak: { value: u.streak || 0 },
+    uCourse: { value: new THREE.Vector2(...vec(u.course || [1, 1], 2)) },
+    uJoint: { value: u.joint || 0.01 },
+    uJointTone: { value: u.jointTone ?? 0.7 },
+    uCellVar: { value: u.cellVar || 0 },
+    uStagger: { value: u.stagger ?? 1 },
+    uMottle: { value: u.mottle || 0 },
+    uMottleScale: { value: u.mottleScale || 1 },
+    uTint: { value: new THREE.Vector3(...vec(u.tint, 3)) },
+    uTint2: { value: new THREE.Vector3(...vec(u.tint2, 3)) },
+    uLit: { value: u.lit || 0 },
+    uLitShare: { value: u.litShare || 0 },
+    uBlind: { value: u.blind || 0 },
+    uPerf: { value: new THREE.Vector2(...vec(u.perf || [0.1, 0.3], 2)) },
+    uLouvre: { value: u.louvre || 0.1 },
+    uDown: { value: u.down || 0 },
+    uWash: { value: u.wash || 0 }
   };
-  material.customProgramCacheKey = () => 'mbg-contact-ao';
+  material.defines = Object.assign(material.defines || {}, Object.fromEntries((finish.defines || []).map(d => [`MBG_${d}`, ''])));
+  if (contactAO) material.defines.MBG_CONTACT_AO = '';
+  material.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec2 mbgCell;\nvarying vec3 vMbgPos;\nvarying vec3 vMbgN;\nvarying vec2 vMbgCell;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMbgPos = position;\nvMbgN = normal;\nvMbgCell = mbgCell;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>\n${FINISH_GLSL}
+uniform vec3 uFace; uniform float uStreak; uniform vec2 uCourse; uniform float uJoint; uniform float uJointTone;
+uniform float uCellVar; uniform float uStagger; uniform float uMottle; uniform float uMottleScale; uniform vec3 uTint;
+uniform vec3 uTint2; uniform float uLit; uniform float uLitShare; uniform float uBlind; uniform vec2 uPerf;
+uniform float uLouvre; uniform float uDown; uniform float uWash;`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+vec3 mbgN = normalize(vMbgN);
+vec2 mbgQ = mbgPlanar(mbgN);
+bool mbgWall = abs(mbgN.y) < 0.6;
+float mbgLitAmount = 0.0;
+float mbgBlind = 0.0;
+#ifdef MBG_FACES
+  diffuseColor.rgb *= mbgN.y > 0.5 ? uFace.x : (mbgN.y < -0.5 ? uFace.z : uFace.y);
+#endif
+#ifdef MBG_STREAKS
+  if (mbgWall) {
+    float s = smoothstep(0.58, 0.9, mbgNoise(vec2(mbgQ.x * 2.4, mbgQ.y * 0.05)));
+    diffuseColor.rgb *= 1.0 - uStreak * s * (0.65 + 0.35 * mbgNoise(vec2(mbgQ.x * 9.0, mbgQ.y * 0.5)));
+  }
+#endif
+#ifdef MBG_COURSES
+  {
+    float row = floor(mbgQ.y / uCourse.y);
+    float x = mbgQ.x / uCourse.x + mod(row, 2.0) * 0.5 * uStagger;
+    vec2 f = vec2(fract(x), fract(mbgQ.y / uCourse.y));
+    float edge = min(min(f.x, 1.0 - f.x) * uCourse.x, min(f.y, 1.0 - f.y) * uCourse.y);
+    float joint = 1.0 - smoothstep(uJoint * 0.6, uJoint, edge);
+    diffuseColor.rgb *= mix(1.0 + (mbgHash(vec2(floor(x), row)) - 0.5) * uCellVar, uJointTone, joint);
+  }
+#endif
+#ifdef MBG_TIES
+  if (mbgWall) {
+    vec2 g = fract(mbgQ / vec2(0.6, 0.6)) - 0.5;
+    diffuseColor.rgb *= mix(0.55, 1.0, smoothstep(0.012, 0.02, length(g * 0.6)));
+  }
+#endif
+#ifdef MBG_CELLS
+  diffuseColor.rgb *= 1.0 + (mbgHash(vec2(vMbgCell.x * 91.7, floor(vMbgPos.y / max(uFloorH, 1.0)) * (mbgWall ? 0.0 : 1.0))) - 0.5) * uCellVar;
+#endif
+#ifdef MBG_MOTTLE
+  {
+    float m1 = smoothstep(0.45, 0.8, mbgNoise(mbgQ * uMottleScale + vMbgCell.x * 7.0));
+    float m2 = smoothstep(0.55, 0.85, mbgNoise(mbgQ * uMottleScale * 2.3 + 13.0));
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * uTint, m1 * uMottle);
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * uTint2, m2 * uMottle * 0.7);
+  }
+#endif
+#ifdef MBG_LOUVRE
+  if (mbgWall) diffuseColor.rgb *= mix(0.45, 1.0, smoothstep(0.0, 0.4, fract(mbgQ.y / uLouvre)));
+#endif
+#ifdef MBG_PERF
+  if (mbgWall) {
+    vec2 c = mbgQ / uPerf.x;
+    c.x += mod(floor(c.y), 2.0) * 0.5;
+    float hole = 1.0 - smoothstep(uPerf.y - 0.04, uPerf.y, length(fract(c) - 0.5));
+    // Far away the holes would shimmer: let them blend into a darker, even screen.
+    float far = smoothstep(0.25, 0.6, fwidth(c.x));
+    if (hole > 0.5 && far < 0.5) discard;
+    diffuseColor.rgb *= mix(1.0, 0.62, far);
+  }
+#endif
+#ifdef MBG_PANES
+  if (mbgWall) {
+    float floorIx = floor(mbgQ.y / uFloorH);
+    float along = vMbgCell.y > 0.0 ? floor(mbgQ.x / vMbgCell.y) : 0.0;
+    float pane = mbgHash(vec2(vMbgCell.x * 57.3 + along * 13.1, floorIx));
+    // Blinds and lights belong to rooms (about 4 m of facade per floor), not to
+    // single panes, so neighbouring panes of one office agree.
+    float h = mbgHash(vec2(floor(mbgQ.x / 4.2) + 0.37, floorIx + 0.71));
+    float v = fract(mbgQ.y / uFloorH);
+    float show = 1.0 - uMbgSeeThrough;
+    float drop = step(1.0 - uBlind, fract(h * 7.13)) * mix(0.18, 0.7, fract(h * 3.71));
+    mbgBlind = step(1.0 - drop, v) * show;
+    diffuseColor.rgb = mix(diffuseColor.rgb * (0.88 + 0.24 * pane * show), vec3(0.66, 0.64, 0.6), mbgBlind * 0.8);
+    diffuseColor.a = mix(diffuseColor.a, 1.0, mbgBlind * 0.7);
+    // A lit room glows from its ceiling down, and only when seen through the glass.
+    mbgLitAmount = step(1.0 - uLitShare, fract(h * 11.7)) * (1.0 - mbgBlind) * show
+      * (0.6 + 0.4 * fract(h * 2.9)) * (0.3 + 0.7 * smoothstep(0.35, 0.95, v));
+  }
+#endif
+#ifdef MBG_FLOORAO
+  diffuseColor.rgb *= mix(0.7, 1.0, smoothstep(0.0, 0.5, mod(vMbgPos.y, uFloorH)));
+#endif`)
+      .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+#ifdef MBG_PANES
+  metalnessFactor *= 1.0 - mbgBlind;
+  roughnessFactor = mix(roughnessFactor, 0.85, mbgBlind);
+#endif`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+#ifdef MBG_PANES
+  totalEmissiveRadiance += vec3(1.0, 0.8, 0.56) * uLit * mbgLitAmount * pow(abs(dot(normal, normalize(vViewPosition))), 1.5);
+#endif
+#ifdef MBG_DOWNLIGHTS
+  if (mbgN.y < -0.5) totalEmissiveRadiance += vec3(1.0, 0.88, 0.68) * uDown * (1.0 - smoothstep(0.04, 0.07, length(fract(vMbgPos.xz / 1.4) - 0.5)));
+#endif
+#ifdef MBG_WASH
+  totalEmissiveRadiance += vec3(1.0, 0.84, 0.62) * uWash * (0.35 + 0.65 * (1.0 - smoothstep(0.0, 4.0, vMbgPos.y)));
+#endif`)
+      .replace('#include <aomap_fragment>', `#include <aomap_fragment>
+#ifdef MBG_CONTACT_AO
+  /* facades darken gently over the first metres above grade, anchoring the model */
+  reflectedLight.indirectDiffuse *= mix(0.62, 1.0, smoothstep(0.0, 4.5, vMbgPos.y));
+  reflectedLight.directDiffuse *= mix(0.85, 1.0, smoothstep(0.0, 2.5, vMbgPos.y));
+#endif`);
+  };
+  material.customProgramCacheKey = () => 'mbg-finish|' + Object.keys(material.defines).sort().join(',');
 }
 
 function layerAppearance(data, layerKey, props = {}) {
@@ -2219,6 +2517,7 @@ function getPbrMaterial(data, layerKey, appearance) {
   const textureSet = createProceduralTextureSet(glass ? 'none' : kind);
   const isPlanting = layerKey === 'roofPlanting';
   const isMineral = kind === 'mineral' || kind === 'brick' || kind === 'panel';
+  const finish = finishFor(layerKey, appearance.part);
   let material;
   if (glass) {
     /* Architectural glass: dark body, strong Fresnel reflection of the sky/sun.
@@ -2241,7 +2540,7 @@ function getPbrMaterial(data, layerKey, appearance) {
   } else {
     /* Exterior surfaces are opaque in AR: translucent walls read as ghosts over a photo. */
     const opacity = internal ? appearance.opacity : 1;
-    material = new THREE.MeshStandardMaterial({
+    material = new (finish.physical ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial)({
       color: new THREE.Color(appearance.color),
       map: textureSet.map,
       normalMap: textureSet.normalMap,
@@ -2255,8 +2554,13 @@ function getPbrMaterial(data, layerKey, appearance) {
       shadowSide: THREE.FrontSide,
       depthWrite: opacity >= 0.82
     });
-    if (!internal) addContactOcclusion(material);
   }
+  Object.entries(finish.params || {}).forEach(([name, value]) => {
+    if (name === 'colorScale') material.color.multiplyScalar(value);
+    else material[name] = value;
+  });
+  applyComponentFinish(material, finish, !internal && !glass, data);
+  material.userData.finish = finish.cue || '';
   material.userData.baseOpacity = material.opacity;
   material.userData.layer = layerKey;
   state.materialCache.set(key, material);
@@ -2272,6 +2576,9 @@ function buildModelGroup(data) {
   const project = localMetersProjector(centerLng, centerLat);
   const group = new THREE.Group();
   const buckets = new Map();
+  const cfg = data.config || {};
+  const paneWidth = Number(cfg.bayWidth) / Math.max(1, Number(cfg.lightsPerBay) || 1) || Number(cfg.windowSpacing) || 1.6;
+  let featureSeed = 1234567;
 
   Object.entries(data.geometry || {}).forEach(([layerKey, fc]) => {
     const features = fc && Array.isArray(fc.features) ? fc.features : [];
@@ -2286,9 +2593,19 @@ function buildModelGroup(data) {
       const bucketKey = [layerKey, appearance.part, appearance.color, appearance.opacity.toFixed(3), appearance.pattern].join('|');
       if (!buckets.has(bucketKey)) buckets.set(bucketKey, { layerKey, appearance, geometries: [] });
       const bucket = buckets.get(bucketKey);
+      const seed = (featureSeed = (featureSeed * 16807) % 2147483647) / 2147483647;
       const addPolygon = coords => {
         const geometry = polygonToGeometry(coords, project, depth, base);
-        if (geometry) bucket.geometries.push(geometry);
+        if (!geometry) return;
+        // Per-feature seed, plus a pane width when one feature spans several bays,
+        // so finishes vary window by window and panel by panel.
+        geometry.computeBoundingBox();
+        const size = geometry.boundingBox.getSize(new THREE.Vector3());
+        const pane = Math.max(size.x, size.z) > 2.6 ? paneWidth : 0;
+        const cell = new Float32Array(geometry.attributes.position.count * 2);
+        for (let i = 0; i < cell.length; i += 2) { cell[i] = seed; cell[i + 1] = pane; }
+        geometry.setAttribute('mbgCell', new THREE.BufferAttribute(cell, 2));
+        bucket.geometries.push(geometry);
       };
       if (feat.geometry.type === 'Polygon') addPolygon(feat.geometry.coordinates);
       else if (feat.geometry.type === 'MultiPolygon' && Array.isArray(feat.geometry.coordinates)) {
@@ -2481,8 +2798,8 @@ function contentViewerXY() {
   const d = ref ? geoDeltaMeters(ref, payload.site) : { east: 0, north: 0 };
   const preview = state.previewActive ? state.previewOffsetM : { east: 0, north: 0 };
   return {
-    x: -(d.east + state.manualOffsetM.east + preview.east),
-    y: -(d.north + state.manualOffsetM.north + preview.north),
+    x: -(d.east - state.stepOffsetM.east + state.manualOffsetM.east + preview.east),
+    y: -(d.north - state.stepOffsetM.north + state.manualOffsetM.north + preview.north),
     preview: Boolean(state.previewActive)
   };
 }
@@ -2944,7 +3261,7 @@ function buildInteriorGroup() {
   if (!interiorScene) {
     interiorScene = createInteriorScene({ interior: payload.interior, site: payload.site, revision: payload.createdAt, modelRoot: state.modelRoot,
       project: localMetersProjector(Number(payload.site.lng), Number(payload.site.lat)), polygonToGeometry,
-      renderer: state.renderer, getQuality: () => state.qualityMode, onWalkStart: () => setPanelCollapsed(true), onExplore: () => { $('detailMode').value = 'complete'; $('detailMode').dispatchEvent(new Event('change')); }, physicallyTracked: () => state.sessionActive || Boolean(state.cameraReady && state.userLoc && state.relOrientation) });
+      renderer: state.renderer, viewCamera: () => activeViewCamera(), getQuality: () => state.qualityMode, onWalkStart: () => { setPanelCollapsed(true); syncUiState(); }, onExplore: () => setInteriorVisible(true), physicallyTracked: () => state.sessionActive });
     state.interiorRoot = interiorScene.root;
   }
   interiorScene.enable(state.detailMode === 'complete');
@@ -3316,9 +3633,11 @@ function updatePlacement() {
   const referenceLoc = getReferenceLocation();
   if (referenceLoc && Number.isFinite(payload.site.lng) && Number.isFinite(payload.site.lat)) {
     const delta = geoDeltaMeters(referenceLoc, payload.site);
-    dist = delta.distanceMeters;
-    east = delta.east;
-    north = delta.north;
+    /* Walked steps move the viewer, so the site moves the other way relative to them. */
+    const walked = state.sessionActive ? { east: 0, north: 0 } : state.stepOffsetM;
+    east = delta.east - walked.east;
+    north = delta.north - walked.north;
+    dist = Math.hypot(east, north);
     state.lastPlacementDistanceM = dist;
     if (!state.sessionActive) {
       const elevationReady = Number.isFinite(state.siteGroundElevationM) && Number.isFinite(state.anchorEyeElevationM);
@@ -3534,6 +3853,7 @@ function onDeviceMotion(event) {
   state.motionRateDps = THREE.MathUtils.lerp(state.motionRateDps, magnitude, 0.32);
   state.lastMotionAtMs = performance.now();
   state.motionTrackingReady = true;
+  detectStep(event);
 }
 
 /* Re-lock: re-estimate heading from ~1.4 s of compass while the user holds still,
@@ -3694,7 +4014,9 @@ async function enableGeolocation() {
     /* Walk-follow: once settled, GPS wander (easily 10-20 m in street canyons) never moves
        the building. Only a clear, sustained walk glides the anchor, and a manual Lock
        disables even that until Re-aim. */
-    if (state.fixedPosition && state.anchorSettled && state.anchorLoc && !state.sessionActive) {
+    if (state.followSteps && state.motionTrackingReady && state.anchorSettled && state.anchorLoc && !state.sessionActive) {
+      correctStepsFromGps(filtered);
+    } else if (state.fixedPosition && state.anchorSettled && state.anchorLoc && !state.sessionActive) {
       const moved = geoDeltaMeters(state.anchorLoc, filtered).distanceMeters;
       const threshold = Math.max(WALK_FOLLOW_MIN_M, WALK_FOLLOW_ACCURACY_FACTOR * (Number(filtered.accuracy) || 10));
       state.movedSinceLockM = moved;
@@ -3714,6 +4036,8 @@ async function enableGeolocation() {
     updatePlacement();
   };
   const handleGeoError = err => {
+    /* a watch that times out between fixes is routine once there is a position */
+    if (err && err.code === 3 && state.userLoc) return;
     if (err && err.code === 1) {
       state.geoPermissionState = 'denied';
       setError(getGeoPermissionHelp());
@@ -4006,6 +4330,7 @@ function updateSolarLighting() {
 /* Sample the live camera: sky (top band), horizon (middle), ground (bottom). */
 function sampleCameraLighting(nowMs) {
   if (state.sessionActive && state.lightingMode === 'xr-estimated') return;
+  if (state.viewMode !== 'live') return;
   if (nowMs - state.lastCameraLightSampleMs < CAMERA_LIGHT_SAMPLE_INTERVAL_MS) return;
   const video = $('cameraFeed');
   if (!video || video.readyState < 2 || !video.videoWidth || !lightSampleCtx) return;
@@ -4132,7 +4457,8 @@ function applyQualityMode() {
   else ratio = clamp(state.renderScale, Math.min(dpr, 0.85), Math.min(dpr, 1.75));
   state.renderScale = ratio;
   state.renderer.setPixelRatio(ratio);
-  state.renderer.setSize(window.innerWidth, window.innerHeight, false);
+  /* updateStyle: the canvas must follow rotation and window resizes, not keep its first size */
+  state.renderer.setSize(window.innerWidth, window.innerHeight, true);
   const shadowSize = state.qualityMode === 'high' ? 2048 : (state.qualityMode === 'performance' ? 512 : 1024);
   if (state.sunLight && state.sunLight.shadow.mapSize.width !== shadowSize) {
     state.sunLight.shadow.mapSize.set(shadowSize, shadowSize);
@@ -4161,9 +4487,12 @@ function updateAdaptiveQuality(nowMs) {
 
 function updateDetailVisibility() {
   if (!state.modelRoot) return;
-  const distance = Number.isFinite(state.lastPlacementDistanceM)
-    ? state.lastPlacementDistanceM
-    : Math.max(20, state.modelMetrics.radius * 2.8);
+  const virtual = state.viewMode !== 'live' && Number.isFinite(state.virtualDistanceM);
+  const distance = virtual
+    ? state.virtualDistanceM
+    : Number.isFinite(state.lastPlacementDistanceM)
+      ? state.lastPlacementDistanceM
+      : Math.max(20, state.modelMetrics.radius * 2.8);
   state.modelRoot.traverse(object => {
     if (!object.isMesh || object.userData.interiorManaged) return;
     const internalVisible = !object.userData.internal
@@ -4305,6 +4634,346 @@ function updateDepthOcclusion() {
   state.depthOcclusionActive = true;
 }
 
+/* ---------- camera modes ----------
+   Live AR draws over the device camera, driven by the phone's sensors. Orbit and Walk are
+   virtual views with their own camera, sky and ground, so the building can be explored
+   without standing at the site. Interior walkthroughs take over from any of them. */
+const VIEW_MODE_STORAGE_KEY = 'mbg_ar_view_mode_v1';
+const WALK_SPEED_MPS = 1.4;
+/* Step following: a step is a peak in linear acceleration. A lone peak (a wave of the
+   hand) moves nothing; only the second step within STEP_MAX_GAP_MS starts a walk. */
+const STEP_LENGTH_M = 0.72;
+const STEP_HIGH_MS2 = 1.3;
+const STEP_LOW_MS2 = 0.55;
+const STEP_MIN_GAP_MS = 320;
+const STEP_MAX_GAP_MS = 1600;
+const STEP_MAX_TURN_DPS = 140;
+
+function activeViewCamera() {
+  if (interiorScene?.walking) return interiorScene.camera;
+  return state.viewMode === 'live' || state.sessionActive || !state.freeCam ? state.camera : state.freeCam;
+}
+
+function modelCentreWorld(target = new THREE.Vector3()) {
+  if (!state.modelRoot || !state.modelLocalCentre) return target.set(0, 0, 0);
+  state.modelRoot.updateWorldMatrix(true, false);
+  return state.modelRoot.localToWorld(target.copy(state.modelLocalCentre));
+}
+
+function groundWorldY() {
+  if (!state.modelRoot || !state.modelLocalCentre) return 0;
+  return state.modelRoot.localToWorld(new THREE.Vector3(state.modelLocalCentre.x, state.modelMetrics.minY, state.modelLocalCentre.z)).y;
+}
+
+function createVirtualSky() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 4;
+  canvas.height = 256;
+  const g = canvas.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, '#6f9cc4');
+  grad.addColorStop(0.55, '#b9d0e0');
+  grad.addColorStop(1, '#e6ecef');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 4, 256);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createVirtualGround() {
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(2500, 64).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: '#bfc2bc', roughness: 1, metalness: 0 })
+  );
+  ground.name = 'Virtual ground';
+  ground.receiveShadow = true;
+  ground.renderOrder = -10;
+  ground.visible = false;
+  return ground;
+}
+
+function frameOrbit() {
+  if (!state.freeCam || !state.orbit) return;
+  const centre = modelCentreWorld();
+  const r = state.modelMetrics.radius, h = state.modelMetrics.height;
+  const dist = Math.max(r * 2.6, h * 1.15, 32);
+  state.freeCam.position.set(centre.x + dist * 0.55, centre.y + dist * 0.42, centre.z + dist * 0.72);
+  state.orbit.target.copy(centre);
+  state.orbit.update();
+}
+
+function placeWalkStart() {
+  if (!state.freeCam) return;
+  const centre = modelCentreWorld();
+  const r = state.modelMetrics.radius;
+  const pos = new THREE.Vector3(centre.x + (r + 18) * 0.6, groundWorldY() + VIEWER_EYE_HEIGHT_M + state.viewerLevelM, centre.z + (r + 18) * 0.8);
+  state.freeCam.position.copy(pos);
+  state.walkYaw = Math.atan2(-(centre.x - pos.x), -(centre.z - pos.z));
+  state.walkPitch = clamp(Math.atan2(Math.min(state.modelMetrics.height * 0.35, 30), r + 18), 0, 0.6);
+  state.freeCam.quaternion.setFromEuler(new THREE.Euler(state.walkPitch, state.walkYaw, 0, 'YXZ'));
+}
+
+async function setViewMode(mode, { quiet = false } = {}) {
+  if (!['live', 'orbit', 'walk'].includes(mode)) return;
+  if (state.sessionActive && mode !== 'live') return;
+  if (mode === 'live' && !state.cameraReady) {
+    try {
+      await ensureCameraFeed();
+    } catch (err) {
+      showToast('Live AR needs the camera. Allow camera access in your browser settings, then use Retry under Status.');
+      return;
+    }
+  }
+  const previous = state.viewMode;
+  state.viewMode = mode;
+  document.body.classList.toggle('virtual-view', mode !== 'live');
+  /* Virtual views are lit by the sun model, not tinted by whatever the camera last saw. */
+  if ((mode === 'live') !== (previous === 'live') && state.scene) {
+    if (mode === 'live') {
+      state.cameraPalette = state.liveCameraPalette || null;
+    } else {
+      state.liveCameraPalette = state.cameraPalette;
+      state.cameraPalette = null;
+    }
+    state.lightingMode = state.cameraPalette ? 'camera-matched' : 'studio';
+    applyLightingBalance();
+    rebuildSkyEnvironment(true);
+  }
+  if (state.scene) state.scene.background = mode === 'live' ? null : state.virtualSky;
+  if (state.virtualGround) state.virtualGround.visible = mode !== 'live';
+  if (state.orbit) state.orbit.enabled = mode === 'orbit';
+  state.walkMove.clear();
+  if (state.freeCam && mode === 'orbit' && previous !== 'orbit') frameOrbit();
+  if (state.freeCam && mode === 'walk' && previous !== 'walk') placeWalkStart();
+  try { localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode); } catch (err) { /* storage unavailable */ }
+  if (!quiet) showToast({ live: 'Live AR', orbit: 'Orbit view', walk: 'Walk view' }[mode], 1600);
+  updateDetailVisibility();
+  syncUiState();
+}
+
+function resetView() {
+  if (interiorScene?.walking) {
+    document.querySelector('.interior-walk-controls [data-exit]')?.click();
+    syncUiState();
+    return;
+  }
+  if (state.viewMode === 'live') {
+    relockParcel();
+    showToast('Re-aiming: hold the phone still toward the street for a second.', 3500);
+    return;
+  }
+  if (state.viewMode === 'orbit') frameOrbit();
+  else placeWalkStart();
+  showToast('View reset.', 1600);
+}
+
+function updateVirtualCamera(dt) {
+  if (!state.freeCam || state.viewMode === 'live' || state.sessionActive) return;
+  if (state.viewMode === 'orbit') {
+    state.orbit.update();
+  } else if (!interiorScene?.walking) {
+    if (state.lookWithPhone && state.relOrientation) state.freeCam.quaternion.copy(state.camera.quaternion);
+    else state.freeCam.quaternion.setFromEuler(new THREE.Euler(state.walkPitch, state.walkYaw, 0, 'YXZ'));
+    if (state.walkMove.size) {
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(state.freeCam.quaternion).setY(0);
+      if (forward.lengthSq() < 1e-6) forward.set(0, 0, -1);
+      forward.normalize();
+      const right = new THREE.Vector3(-forward.z, 0, forward.x);
+      const move = new THREE.Vector3();
+      if (state.walkMove.has('forward')) move.add(forward);
+      if (state.walkMove.has('back')) move.sub(forward);
+      if (state.walkMove.has('right')) move.add(right);
+      if (state.walkMove.has('left')) move.sub(right);
+      if (move.lengthSq() > 0) state.freeCam.position.addScaledVector(move.normalize(), WALK_SPEED_MPS * (state.walkMove.has('fast') ? 3 : 1) * dt);
+    }
+    state.freeCam.position.y = groundWorldY() + VIEWER_EYE_HEIGHT_M + state.viewerLevelM;
+  }
+  if (state.virtualGround) state.virtualGround.position.y = groundWorldY() - 0.03;
+  const centre = modelCentreWorld();
+  state.virtualDistanceM = Math.max(0, Math.hypot(state.freeCam.position.x - centre.x, state.freeCam.position.z - centre.z) - state.modelMetrics.radius);
+}
+
+/* ---------- step following ---------- */
+function detectStep(event) {
+  if (state.sessionActive || !state.followSteps) return;
+  const a = event.acceleration;
+  const g = event.accelerationIncludingGravity;
+  let magnitude;
+  if (a && Number.isFinite(a.x) && Number.isFinite(a.y) && Number.isFinite(a.z)) magnitude = Math.hypot(a.x, a.y, a.z);
+  else if (g && Number.isFinite(g.x) && Number.isFinite(g.y) && Number.isFinite(g.z)) magnitude = Math.abs(Math.hypot(g.x, g.y, g.z) - 9.81);
+  else return;
+  state.stepSignal += (magnitude - state.stepSignal) * 0.35;
+  const now = performance.now();
+  if (state.stepArmed && state.stepSignal > STEP_HIGH_MS2 && now - state.lastStepAtMs > STEP_MIN_GAP_MS) {
+    state.stepArmed = false;
+    if (state.motionRateDps > STEP_MAX_TURN_DPS) return;
+    const walking = now - state.lastStepAtMs < STEP_MAX_GAP_MS;
+    state.lastStepAtMs = now;
+    if (walking) takeSteps(state.stepPending ? 2 : 1);
+    state.stepPending = !walking;
+  } else if (!state.stepArmed && state.stepSignal < STEP_LOW_MS2) {
+    state.stepArmed = true;
+  }
+}
+
+function takeSteps(count) {
+  state.stepPending = false;
+  const camera = state.viewMode === 'walk' ? state.freeCam : state.camera;
+  if (!camera || interiorScene?.walking) return;
+  const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).setY(0);
+  if (forward.lengthSq() < 0.04) return;
+  forward.normalize();
+  const metres = STEP_LENGTH_M * count;
+  state.stepCount += count;
+  if (state.viewMode === 'walk') {
+    state.freeCam.position.addScaledVector(forward, metres);
+  } else if (state.viewMode === 'live') {
+    state.stepTargetM = state.stepTargetM || { ...state.stepOffsetM };
+    state.stepTargetM.east += forward.x * metres;
+    state.stepTargetM.north += -forward.z * metres;
+  }
+  syncUiState();
+}
+
+/* Walked distance glides in, so a step reads as movement instead of a jump. */
+function easeSteps(dt) {
+  const target = state.stepTargetM;
+  if (!target) return;
+  const k = 1 - Math.exp(-dt / 0.3);
+  const de = (target.east - state.stepOffsetM.east) * k, dn = (target.north - state.stepOffsetM.north) * k;
+  if (Math.abs(de) + Math.abs(dn) < 0.0005) return;
+  state.stepOffsetM.east += de;
+  state.stepOffsetM.north += dn;
+  updatePlacement();
+}
+
+/* GPS keeps walked drift bounded: only a clear disagreement, bigger than the fix's own
+   accuracy, pulls the walked position toward it. */
+function correctStepsFromGps(loc) {
+  const gps = geoDeltaMeters(state.anchorLoc, loc);
+  const target = state.stepTargetM || (state.stepTargetM = { ...state.stepOffsetM });
+  const errEast = gps.east - target.east, errNorth = gps.north - target.north;
+  const tolerance = Math.max(5, 1.2 * (Number(loc.accuracy) || 10));
+  if (Math.hypot(errEast, errNorth) <= tolerance) return;
+  target.east += errEast * 0.3;
+  target.north += errNorth * 0.3;
+}
+
+/* ---------- interiors ---------- */
+function setInteriorVisible(on) {
+  state.detailMode = on ? 'complete' : 'exterior';
+  document.body.classList.toggle('interior-on', on);
+  FINISH_UNIFORMS.uMbgSeeThrough.value = on ? 1 : 0;
+  state.materialCache.forEach(material => {
+    if (!GLASS_LAYERS.has(material.userData.layer)) return;
+    material.opacity = on ? 0.2 : clamp(Math.max(material.userData.baseOpacity, 0.84), 0.84, 0.94);
+    material.metalness = on ? 0.08 : 0.45;
+    material.envMapIntensity = on ? 0.6 : 1.35;
+    material.depthWrite = !on;
+    material.needsUpdate = true;
+  });
+  if (on) buildInteriorGroup();
+  else interiorScene?.enable(false);
+  updateDetailVisibility();
+  syncUiState();
+}
+
+/* ---------- permissions ----------
+   Requested on load, each independently, so a refusal of one never blocks the others.
+   iOS only grants motion inside a tap, so that one waits for the first touch. */
+async function requestPermissionsOnLoad() {
+  const [camera, location, motion] = await Promise.allSettled([
+    ensureCameraFeed(),
+    enableGeolocation(),
+    enableOrientation({ userInitiated: false })
+  ]);
+  updateSensorState();
+  summarisePermissions({ camera, location, motion });
+  if (camera.status === 'fulfilled') await setViewMode('live', { quiet: true });
+  else showToast('Camera unavailable, so you are in Orbit view. Allow the camera, then use Retry under Status for Live AR.', 6000);
+}
+
+function summarisePermissions(results = {}) {
+  const word = (key, ready) => {
+    const r = results[key];
+    if (ready) return 'on';
+    if (key === 'motion' && state.orientationGestureRequired) return 'tap to allow';
+    return r && r.status === 'rejected' ? 'blocked' : 'off';
+  };
+  const text = `Camera ${word('camera', state.cameraReady)} · Location ${word('location', state.geolocationReady)} · Motion ${word('motion', state.orientationReady)}`;
+  if ($('permissionSummary')) $('permissionSummary').textContent = text;
+  if ($('motionPrompt')) $('motionPrompt').hidden = !(state.orientationGestureRequired && !state.orientationReady);
+}
+
+function bindViewControls() {
+  document.querySelectorAll('#quickDock [data-view]').forEach(button =>
+    button.addEventListener('click', () => void setViewMode(button.dataset.view)));
+  $('dockReset').addEventListener('click', resetView);
+  $('recenter').addEventListener('click', resetView);
+  $('dockInterior').addEventListener('click', () => setInteriorVisible(state.detailMode !== 'complete'));
+  $('interiorToggle').addEventListener('change', event => setInteriorVisible(event.target.checked));
+  $('followSteps').checked = state.followSteps;
+  $('followSteps').addEventListener('change', event => {
+    state.followSteps = event.target.checked;
+    syncUiState();
+  });
+  $('lookWithPhone').checked = state.lookWithPhone;
+  $('lookWithPhone').addEventListener('change', event => { state.lookWithPhone = event.target.checked; });
+  $('motionPrompt').addEventListener('click', async () => {
+    try {
+      await enableOrientation({ userInitiated: true });
+      showToast('Motion on. Move the phone to look around; walk and the view follows.', 3500);
+    } catch (err) {
+      showToast(String(err && err.message ? err.message : err), 5000);
+    }
+    summarisePermissions();
+    syncUiState();
+  });
+  /* Walk: hold an arrow (or W A S D) to move; drag to look when the phone is not steering. */
+  const pad = $('walkPad');
+  pad.querySelectorAll('[data-move]').forEach(button => {
+    const stop = () => state.walkMove.delete(button.dataset.move);
+    button.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      state.walkMove.add(button.dataset.move);
+      button.setPointerCapture(event.pointerId);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => button.addEventListener(type, stop));
+  });
+  const keyMap = { w: 'forward', ArrowUp: 'forward', s: 'back', ArrowDown: 'back', a: 'left', ArrowLeft: 'left', d: 'right', ArrowRight: 'right', Shift: 'fast' };
+  window.addEventListener('keydown', event => {
+    if (state.viewMode !== 'walk' || interiorScene?.walking || /INPUT|SELECT|TEXTAREA/.test(event.target.tagName)) return;
+    const move = keyMap[event.key] || keyMap[event.key.toLowerCase?.()];
+    if (!move) return;
+    event.preventDefault();
+    state.walkMove.add(move);
+  });
+  window.addEventListener('keyup', event => {
+    const move = keyMap[event.key] || keyMap[event.key.toLowerCase?.()];
+    if (move) state.walkMove.delete(move);
+  });
+  window.addEventListener('blur', () => state.walkMove.clear());
+  const canvas = $('xrCanvas');
+  let drag = null;
+  canvas.addEventListener('pointerdown', event => {
+    if (state.viewMode !== 'walk' || interiorScene?.walking || state.bindMode) return;
+    if (state.lookWithPhone && state.relOrientation) return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    canvas.setPointerCapture(event.pointerId);
+  });
+  canvas.addEventListener('pointermove', event => {
+    if (!drag || event.pointerId !== drag.id) return;
+    state.walkYaw += (event.clientX - drag.x) * 0.005;
+    state.walkPitch = clamp(state.walkPitch + (event.clientY - drag.y) * 0.004, -1.2, 1.2);
+    drag.x = event.clientX;
+    drag.y = event.clientY;
+  });
+  const end = event => { if (drag && event.pointerId === drag.id) drag = null; };
+  canvas.addEventListener('pointerup', end);
+  canvas.addEventListener('pointercancel', end);
+}
+
 function initScene() {
   if (state.renderer) return;
   state.renderer = new THREE.WebGLRenderer({
@@ -4340,6 +5009,8 @@ function initScene() {
     throw new Error('No valid model geometry found in AR payload.');
   }
   state.modelMetrics = getModelMetrics(state.modelRoot);
+  /* The model is still detached here, so its world box is its local box. */
+  state.modelLocalCentre = new THREE.Box3().setFromObject(state.modelRoot).getCenter(new THREE.Vector3());
   ensureInitialPreviewOffset();
   loadPayloadOccluders();
   state.alignmentRoot = buildAlignmentProofGroup(payload);
@@ -4356,6 +5027,17 @@ function initScene() {
   state.geoRoot.add(state.contentRoot);
   state.northRoot.add(state.geoRoot);
   state.scene.add(state.northRoot);
+  state.virtualSky = createVirtualSky();
+  state.virtualGround = createVirtualGround();
+  state.scene.add(state.virtualGround);
+  state.freeCam = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 20000);
+  state.orbit = new OrbitControls(state.freeCam, state.renderer.domElement);
+  state.orbit.enableDamping = true;
+  state.orbit.dampingFactor = 0.08;
+  state.orbit.minDistance = 4;
+  state.orbit.maxDistance = 4000;
+  state.orbit.maxPolarAngle = THREE.MathUtils.degToRad(88);
+  state.orbit.enabled = false;
   rebuildOccluders();
   void fetchViewerContextTiles();
 
@@ -4383,9 +5065,14 @@ function initScene() {
   applyQualityMode();
   updateDetailVisibility();
 
+  let lastLoopMs = performance.now();
   state.renderer.setAnimationLoop((time, frame) => {
     const nowMs = Number(time) || performance.now();
     const nowS = nowMs * 0.001;
+    const dt = clamp((nowMs - lastLoopMs) / 1000, 0, 0.1);
+    lastLoopMs = nowMs;
+    easeSteps(dt);
+    updateVirtualCamera(dt);
     if (!state.sessionActive && state.camera && state.relOrientation) {
       updateOverlayCameraPose(performance.now());
     }
@@ -4420,11 +5107,21 @@ function initScene() {
     updateContextFade(nowMs);
     if (state.contactShadow) state.contactShadow.visible = state.previewActive || groundAcknowledged();
     interiorScene?.update(nowMs);
-    state.renderer.render(state.scene, interiorScene?.walking ? interiorScene.camera : state.camera);
+    const walking = interiorScene?.walking;
+    if (walking !== state.lastInteriorWalking) {
+      state.lastInteriorWalking = walking;
+      syncUiState();
+    }
+    const exposure = state.renderer.toneMappingExposure;
+    if (walking) state.renderer.toneMappingExposure = interiorScene.exposure;
+    state.renderer.render(state.scene, activeViewCamera());
+    state.renderer.toneMappingExposure = exposure;
   });
 
   window.addEventListener('resize', () => {
     if (!state.renderer || !state.camera) return;
+    state.freeCam.aspect = window.innerWidth / Math.max(1, window.innerHeight);
+    state.freeCam.updateProjectionMatrix();
     syncCameraProjection();
     applyQualityMode();
   });
@@ -4437,9 +5134,7 @@ async function startArSession() {
   setError('');
   try {
     if (!payload) throw new Error('AR payload missing. Generate building and open AR from the main app.');
-    if (!state.sensorsEnabled) {
-      throw new Error('Use Enable Camera & Motion first, or continue with the virtual preview.');
-    }
+    if (!state.cameraReady) await ensureCameraFeed();
     await ensureCameraFeed();
     if (!navigator.xr) {
       setStatus('WebXR is unavailable on this device/browser. Using camera-overlay mode with live location alignment.');
@@ -4489,6 +5184,7 @@ async function startArSession() {
       setStatus('AR session ended. You can start it again.');
     });
 
+    await setViewMode('live', { quiet: true });
     await state.renderer.xr.setSession(session);
     state.sessionActive = true;
     state.xrSession = session;
@@ -4508,6 +5204,7 @@ function relockParcel() {
   captureStablePoseLock();
   state.anchorTargetLoc = null;
   state.movedSinceLockM = 0;
+  state.stepOffsetM = { east: 0, north: 0 };
   if (state.userLoc) {
     setAnchorFromLocation(state.userLoc, 'manual');
     state.anchorSettled = true;
@@ -4569,17 +5266,15 @@ async function boot() {
   }
 
   loadSavedCalibration();
-  setStatus('Choose Enable Camera & Motion, or continue with the virtual preview.');
-  permissionSheet = mountPermissionSheet({ camera: ensureCameraFeed, location: enableGeolocation, orientationGranted: () => enableOrientation({ userInitiated: true, preGranted: true }) });
-
+  setStatus('Requesting camera, location and motion…');
   $('enableSensors').addEventListener('click', async () => {
-    if (permissionSheet) permissionSheet.open();
-    else await enableSensors();
+    await enableSensors({ userInitiated: true });
+    summarisePermissions();
+    if (state.cameraReady && state.viewMode !== 'live') await setViewMode('live');
   });
   $('startAr').addEventListener('click', async () => {
     await startArSession();
   });
-  $('recenter').addEventListener('click', relockParcel);
   $('toggleFixedPosition').addEventListener('click', relockParcel);
   $('quickLock').addEventListener('click', lockAlignmentNow);
   bindDialControl('rotateLeft', () => stepHeadingTrim(-HEADING_TRIM_STEP_DEG));
@@ -4644,21 +5339,6 @@ async function boot() {
     setStatus(`Context: ${CONTEXT_MODES[next]}.${next === 'outlines' ? ' Line the outlines up with the real buildings using Reposition Model.' : ''}`);
   });
   syncContextChip();
-  $('detailMode').addEventListener('change', event => {
-    state.detailMode = event.target.value;
-    const seeThrough = state.detailMode === 'complete';
-    state.materialCache.forEach(material => {
-      if (!GLASS_LAYERS.has(material.userData.layer)) return;
-      material.opacity = seeThrough ? 0.2 : clamp(Math.max(material.userData.baseOpacity, 0.84), 0.84, 0.94);
-      material.metalness = seeThrough ? 0.08 : 0.45;
-      material.envMapIntensity = seeThrough ? 0.6 : 1.35;
-      material.depthWrite = !seeThrough;
-      material.needsUpdate = true;
-    });
-    if (seeThrough) buildInteriorGroup();
-    else interiorScene?.enable(false);
-    updateDetailVisibility();
-  });
   $('panelToggle').addEventListener('click', () => {
     setPanelCollapsed(true);
     $('toolsToggle').focus();
@@ -4669,7 +5349,7 @@ async function boot() {
     if(opening)$('panelToggle').focus({preventScroll:true});
   });
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape'&&!document.body.classList.contains('panel-collapsed')&&$('permissionSheet')?.hidden!==false){
+    if(event.key==='Escape'&&!document.body.classList.contains('panel-collapsed')){
       setPanelCollapsed(true);$('toolsToggle').focus();
     }
   });
@@ -4677,23 +5357,28 @@ async function boot() {
   window.addEventListener('pointercancel', clearBindHold);
   window.addEventListener('blur', clearBindHold);
   setPanelCollapsed(true);
-  syncUiState();
   bindCanvasInteractions();
+  bindViewControls();
 
-  // Render a non-AR preview immediately so desktop/dev environments can validate geometry.
+  /* Something to look at straight away: the orbit view, until the camera answers. */
   try {
     initScene();
     void ensureSiteGroundElevation();
     buildInteriorGroup();
-
+    await setViewMode('orbit', { quiet: true });
   } catch (err) {
     setError(String(err && err.message ? err.message : err));
   }
+  if (navigator.xr && typeof navigator.xr.isSessionSupported === 'function') {
+    navigator.xr.isSessionSupported('immersive-ar').then(ok => { state.xrSupported = Boolean(ok); syncUiState(); }).catch(() => {});
+  }
+  syncUiState();
+  void requestPermissionsOnLoad().then(syncUiState);
 }
 
 void boot();
 if (AR_DEBUG) window.__arDebug = { state, THREE, relativeDeviceQuat, get interior() { return interiorScene; } };
-window.addEventListener('pagehide', event => { if (!event.persisted) { interiorScene?.dispose(); permissionSheet?.dispose(); } });
+window.addEventListener('pagehide', event => { if (!event.persisted) interiorScene?.dispose(); });
 </script>
 </body>
 </html>

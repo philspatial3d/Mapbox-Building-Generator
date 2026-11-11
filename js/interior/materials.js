@@ -1,8 +1,9 @@
 import * as THREE from "https://esm.sh/three@0.185.1";
 import { STYLES } from "./state.js";
+import { artAtlas, rugTexture, bookTexture, carpetTexture, tileTexture, screenTexture } from "./canvas-textures.js";
 const baseMaps = new Map();
 function baseMap(family) {
-  const name = { wall: "plaster", wood: "oak", stone: "stone", tile: "stone" }[
+  const name = { wall: "plaster", wood: "oak", stone: "stone" }[
     family
   ];
   if (!name) return null;
@@ -30,11 +31,18 @@ export function finishMaterial(material, family) {
   if (family === "wall") {
     // Paint is a finish colour with restrained grain, rather than a photograph
     // covering the wall. Keep broad generated colour variation below the paint.
+    // Wall geometry is baked floor-relative, so object-space y is height above
+    // the slab: darken the bottom 0.6 m as cheap contact occlusion at skirtings.
     material.onBeforeCompile = (shader) => {
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <map_fragment>",
-        "vec3 paintColour = diffuseColor.rgb;\n#include <map_fragment>\ndiffuseColor.rgb = mix(paintColour, diffuseColor.rgb, 0.18);",
-      );
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying float vFloorY;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvFloorY = position.y;");
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", "#include <common>\nvarying float vFloorY;")
+        .replace(
+          "#include <map_fragment>",
+          "vec3 paintColour = diffuseColor.rgb;\n#include <map_fragment>\ndiffuseColor.rgb = mix(paintColour, diffuseColor.rgb, 0.18) * (0.8 + 0.2 * smoothstep(0.04, 0.65, vFloorY));",
+        );
     };
     material.roughness = 0.92;
     material.envMapIntensity = 0.12;
@@ -71,59 +79,108 @@ export function finishMaterial(material, family) {
 export function palette(style, environment) {
   const p = STYLES[style],
     result = {};
-  for (const [k, color] of Object.entries({
+  const colors = {
     wall: p.wall,
+    ceiling: p.ceiling,
     floor: p.floor,
     wood: p.wood,
     textile: p.textile,
     stone: p.stone,
     tile: p.stone,
-    carpet: p.floor,
+    walltile: "#f3f2ee",
+    carpet: p.carpet,
     metal: p.metal,
-    linen: "#eee8dc",
-    ceramic: "#eeeae1",
-    dark: "#242b2c",
-    glass: "#c2d2cb",
-    mirror: "#afb9b5",
-  }))
+    linen: p.linen,
+    ceramic: "#f2f0ea",
+    dark: "#22282a",
+    glass: "#c9d8d4",
+    mirror: "#b9c3c0",
+    accent: p.accent,
+    soft: p.soft,
+    soft2: p.soft2,
+    throw: p.throw,
+    brass: p.brass,
+    felt: p.felt,
+    door: new THREE.Color(p.wall).multiplyScalar(0.94).getStyle(),
+    leaf: "#4f6b45",
+    paper: "#f1ede4",
+    // Window joinery and drapes are separate so a section can cut them
+    // without cutting furniture that shares their colours.
+    frame: p.metal,
+    trim: p.wood,
+    pane: "#c9d8d4",
+    drape: p.linen,
+  };
+  const roughness = {
+    glass: 0.08,
+    pane: 0.08,
+    frame: 0.4,
+    drape: 0.95,
+    metal: 0.38,
+    brass: 0.32,
+    ceramic: 0.22,
+    walltile: 0.28,
+    mirror: 0.05,
+    stone: 0.45,
+    tile: 0.4,
+    dark: 0.5,
+    carpet: 0.98,
+    felt: 0.97,
+    textile: 0.92,
+    linen: 0.95,
+    soft: 0.92,
+    soft2: 0.92,
+    throw: 0.95,
+    ceiling: 0.96,
+  };
+  for (const [k, color] of Object.entries(colors))
     result[k] = new THREE.MeshStandardMaterial({
       color,
-      roughness:
-        k === "glass"
-          ? 0.12
-          : k === "metal"
-            ? 0.35
-            : k === "ceramic"
-              ? 0.3
-              : 0.78,
-      metalness: k === "metal" || k === "mirror" ? 0.8 : 0,
-      transparent: k === "glass",
-      opacity: k === "glass" ? 0.22 : 1,
-      depthWrite: k !== "glass",
+      roughness: roughness[k] ?? 0.78,
+      metalness: ["metal", "brass", "mirror", "frame"].includes(k) ? 0.85 : 0,
+      transparent: k === "glass" || k === "pane",
+      opacity: k === "glass" || k === "pane" ? 0.16 : 1,
+      depthWrite: k !== "glass" && k !== "pane",
       side: THREE.DoubleSide,
     });
   Object.values(result).forEach((m) => {
     m.envMap = environment;
     m.envMapIntensity = 0.4;
   });
-  result.carpet.roughness = 0.97;
-  result.tile.roughness = 0.4;
-  result.mirror.roughness = 0.06;
+  result.glass.envMapIntensity = result.pane.envMapIntensity = 1.2;
+  result.mirror.envMapIntensity = 1.1;
+  result.ceramic.envMapIntensity = 0.7;
+  // Ceilings only see the hemisphere's ground colour; a little self-light stands
+  // in for bounce from the floor so they read white rather than grey.
+  result.ceiling.emissive = new THREE.Color(p.ceiling).multiplyScalar(0.2);
   result.glow = new THREE.MeshStandardMaterial({
     color: "#fff1d7",
     emissive: "#ffdfa3",
     emissiveIntensity: 1.4,
     roughness: 0.8,
   });
-  for (const key of [
-    "wall",
-    "floor",
-    "wood",
-    "textile",
-    "stone",
-    "carpet",
-    "tile",
-  ])
+  const map = (key, texture) => {
+    const m = result[key] || (result[key] = new THREE.MeshStandardMaterial({ roughness: 0.85, side: THREE.DoubleSide, envMap: environment, envMapIntensity: 0.3 }));
+    m.map = texture;
+    if (["art", "rug", "books", "screen"].includes(key)) m.color.set("#ffffff");
+    return m;
+  };
+  map("art", artAtlas(style, p.art)).roughness = 0.7;
+  map("rug", rugTexture(style, p.art, p.throw)).roughness = 0.98;
+  map("books", bookTexture(style, p.art));
+  const screen = map("screen", screenTexture());
+  screen.emissive = new THREE.Color("#ffffff");
+  screen.emissiveMap = screen.map;
+  screen.emissiveIntensity = 0.55;
+  screen.roughness = 0.25;
+  for (const key of ["wall", "floor", "wood", "textile", "stone", "carpet", "tile", "walltile"])
     finishMaterial(result[key], key === "floor" ? "wood" : key);
+  result.carpet.map = carpetTexture(style, p.carpet);
+  result.carpet.color.set("#ffffff");
+  // Wet-room floors sit a few tones below the wall tile so the room has a base.
+  result.tile.map = tileTexture("floor", new THREE.Color(p.stone).lerp(new THREE.Color(p.metal), 0.38).getStyle(), 0.6);
+  result.tile.color.set("#ffffff");
+  result.walltile.map = tileTexture("wall", "#f3f2ee", 0.6, 2);
+  result.walltile.color.set("#ffffff");
   return result;
 }
