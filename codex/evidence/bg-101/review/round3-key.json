@@ -1,0 +1,26 @@
+{
+ "rect-tower-default": {
+  "M": "after",
+  "N": "baseline"
+ },
+ "irregular-masonry": {
+  "M": "baseline",
+  "N": "after"
+ },
+ "residential-tower": {
+  "M": "baseline",
+  "N": "after"
+ },
+ "office-commercial": {
+  "M": "after",
+  "N": "baseline"
+ },
+ "podium-tower": {
+  "M": "baseline",
+  "N": "after"
+ },
+ "art-deco-tower": {
+  "M": "after",
+  "N": "baseline"
+ }
+}

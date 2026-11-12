@@ -478,14 +478,15 @@ assert(
 assert(
   presets.presets.every(preset => {
     const cfg = preset.config;
-    const balconyValid = cfg.balType === 'none'
+    /* Juliet rails are guards across full-height windows: no slab, so no projection */
+    const balconyValid = ['none', 'juliet'].includes(cfg.balType)
       ? Number(cfg.balD) === 0
       : Number(cfg.balD) >= 0.5 && Number(cfg.balD) <= 1.8;
     const structural = ['lattice', 'expressed-frame', 'vertical-fins'].includes(cfg.facadeArticulation);
     return Number(cfg.facadeArticulationDepth) >= 0.08
       && Number(cfg.facadeArticulationDepth) <= 1.2
       && balconyValid
-      && !(structural && cfg.balType !== 'none');
+      && !(structural && !['none', 'juliet'].includes(cfg.balType));
   }),
   'preset projections are buildable and competing exterior systems are excluded'
 );
@@ -703,7 +704,8 @@ for (const preset of presets.presets) {
         && (Number(cfg.podiumCapDepth) <= 0 || featureCount(geometry, 'podiumCap') > 0)))
       && featureCount(geometry, 'roof') > 0
       && (cfg.separatorStyle === 'none' || featureCount(geometry, 'seps') > 0)
-      && (cfg.balType === 'none' || (featureCount(geometry, 'balconies') > 0 && featureCount(geometry, 'railings') > 0))
+      && (cfg.balType === 'none'
+        || (cfg.balType === 'juliet' ? featureCount(geometry, 'railings') > 0 : (featureCount(geometry, 'balconies') > 0 && featureCount(geometry, 'railings') > 0)))
       && (!articulationLayer || featureCount(geometry, articulationLayer) > 0);
   }
   assert(finiteAcrossFootprints, `${preset.name} emits finite geometry on rectangular, elongated, and concave footprints`);
@@ -1154,13 +1156,26 @@ const taperedRoof = context.build(footprint, configFor({
   roofTaperStartFloor: 6,
   roofTaperStep: -0.07
 }));
-assert(featureCount(standardRoof, 'roof') === 1, 'standard roof remains a restrained slab and parapet assembly');
+/* BG-101: a flat roof is finished as a fifth facade (ballast field, rooflights, access, plant),
+   so the slab is counted by part; the restraint is that it stays one slab under one parapet. */
+const roofParts = (geometry, layer, test) => geometry[layer].features.filter(f => test.test(String(f.properties.part || ''))).length;
+assert(
+  roofParts(standardRoof, 'roof', /^main_roof_slab$/) === 1
+    && roofParts(standardRoof, 'roof', /^roof_field$/) === 1
+    && roofParts(standardRoof, 'parapets', /^parapet$/) === 1
+    && featureCount(standardRoof, 'roofScreens') <= 1,
+  'standard roof remains one slab and parapet, finished with a ballast field'
+);
 assert(featureCount(mechanicalRoof, 'roofScreens') > 0 && featureCount(mechanicalRoof, 'roofEquipment') > 0, 'mechanical roof generates screened equipment');
 assert(featureCount(terracedRoof, 'roofTerraces') === 3, 'terraced roof generates a three-stage crown');
 assert(featureCount(greenRoof, 'roofPlanting') > 0, 'green roof generates a planting layer');
 assert(topLevelArea(taperedRoof.core) < topLevelArea(standardRoof.core) * 0.8, 'tapered roof creates a narrowing crown in the tower envelope');
 const penthouseRoof = context.build(footprint, configFor({ ...roofBaseConfig, roofProfile: 'standard', penthouseF: 2, penthouseScale: 0.5 }));
-assert(featureCount(penthouseRoof, 'rooftopStructures') === 1 && featureCount(penthouseRoof, 'roof') === 2, 'penthouse floors add a roof structure and cap');
+assert(
+  roofParts(penthouseRoof, 'rooftopStructures', /^roof_penthouse$/) === 1 && roofParts(penthouseRoof, 'roof', /^(main_roof_slab|penthouse_roof)$/) === 2
+    && roofParts(penthouseRoof, 'rooftopStructures', /^roof_access_core$/) === 0,
+  'penthouse floors add a roof structure and cap, and no second access core'
+);
 const shortSpire = context.build(footprint, configFor({ ...roofBaseConfig, enableSpire: true, spireHeight: 12 }));
 const tallSpire = context.build(footprint, configFor({ ...roofBaseConfig, enableSpire: true, spireHeight: 48 }));
 assert(featureCount(shortSpire, 'spires') >= 3, 'enabled spire generates a tapered multi-stage assembly');

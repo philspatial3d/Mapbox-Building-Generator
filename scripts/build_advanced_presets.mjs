@@ -226,7 +226,7 @@ const BASE = {
   "orielFaces": "street",
   "orielFrom": 1,
   "orielTo": 0,
-  "entryType": "none",
+  "entryType": "auto",
   "entryEvery": 2,
   "doorColor": "#2f2a26",
   "roofPitch": 35,
@@ -719,7 +719,7 @@ const SPECS = [
       ...palette({ wall: '#9c5b45', glass: '#2a3036', frame: '#f1efe9', trim: '#d6cbb4', roof: '#3a3a38', accent: '#d6cbb4', base: '#d6cbb4' }),
       wallTex: 'wall-brick-red', roofTex: 'roof-bitumen-dark', zoneEnable: true, zoneBaseFloors: 3, zoneTopFloors: 0, zoneBaseTex: 'wall-limestone',
       bayWidth: 2.8, pierWidth: 0.55, pierProjection: 0.04, glassRecess: 0.27, lightsPerBay: 2, transomHeight: 0,
-      muntinPattern: 'six-over-six', windowHead: 'lintel', rusticFloors: 3, quoins: true, entryType: 'porch', entryEvery: 9,
+      muntinPattern: 'six-over-six', windowHead: 'lintel', rusticFloors: 3, quoins: true, entryType: 'portal', entryEvery: 9,
       separatorStyle: 'belt-course', separatorEvery: 3, sH: 0.45, sW: 0.15,
       sb1Floor: 13, sb1Depth: 3.6, sb1Faces: 'street', terraceRail: 'iron',
       roofProfile: 'standard', parapetH: 1.1, parapetThick: 0.35, corniceH: 0.6, corniceOut: 0.6, penthouseF: 1, penthouseScale: 0.6, waterTower: true
@@ -749,7 +749,7 @@ const SPECS = [
       ...palette({ wall: '#d6cbb5', glass: '#2c3338', frame: '#5a4938', trim: '#cdc2ab', roof: '#3f3c38', accent: '#b9aa8f', base: '#cfc3aa' }),
       wallTex: 'wall-limestone', roofTex: 'roof-bitumen-dark',
       bayWidth: 2.9, pierWidth: 0.6, pierProjection: 0.14, glassRecess: 0.26, lightsPerBay: 3, transomHeight: 2.1,
-      muntinPattern: 'one-over-one', windowHead: 'keystone', rusticFloors: 2, archFloors: 1, entryType: 'porch', entryEvery: 8,
+      muntinPattern: 'one-over-one', windowHead: 'keystone', rusticFloors: 2, archFloors: 1, entryType: 'portal', entryEvery: 8,
       separatorStyle: 'belt-course', separatorEvery: 3, sH: 0.3, sW: 0.16,
       roofProfile: 'standard', parapetH: 1.0, parapetThick: 0.4, corniceH: 0.95, corniceOut: 0.7, penthouseF: 1, penthouseScale: 0.74
     }
@@ -797,6 +797,9 @@ const SPECS = [
       separatorStyle: 'belt-course', separatorEvery: 4, sH: 0.45, sW: 0.2,
       sb1Floor: 24, sb1Depth: 3.6, sb1Faces: 'all', sb2Floor: 30, sb2Depth: 3.2, sb2Faces: 'all', sb3Floor: 34, sb3Depth: 2.8, sb3Faces: 'all', terraceRail: 'stone',
       roofProfile: 'crown', crownStyle: 'lantern', corniceH: 0.6, corniceOut: 0.45, penthouseF: 0,
+      /* cast-stone spandrels a shade below the limestone, so window and spandrel read as one
+         vertical strip between the piers */
+      accentPanels: 'spandrel', accentDensity: 1, accentColor: '#b3a78c',
       enableSpire: true, spireHeight: 10, spireWidth: 1.0, spireColor: '#7fa493'
     }
   },
@@ -838,11 +841,14 @@ const SPECS = [
     description: 'A Toronto podium-and-point tower, built the way the better Hariri Pontarini projects are. A six-storey crimson-brick podium meets the street with deep 0.2 m reveals, and the brick piers carry on up the tower every 3.2 m. Black window-wall infill and black spandrels sit between them, Juliet rails replace slab balconies, and a picture-frame crown hides the plant.',
     config: {
       ...MASONRY, buildingType: 'residential', facadeType: 'residential-balcony', floors: 44, F: 3.0,
-      ...palette({ wall: '#26292b', glass: '#1f262b', frame: '#1e1e1e', trim: '#7a3b33', roof: '#2f3335', accent: '#7a3b33', pier: '#7a3b33', base: '#7a3b33' }),
+      ...palette({ wall: '#26292b', glass: '#1f262b', frame: '#1e1e1e', trim: '#7b4a3f', roof: '#2f3335', accent: '#7b4a3f', pier: '#7b4a3f', base: '#7b4a3f' }),
       wallTex: 'none', roofTex: 'roof-membrane-light', zoneEnable: true, zoneBaseFloors: 6, zoneTopFloors: 0, zoneBaseTex: 'wall-brick-red',
       podF: 1, podOut: 0, podiumStyle: 'bronze-residential', podiumGroundFlrHt: 5.5, podiumWinRatio: 0.7, podiumCanopyStyle: 'framed',
       bayWidth: 3.2, pierWidth: 0.75, pierProjection: 0.2, glassRecess: 0.2, lightsPerBay: 2, transomHeight: 0,
-      sb1Floor: 7, sb1Depth: 5.5, sb1Faces: 'all', terraceRail: 'glass',
+      sb1Floor: 7, sb1Depth: 5.5, sb1Faces: 'all', terraceRail: 'glass', balType: 'juliet', railCol: '#8c7a62',
+      /* brick piers at the street, bronze frames in them: the base is the same brick as the podium above */
+      podiumFrameColor: '#7b4a3f', podiumDoorFrameColor: '#4a3b2f', podiumCanopyColor: '#4a3b2f', podiumCapColor: '#6c4138',
+      podiumLobbyFloorColor: '#b9aa91', podiumLobbyWallColor: '#8a7460', podiumGlassColor: '#3d4a52', podiumDoorColor: '#55666d',
       separatorStyle: 'none', roofProfile: 'crown', crownStyle: 'picture-frame', crownFloors: 2, corniceH: 0, corniceOut: 0, penthouseF: 0
     }
   },
@@ -1039,7 +1045,7 @@ const MODERN = [
       ...palette({ wall: '#c9b593', glass: '#2b3439', frame: '#6b4f33', trim: '#d2bf9d', roof: '#3a3b3b', accent: '#6b4f33', pier: '#cdb997', base: '#bfa984', door: '#6b4f33' }),
       wallTex: 'wall-limestone', roofTex: 'roof-membrane-light',
       bayWidth: 3.2, pierWidth: 0.5, pierProjection: 0.3, glassRecess: 0.32, lightsPerBay: 4, transomHeight: 0,
-      entryType: 'door', entryEvery: 6,
+      entryType: 'portal', entryEvery: 6,
       separatorStyle: 'spandrel-band', separatorEvery: 1, sH: 0.55, sW: 0.22,
       sb1Floor: 10, sb1Depth: 3.0, sb1Faces: 'all', terraceRail: 'iron',
       roofProfile: 'green', roofAccentCol: '#66835f', parapetH: 0.9, parapetThick: 0.35, corniceH: 0, corniceOut: 0, penthouseF: 0

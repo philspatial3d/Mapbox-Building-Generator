@@ -52,3 +52,11 @@ In Auto mode, the entrance faces the nearest mapped street within 90 m, read fro
 A face only takes the entrance if it can hold the opening plus a pier either side, so the entrance width plus 2 m, and never less than 4 m. When the plan has no face that wide, the narrowest usable face is 2.4 m.
 
 The Entrance Facade control (North, East, South, West, Longest edge, Near corner) overrides all of this.
+
+The entrance takes whole storefront bays. Where the tower above has a structural grid (bay-grid piers, or the 6 m structural bays a ribbon wall's mullions are set out in), the podium piers stand under it, and the entrance spans the run of bays closest to the width asked for, never less than about a seventh of a long front.
+
+A building without a podium takes its entrance from Entrance Type. `Auto` (the default) gives a building of five storeys or more a lobby portal: the central bay of the street face (three bays from twelve storeys) opens to the pavement behind a surround of pilasters and an entablature, with glazed doors and a bracketed canopy. Lower buildings get a door or a stoop. Ribbon-glazed towers without a podium have no bay grid to take a portal and still have no entrance (see TASKS BG-101, follow-up).
+
+## Source height
+
+`provenance.source.sourceHeightM` and `sourceLevels` record what the source said. On first use (no preset chosen, storey controls untouched) the storey controls are set from that height, and `heightFollowsSource` records the height matched. Once a preset is chosen or the storey controls are edited, the design's own storeys apply and `heightFollowsSource` is null. Either way the storeys are a design interpretation, not a survey.

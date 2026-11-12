@@ -1,17 +1,17 @@
 {
  "headroom": 1.15,
- "recorded": "2026-11-02",
+ "recorded": "2026-11-12",
  "presets": {
   "Brooklyn Brick Two-Storey Condos": {
    "tower": {
-    "components": 134,
-    "vertices": 7740,
-    "solids": 1352
+    "components": 154,
+    "vertices": 7912,
+    "solids": 1372
    },
    "block": {
-    "components": 173,
-    "vertices": 12478,
-    "solids": 2094
+    "components": 195,
+    "vertices": 12718,
+    "solids": 2116
    }
   },
   "Gabled Stacked Townhouses": {
@@ -52,506 +52,506 @@
   },
   "Avenue Mid-Rise Rental (5-over-1)": {
    "tower": {
-    "components": 268,
-    "vertices": 12217,
-    "solids": 2124
+    "components": 271,
+    "vertices": 13351,
+    "solids": 2255
    },
    "block": {
-    "components": 361,
-    "vertices": 19272,
-    "solids": 3238
+    "components": 345,
+    "vertices": 21369,
+    "solids": 3440
    }
   },
   "Scandinavian Brick Courtyard Block": {
    "tower": {
-    "components": 344,
-    "vertices": 16859,
-    "solids": 3048
+    "components": 389,
+    "vertices": 20773,
+    "solids": 3830
    },
    "block": {
-    "components": 418,
-    "vertices": 28214,
-    "solids": 4965
+    "components": 463,
+    "vertices": 34608,
+    "solids": 6243
    }
   },
   "Mass Timber Mixed-Use": {
    "tower": {
-    "components": 341,
-    "vertices": 17436,
-    "solids": 3007
+    "components": 339,
+    "vertices": 18249,
+    "solids": 3152
    },
    "block": {
-    "components": 377,
-    "vertices": 27847,
-    "solids": 4744
+    "components": 357,
+    "vertices": 29091,
+    "solids": 4969
    }
   },
   "Upper East Side Pre-War Co-op": {
    "tower": {
-    "components": 1191,
-    "vertices": 76855,
-    "solids": 13357
+    "components": 1223,
+    "vertices": 76995,
+    "solids": 13367
    },
    "block": {
-    "components": 1177,
-    "vertices": 121842,
-    "solids": 21265
+    "components": 1223,
+    "vertices": 122230,
+    "solids": 21282
    }
   },
   "Haussmann Limestone Block": {
    "tower": {
-    "components": 378,
-    "vertices": 32654,
-    "solids": 5561
+    "components": 423,
+    "vertices": 36722,
+    "solids": 6385
    },
    "block": {
-    "components": 374,
-    "vertices": 50650,
-    "solids": 8609
+    "components": 419,
+    "vertices": 57038,
+    "solids": 9897
    }
   },
   "Limestone Mansion Block": {
    "tower": {
-    "components": 551,
-    "vertices": 50164,
-    "solids": 8133
+    "components": 606,
+    "vertices": 54109,
+    "solids": 8900
    },
    "block": {
-    "components": 551,
-    "vertices": 76025,
-    "solids": 12342
+    "components": 624,
+    "vertices": 82214,
+    "solids": 13520
    }
   },
   "Chicago School Terracotta Office": {
    "tower": {
-    "components": 673,
-    "vertices": 32019,
-    "solids": 5829
+    "components": 710,
+    "vertices": 32419,
+    "solids": 5896
    },
    "block": {
-    "components": 673,
-    "vertices": 50359,
-    "solids": 9155
+    "components": 712,
+    "vertices": 50779,
+    "solids": 9224
    }
   },
   "Brick Warehouse Loft Conversion": {
    "tower": {
-    "components": 370,
-    "vertices": 18484,
-    "solids": 3440
+    "components": 404,
+    "vertices": 18975,
+    "solids": 3480
    },
    "block": {
-    "components": 356,
-    "vertices": 30335,
-    "solids": 5688
+    "components": 404,
+    "vertices": 31113,
+    "solids": 5742
    }
   },
   "Limestone Art Deco Tower (RAMSA style)": {
    "tower": {
-    "components": 1353,
-    "vertices": 72809,
-    "solids": 11168
+    "components": 1550,
+    "vertices": 80408,
+    "solids": 12779
    },
    "block": {
-    "components": 1357,
-    "vertices": 120571,
-    "solids": 18287
+    "components": 1554,
+    "vertices": 133125,
+    "solids": 20888
    }
   },
   "Art Deco Brick Setback Tower": {
    "tower": {
-    "components": 1297,
-    "vertices": 77890,
-    "solids": 14179
+    "components": 1338,
+    "vertices": 79161,
+    "solids": 14231
    },
    "block": {
-    "components": 1310,
-    "vertices": 136747,
-    "solids": 24483
+    "components": 1352,
+    "vertices": 140525,
+    "solids": 24414
    }
   },
   "Gothic Terracotta Spire": {
    "tower": {
-    "components": 1835,
-    "vertices": 112147,
-    "solids": 20731
+    "components": 1912,
+    "vertices": 121314,
+    "solids": 22562
    },
    "block": {
-    "components": 1868,
-    "vertices": 198064,
-    "solids": 35891
+    "components": 1945,
+    "vertices": 208214,
+    "solids": 37986
    }
   },
   "Brick-Carried Point Tower (Toronto)": {
    "tower": {
-    "components": 1293,
-    "vertices": 53131,
-    "solids": 9547
+    "components": 1506,
+    "vertices": 61543,
+    "solids": 11111
    },
    "block": {
-    "components": 1329,
-    "vertices": 97695,
-    "solids": 17327
+    "components": 1525,
+    "vertices": 109388,
+    "solids": 19492
    }
   },
   "Arched Concrete Tower (130 William style)": {
    "tower": {
-    "components": 1764,
-    "vertices": 130562,
-    "solids": 24022
+    "components": 1931,
+    "vertices": 147459,
+    "solids": 27276
    },
    "block": {
-    "components": 1764,
-    "vertices": 207260,
-    "solids": 37924
+    "components": 1931,
+    "vertices": 234267,
+    "solids": 43034
    }
   },
   "Green Terracotta Loft (Fitzroy style)": {
    "tower": {
-    "components": 450,
-    "vertices": 38169,
-    "solids": 7093
+    "components": 511,
+    "vertices": 42888,
+    "solids": 7987
    },
    "block": {
-    "components": 464,
-    "vertices": 61007,
-    "solids": 11294
+    "components": 525,
+    "vertices": 68577,
+    "solids": 12700
    }
   },
   "Brutalist Concrete Slab": {
    "tower": {
-    "components": 1156,
-    "vertices": 46866,
-    "solids": 8161
+    "components": 1193,
+    "vertices": 47744,
+    "solids": 8226
    },
    "block": {
-    "components": 1156,
-    "vertices": 69978,
-    "solids": 12115
+    "components": 1193,
+    "vertices": 71220,
+    "solids": 12178
    }
   },
   "Fluid Band Residences (Hadid style)": {
    "tower": {
-    "components": 143,
-    "vertices": 15401,
-    "solids": 875
+    "components": 167,
+    "vertices": 15942,
+    "solids": 959
    },
    "block": {
-    "components": 143,
-    "vertices": 24004,
-    "solids": 1479
+    "components": 169,
+    "vertices": 24761,
+    "solids": 1599
    }
   },
   "Twisting White-Band Tower": {
    "tower": {
-    "components": 453,
-    "vertices": 47192,
-    "solids": 3063
+    "components": 482,
+    "vertices": 46108,
+    "solids": 2822
    },
    "block": {
-    "components": 453,
-    "vertices": 69683,
-    "solids": 4773
+    "components": 484,
+    "vertices": 73370,
+    "solids": 5479
    }
   },
   "Curved Exoskeleton Residences": {
    "tower": {
-    "components": 759,
-    "vertices": 66738,
-    "solids": 4115
+    "components": 785,
+    "vertices": 67031,
+    "solids": 4037
    },
    "block": {
-    "components": 759,
-    "vertices": 98991,
-    "solids": 6645
+    "components": 785,
+    "vertices": 103010,
+    "solids": 7167
    }
   },
   "Diagrid Cigar Tower (30 St Mary Axe style)": {
    "tower": {
-    "components": 798,
-    "vertices": 121317,
-    "solids": 16544
+    "components": 819,
+    "vertices": 122149,
+    "solids": 16691
    },
    "block": {
-    "components": 798,
-    "vertices": 190028,
-    "solids": 26733
+    "components": 827,
+    "vertices": 190430,
+    "solids": 26782
    }
   },
   "Chamfered Obelisk Supertall (One World Trade style)": {
    "tower": {
-    "components": 937,
-    "vertices": 36451,
-    "solids": 6327
+    "components": 958,
+    "vertices": 36713,
+    "solids": 6304
    },
    "block": {
-    "components": 948,
-    "vertices": 65269,
-    "solids": 10983
+    "components": 979,
+    "vertices": 64926,
+    "solids": 10845
    }
   },
   "Spiral Setback Supertall (Burj Khalifa style)": {
    "tower": {
-    "components": 1606,
-    "vertices": 198522,
-    "solids": 13659
+    "components": 1623,
+    "vertices": 194972,
+    "solids": 14526
    },
    "block": {
-    "components": 1603,
-    "vertices": 348935,
-    "solids": 23667
+    "components": 1635,
+    "vertices": 351704,
+    "solids": 24749
    }
   },
   "Gold Sail Tower (Dubai Marina style)": {
    "tower": {
-    "components": 1189,
-    "vertices": 75701,
-    "solids": 6469
+    "components": 1099,
+    "vertices": 78353,
+    "solids": 6899
    },
    "block": {
-    "components": 1333,
-    "vertices": 111137,
-    "solids": 9769
+    "components": 1135,
+    "vertices": 112908,
+    "solids": 9983
    }
   },
   "Sun-Shaded Slab Tower (Index Tower Dubai style)": {
    "tower": {
-    "components": 2314,
-    "vertices": 127417,
-    "solids": 22370
+    "components": 2309,
+    "vertices": 131268,
+    "solids": 22945
    },
    "block": {
-    "components": 2474,
-    "vertices": 207040,
-    "solids": 36370
+    "components": 2413,
+    "vertices": 212947,
+    "solids": 37236
    }
   },
   "Bundled-Tube Black Tower (Willis style)": {
    "tower": {
-    "components": 1427,
-    "vertices": 40038,
-    "solids": 6851
+    "components": 1437,
+    "vertices": 39047,
+    "solids": 6571
    },
    "block": {
-    "components": 1427,
-    "vertices": 78471,
-    "solids": 12048
+    "components": 1451,
+    "vertices": 82633,
+    "solids": 12682
    }
   },
   "Sandstone and Bronze Headquarters (Bloomberg London style)": {
    "tower": {
-    "components": 302,
-    "vertices": 22955,
-    "solids": 4174
+    "components": 311,
+    "vertices": 23014,
+    "solids": 4185
    },
    "block": {
-    "components": 302,
-    "vertices": 36826,
-    "solids": 6657
+    "components": 311,
+    "vertices": 36845,
+    "solids": 6660
    }
   },
   "Diagrid on Landmark Base (Hearst style)": {
    "tower": {
-    "components": 1249,
-    "vertices": 74756,
-    "solids": 14529
+    "components": 1195,
+    "vertices": 78528,
+    "solids": 15183
    },
    "block": {
-    "components": 1537,
-    "vertices": 120865,
-    "solids": 23017
+    "components": 1329,
+    "vertices": 124981,
+    "solids": 23700
    }
   },
   "Modernist Glass Slab on Pilotis (Lever House style)": {
    "tower": {
-    "components": 434,
-    "vertices": 13533,
-    "solids": 2129
+    "components": 402,
+    "vertices": 15645,
+    "solids": 2413
    },
    "block": {
-    "components": 517,
-    "vertices": 23323,
-    "solids": 3291
+    "components": 435,
+    "vertices": 26317,
+    "solids": 3668
    }
   },
   "Precast Ribbon-Window Office Park": {
    "tower": {
-    "components": 51,
-    "vertices": 1436,
-    "solids": 251
+    "components": 62,
+    "vertices": 1630,
+    "solids": 238
    },
    "block": {
-    "components": 48,
-    "vertices": 2523,
-    "solids": 396
+    "components": 61,
+    "vertices": 3203,
+    "solids": 441
    }
   },
   "Wraparound Balcony Residences (Dubai Marina style)": {
    "tower": {
-    "components": 907,
-    "vertices": 92213,
-    "solids": 3307
+    "components": 811,
+    "vertices": 92202,
+    "solids": 3206
    },
    "block": {
-    "components": 1066,
-    "vertices": 132402,
-    "solids": 5194
+    "components": 910,
+    "vertices": 137783,
+    "solids": 6132
    }
   },
   "Stepped Garden Terraces (8 House style)": {
    "tower": {
     "components": 340,
-    "vertices": 18335,
-    "solids": 3004
+    "vertices": 17844,
+    "solids": 2905
    },
    "block": {
-    "components": 340,
-    "vertices": 30342,
-    "solids": 4972
+    "components": 336,
+    "vertices": 29357,
+    "solids": 4775
    }
   },
   "Setback Crown Office Tower": {
    "tower": {
-    "components": 1124,
-    "vertices": 53632,
-    "solids": 6174
+    "components": 1137,
+    "vertices": 54475,
+    "solids": 6648
    },
    "block": {
-    "components": 1261,
-    "vertices": 89524,
-    "solids": 10000
+    "components": 1214,
+    "vertices": 92534,
+    "solids": 10591
    }
   },
   "Fluted Crystal Spire": {
    "tower": {
-    "components": 932,
-    "vertices": 81494,
-    "solids": 7624
+    "components": 929,
+    "vertices": 84257,
+    "solids": 8013
    },
    "block": {
-    "components": 1022,
-    "vertices": 118509,
-    "solids": 10851
+    "components": 983,
+    "vertices": 121945,
+    "solids": 11296
    }
   },
   "Bronze Rainscreen Exchange": {
    "tower": {
-    "components": 986,
-    "vertices": 48596,
-    "solids": 5412
+    "components": 952,
+    "vertices": 50647,
+    "solids": 5651
    },
    "block": {
-    "components": 1096,
-    "vertices": 86623,
-    "solids": 8698
+    "components": 978,
+    "vertices": 91850,
+    "solids": 8882
    }
   },
   "Art Deco Setback Supertall (Empire State style)": {
    "tower": {
-    "components": 3109,
-    "vertices": 107580,
-    "solids": 19425
+    "components": 3027,
+    "vertices": 110169,
+    "solids": 19918
    },
    "block": {
-    "components": 3307,
-    "vertices": 251513,
-    "solids": 44679
+    "components": 3140,
+    "vertices": 255874,
+    "solids": 45457
    }
   },
   "Beaux-Arts Wedge (Flatiron style)": {
    "tower": {
-    "components": 1657,
-    "vertices": 107894,
-    "solids": 17783
+    "components": 1650,
+    "vertices": 114084,
+    "solids": 18946
    },
    "block": {
-    "components": 1846,
-    "vertices": 165309,
-    "solids": 27342
+    "components": 1823,
+    "vertices": 176059,
+    "solids": 29367
    }
   },
   "Béton Brut Slab on Pilotis (Unité d'Habitation style)": {
    "tower": {
-    "components": 721,
-    "vertices": 25863,
-    "solids": 4546
+    "components": 738,
+    "vertices": 27043,
+    "solids": 4720
    },
    "block": {
-    "components": 754,
-    "vertices": 38580,
-    "solids": 6721
+    "components": 753,
+    "vertices": 40436,
+    "solids": 6990
    }
   },
   "Bronze I-Beam Tower on a Plaza (Seagram style)": {
    "tower": {
-    "components": 1117,
-    "vertices": 42530,
-    "solids": 7349
+    "components": 1139,
+    "vertices": 43923,
+    "solids": 7499
    },
    "block": {
-    "components": 1156,
-    "vertices": 68489,
-    "solids": 11644
+    "components": 1158,
+    "vertices": 68633,
+    "solids": 11452
    }
   },
   "Brutalist Terrace Block (Barbican style)": {
    "tower": {
-    "components": 199,
-    "vertices": 2769,
-    "solids": 439
+    "components": 200,
+    "vertices": 3647,
+    "solids": 597
    },
    "block": {
-    "components": 251,
-    "vertices": 4427,
-    "solids": 627
+    "components": 232,
+    "vertices": 5803,
+    "solids": 878
    }
   },
   "Chateau Hotel with Street Arcade (The Ritz London style)": {
    "tower": {
-    "components": 542,
-    "vertices": 38947,
-    "solids": 6824
+    "components": 575,
+    "vertices": 43960,
+    "solids": 7809
    },
    "block": {
-    "components": 574,
-    "vertices": 60403,
-    "solids": 10562
+    "components": 586,
+    "vertices": 68149,
+    "solids": 12087
    }
   },
   "Clinker Brick Prow Block (Chilehaus style)": {
    "tower": {
-    "components": 620,
-    "vertices": 70852,
-    "solids": 13484
+    "components": 665,
+    "vertices": 77955,
+    "solids": 14837
    },
    "block": {
-    "components": 656,
-    "vertices": 114883,
-    "solids": 21631
+    "components": 682,
+    "vertices": 126444,
+    "solids": 23692
    }
   },
   "Exposed Frame Culture Centre (Centre Pompidou style)": {
    "tower": {
-    "components": 206,
-    "vertices": 6141,
-    "solids": 1106
+    "components": 219,
+    "vertices": 7367,
+    "solids": 1267
    },
    "block": {
-    "components": 239,
-    "vertices": 9720,
-    "solids": 1697
+    "components": 236,
+    "vertices": 11681,
+    "solids": 1948
    }
   },
   "Fluted Steel Twin-Tower Half (Petronas style)": {
    "tower": {
-    "components": 1724,
-    "vertices": 145474,
-    "solids": 14744
+    "components": 1679,
+    "vertices": 149259,
+    "solids": 15264
    },
    "block": {
-    "components": 1824,
-    "vertices": 285662,
-    "solids": 23260
+    "components": 1747,
+    "vertices": 288723,
+    "solids": 23536
    }
   },
   "Gabled Canal House (Herengracht style)": {
@@ -568,182 +568,182 @@
   },
   "Gabled Mansion Apartments (The Dakota style)": {
    "tower": {
-    "components": 612,
-    "vertices": 32051,
-    "solids": 5497
+    "components": 644,
+    "vertices": 36211,
+    "solids": 6329
    },
    "block": {
-    "components": 608,
-    "vertices": 49622,
-    "solids": 8476
+    "components": 640,
+    "vertices": 56102,
+    "solids": 9772
    }
   },
   "Georgian Crescent Terrace (Royal Crescent style)": {
    "tower": {
-    "components": 363,
-    "vertices": 17642,
-    "solids": 2922
+    "components": 398,
+    "vertices": 21110,
+    "solids": 3598
    },
    "block": {
-    "components": 395,
-    "vertices": 27891,
-    "solids": 4590
+    "components": 414,
+    "vertices": 33342,
+    "solids": 5656
    }
   },
   "Glass Curtain Workshop Wing (Bauhaus Dessau style)": {
    "tower": {
-    "components": 123,
-    "vertices": 2222,
-    "solids": 375
+    "components": 136,
+    "vertices": 3103,
+    "solids": 524
    },
    "block": {
-    "components": 159,
-    "vertices": 3757,
-    "solids": 600
+    "components": 153,
+    "vertices": 4871,
+    "solids": 787
    }
   },
   "Inside-Out Services Tower (Lloyd's Building style)": {
    "tower": {
-    "components": 312,
-    "vertices": 10533,
-    "solids": 1642
+    "components": 319,
+    "vertices": 11724,
+    "solids": 1796
    },
    "block": {
     "components": 347,
-    "vertices": 17007,
-    "solids": 2567
+    "vertices": 19032,
+    "solids": 2820
    }
   },
   "Red Vienna Superblock (Karl-Marx-Hof style)": {
    "tower": {
-    "components": 377,
-    "vertices": 16764,
-    "solids": 3081
+    "components": 410,
+    "vertices": 21437,
+    "solids": 3998
    },
    "block": {
-    "components": 417,
-    "vertices": 27406,
-    "solids": 4943
+    "components": 429,
+    "vertices": 34972,
+    "solids": 6432
    }
   },
   "Shard of Glass Spire (The Shard style)": {
    "tower": {
-    "components": 1182,
-    "vertices": 37420,
-    "solids": 6968
+    "components": 1184,
+    "vertices": 38342,
+    "solids": 7046
    },
    "block": {
-    "components": 1238,
-    "vertices": 62100,
-    "solids": 10027
+    "components": 1210,
+    "vertices": 63888,
+    "solids": 10233
    }
   },
   "Slender Concrete Grid Tower (432 Park Avenue style)": {
    "tower": {
     "components": 2867,
-    "vertices": 106697,
-    "solids": 18077
+    "vertices": 108073,
+    "solids": 18324
    },
    "block": {
-    "components": 2939,
-    "vertices": 159991,
-    "solids": 26729
+    "components": 2899,
+    "vertices": 162155,
+    "solids": 27125
    }
   },
   "Stacked Pagoda Supertall (Taipei 101 style)": {
    "tower": {
-    "components": 1496,
-    "vertices": 59339,
-    "solids": 6202
+    "components": 1484,
+    "vertices": 62084,
+    "solids": 6699
    },
    "block": {
-    "components": 1710,
-    "vertices": 368600,
-    "solids": 10084
+    "components": 1483,
+    "vertices": 371481,
+    "solids": 10568
    }
   },
   "Stainless Crown Deco Tower (Chrysler style)": {
    "tower": {
-    "components": 2740,
-    "vertices": 91995,
-    "solids": 16670
+    "components": 2688,
+    "vertices": 95140,
+    "solids": 17090
    },
    "block": {
-    "components": 2912,
-    "vertices": 188729,
-    "solids": 32110
+    "components": 2707,
+    "vertices": 190867,
+    "solids": 31838
    }
   },
   "Sullivan Brick Skyscraper Block (Wainwright style)": {
    "tower": {
-    "components": 686,
-    "vertices": 41196,
-    "solids": 7554
+    "components": 697,
+    "vertices": 42797,
+    "solids": 7846
    },
    "block": {
-    "components": 758,
-    "vertices": 63707,
-    "solids": 11673
+    "components": 741,
+    "vertices": 66116,
+    "solids": 12118
    }
   },
   "Twisting Glass Spiral (Shanghai Tower style)": {
    "tower": {
-    "components": 1507,
-    "vertices": 121010,
-    "solids": 6589
+    "components": 1365,
+    "vertices": 123548,
+    "solids": 7042
    },
    "block": {
-    "components": 1707,
-    "vertices": 180481,
-    "solids": 10781
+    "components": 1432,
+    "vertices": 186287,
+    "solids": 11861
    }
   },
   "Undulating Stone Quarry (Casa Milà style)": {
    "tower": {
-    "components": 242,
-    "vertices": 14375,
-    "solids": 1708
+    "components": 247,
+    "vertices": 15142,
+    "solids": 1842
    },
    "block": {
-    "components": 274,
-    "vertices": 24212,
-    "solids": 2722
+    "components": 271,
+    "vertices": 25513,
+    "solids": 2935
    }
   },
   "White Quartz Pyramid (Transamerica style)": {
    "tower": {
-    "components": 862,
-    "vertices": 48070,
-    "solids": 6064
+    "components": 870,
+    "vertices": 49013,
+    "solids": 6235
    },
    "block": {
-    "components": 898,
-    "vertices": 77720,
-    "solids": 9664
+    "components": 896,
+    "vertices": 79173,
+    "solids": 9925
    }
   },
   "White Villa on Pilotis (Villa Savoye style)": {
    "tower": {
-    "components": 114,
-    "vertices": 1281,
-    "solids": 214
+    "components": 115,
+    "vertices": 2096,
+    "solids": 315
    },
    "block": {
-    "components": 147,
-    "vertices": 2120,
-    "solids": 329
+    "components": 129,
+    "vertices": 3641,
+    "solids": 531
    }
   },
   "X-Braced Black Tapered Tower (John Hancock Center style)": {
    "tower": {
-    "components": 2416,
-    "vertices": 123870,
-    "solids": 24202
+    "components": 2395,
+    "vertices": 123344,
+    "solids": 24071
    },
    "block": {
-    "components": 2520,
-    "vertices": 204931,
-    "solids": 38929
+    "components": 2430,
+    "vertices": 210205,
+    "solids": 39947
    }
   }
  }

@@ -2436,3 +2436,48 @@ Checks run, all passing:
 Upload to hosting: `app.html`, `js/asset-model.js`, `js/ifc-export.js` (plus the BG-099 AR files). Docs and `scripts/` are not needed on the server.
 
 Evidence: `codex/evidence/bg-100/`.
+
+## BG-101 — Architectural quality: street level, entrances, roofscape, exported materials
+
+Generated buildings now read as designed at the street, the entrance and the roof. The click/upload → preset → refine → export workflow is unchanged, and no preset was removed. Full write-up: [docs/ARCHITECTURAL_QUALITY.md](../docs/ARCHITECTURAL_QUALITY.md).
+
+- [x] Storefront podium:
+  - piers stand under the tower's structural grid (bay-grid piers, or 6 m ribbon-wall bays);
+  - corners follow the real plan (square, chamfered or rounded, glazed round the turn on glass storefronts);
+  - real depth: piers proud of the wall, 18 cm glass reveal, spandrels, transom at door-head height;
+  - the plinth stops at the doorway.
+- [x] Entrances:
+  - podium entrances take whole bays, at least about a seventh of a long front;
+  - built-out door screen (swing or revolving doors, pulls, sidelights, transom, overlight), vestibule soffit, canopy on posts or brackets;
+  - a lobby behind the glass.
+- [x] Lobby portal for buildings without a podium: new Entrance Types `auto` (the default) and `portal`. `auto` gives five storeys and up a pilastered portal with glazed doors and a canopy, and lower buildings a door or a stoop. Rustication, sills and spandrels stop at the portal. The Art Deco tower, which had no entrance, now has one.
+- [x] Juliet rails (`balType: 'juliet'`): full-height bay windows behind a glass guard, with no slab. Used by Brick-Carried Point Tower (Toronto). Kept to two parts per face and floor for phone frame rate.
+- [x] Flat roofs finished as a fifth facade: ballast field and gutter, roof access core, louvred plant yard with fan units and vents, rooflights, and a facade maintenance unit on towers. Podium roofs where the tower steps back become paved terraces with an upstand, plus a glass balustrade and planter where deep enough.
+- [x] GLB materials: `<finish>_<layer>_<colour>` names; glass as opaque, lightly transmissive PBR graded by height via 8-bit RGBA `COLOR_0`; entrance glazing stays see-through.
+- [x] First-use massing follows the source height (Mapbox `height`, uploaded `height` or `building:levels`) until a preset is picked or the storey controls are edited. The height is recorded as `provenance.source.heightFollowsSource`.
+- [x] New parts mapped to IFC classes in `js/asset-model.js` (portal, door screen, canopy, lobby, roofscape, Juliet guards).
+- [x] Presets: `entryType` `none` → `auto` across the library; three masonry presets use `portal`; Art Deco spandrels; Toronto podium in brick and bronze. `presets/defaults.json` rebuilt from `scripts/build_advanced_presets.mjs` (verified identical).
+- [x] Quality harness `scripts/quality/`: six fixed cases through the real app, matched Mapbox and independent three.js views, before/after contact sheets, desktop and 390 px phone.
+- [x] `check_external_fidelity` updated for Juliet rails and the roofscape (one slab, one parapet, one ballast field; no second access core under a penthouse). `scripts/budgets.json` re-recorded (previous kept in evidence).
+- [ ] Blind review verdicts not recorded: three blind pairwise rounds were run (keys and round-3 pairs in evidence), but the verdicts were not saved. Re-run and record them.
+- [ ] Follow-up: ribbon-glazed towers without a podium still have no entrance (no bay grid for a portal).
+- [ ] Known: Spiral Setback Supertall now logs two caught turf errors in `buildSetbackTerrace` (terrace rail band) on the L-shaped integrity footprint, up from one. This is the same known failure as BG-100; it still generates, and integrity passes.
+- [ ] Not tested on a real phone; frame rates are from Chromium emulation.
+
+Checks run, all passing (2026-11-12):
+- geometry integrity (62 presets × 3 footprints);
+- budgets;
+- external fidelity (37 presets);
+- AR fidelity;
+- interior;
+- planner parity `--check`;
+- asset export;
+- preset rebuild matches `presets/defaults.json`;
+- IFC validation (6 files, 0 issues);
+- glTF validation (6 files, 0 errors, 0 warnings);
+- browser workflow, click → generate → export GLB, IFC and GeoJSON, desktop and phone, 0 console errors;
+- quality capture, upload → generate → export, 6 cases on desktop and phone, 0 console errors.
+
+Upload to hosting: `app.html`, `js/asset-model.js`, `presets/defaults.json`. Docs and `scripts/` are not needed on the server.
+
+Evidence: `codex/evidence/bg-101/`.

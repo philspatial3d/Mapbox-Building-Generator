@@ -1428,9 +1428,9 @@
   </select>
 </td></tr>
 <tr><td colspan="2"><strong>Bay Grid</strong></td></tr>
-<tr><td>Align Windows, Fins &amp; Posts to Bay Grid</td><td><input id="bayGrid" type="checkbox"></td></tr>
-<tr><td>Bay Width (m)</td><td><input id="bayWidth" type="number" min="1.5" max="9" step="0.1" value="3.3"></td></tr>
-<tr><td>Pier Width (m)</td><td><input id="pierWidth" type="number" min="0.15" max="2" step="0.05" value="0.7"></td></tr>
+<tr><td>Align Windows, Fins &amp; Posts to Bay Grid</td><td><input id="bayGrid" type="checkbox" checked></td></tr>
+<tr><td>Bay Width (m)</td><td><input id="bayWidth" type="number" min="1.5" max="9" step="0.1" value="3.0"></td></tr>
+<tr><td>Pier Width (m)</td><td><input id="pierWidth" type="number" min="0.15" max="2" step="0.05" value="0.5"></td></tr>
 <tr><td>Pier Projection (m)</td><td><input id="pierProjection" type="number" min="0" max="1.2" step="0.05" value="0.2"></td></tr>
 <tr><td>Glass Recess (m)</td><td><input id="glassRecess" type="number" min="0.05" max="0.9" step="0.05" value="0.3"></td></tr>
 <tr><td>Lights per Bay</td><td><input id="lightsPerBay" type="number" min="1" max="4" step="1" value="2"></td></tr>
@@ -1445,18 +1445,18 @@
 <tr><td>Mullion Color</td><td><input id="mullionColor" type="color" value="#8e9598"></td></tr>
 <tr><td>Facade Articulation</td><td>
   <select id="facadeArticulation">
-    <option value="none" selected>None</option>
+    <option value="none">None</option>
     <option value="panel-grid">Panel grid</option>
-    <option value="vertical-fins">Vertical fins</option>
+    <option value="vertical-fins" selected>Vertical fins</option>
     <option value="expressed-frame">Expressed frame</option>
     <option value="lattice">X-braced lattice</option>
   </select>
 </td></tr>
 <tr><td id="facadeArticulationDensityLabel">Members per facade segment</td><td><input id="facadeArticulationDensity" type="number" min="1" max="12" step="1" value="4"></td></tr>
 <tr><td>Panel Module Width (m)</td><td><input id="panelModuleWidth" type="number" min="0.6" max="5" step="0.1" value="1.8"></td></tr>
-<tr><td id="facadeArticulationDepthLabel">Projection Depth (m)</td><td><input id="facadeArticulationDepth" type="number" min="0.04" max="2" step="0.05" value="0.2"></td></tr>
-<tr><td id="facadeArticulationWidthLabel">Member Width (m)</td><td><input id="facadeArticulationWidth" type="number" min="0.04" max="1.2" step="0.01" value="0.09"></td></tr>
-<tr><td>Articulation Color</td><td><input id="facadeArticulationColor" type="color" value="#a9afb2"></td></tr>
+<tr><td id="facadeArticulationDepthLabel">Projection Depth (m)</td><td><input id="facadeArticulationDepth" type="number" min="0.04" max="2" step="0.05" value="0.32"></td></tr>
+<tr><td id="facadeArticulationWidthLabel">Member Width (m)</td><td><input id="facadeArticulationWidth" type="number" min="0.04" max="1.2" step="0.01" value="0.12"></td></tr>
+<tr><td>Articulation Color</td><td><input id="facadeArticulationColor" type="color" value="#8a9296"></td></tr>
 <tr class="main-flow-secondary"><td>Enable Ribs</td><td><input id="enableRibs" type="checkbox" checked></td></tr>
 <tr class="main-flow-secondary"><td>Rib Count/Segment</td><td><input id="ribCount" type="number" min="0" max="10" value="2"></td></tr>
 <tr class="main-flow-secondary"><td>Rib Depth (m)</td><td><input id="ribDepth" type="number" min="0.1" max="2" step="0.05" value="0.22"></td></tr>
@@ -1485,8 +1485,8 @@
 </td></tr>
 <tr><td>Frequency (every N floors)</td><td><input id="separatorEvery" type="number" value="1" step="1" min="1" max="20"></td></tr>
 <tr><td>Band Wave (m, flowing band)</td><td><input id="bandWave" type="number" min="0" max="3" step="0.05" value="0.9"></td></tr>
-<tr><td>Band Height (m)</td><td><input id="sepH" type="number" value="0.18" step="0.05" min="0"></td></tr>
-<tr><td>Projection / Recess (m)</td><td><input id="sepW" type="number" value="0.12" step="0.05" min="0"></td></tr>
+<tr><td>Band Height (m)</td><td><input id="sepH" type="number" value="0.22" step="0.05" min="0"></td></tr>
+<tr><td>Projection / Recess (m)</td><td><input id="sepW" type="number" value="0.14" step="0.05" min="0"></td></tr>
 <tr><td>Band Color</td><td><input id="sepColor" type="color" value="#8e9598"></td></tr>
 <tr><td>Mechanical Louvre Floor Every N (0 = none)</td><td><input id="mechEvery" type="number" min="0" max="40" step="1" value="0"></td></tr>
 </tbody>
@@ -1535,6 +1535,7 @@
       <option value="alternating">Alternating segments</option>
       <option value="corner">Corner only</option>
       <option value="stacked">Stacked / split façade</option>
+      <option value="juliet">Juliet rails (full-height bay windows)</option>
     </select>
   </td></tr>
 <tr><td>Depth (m)</td><td><input id="balconyDepth" type="number" value="0.9" step="0.1" min="0"></td></tr>
@@ -1561,7 +1562,7 @@
 </select></td></tr>
 <tr><td colspan="2"><strong>Massing &amp; Streetwall</strong></td></tr>
 <tr><td>Podium Floors</td><td><input id="podiumFloors" type="number" value="2" min="0"></td></tr>
-<tr><td>Outset (m)</td><td><input id="podiumOut" type="number" value="1.8" step="0.1" min="0"></td></tr>
+<tr><td>Outset (m)</td><td><input id="podiumOut" type="number" value="2.4" step="0.1" min="0"></td></tr>
 <tr><td>Podium Opacity (0 transparent, 1 solid)</td><td><input id="podiumAlpha" type="number" min="0" max="1" step="0.05" value="0.5"></td></tr>
 <tr><td>Podium Color</td><td><input id="podiumColor" type="color" value="#b3b8bb"></td></tr>
 <tr><td>Use Tall Ground Floor</td><td><input id="podiumSpecialGroundFloor" type="checkbox" checked></td></tr>
@@ -1588,7 +1589,7 @@
   <option value="colonnade">Colonnade</option>
   <option value="sculpted">Sculpted glass</option>
 </select></td></tr>
-<tr><td>Entrance Width (m)</td><td><input id="podiumEntranceWidth" type="number" min="2.4" max="18" step="0.1" value="6.4"></td></tr>
+<tr><td>Entrance Width (m)</td><td><input id="podiumEntranceWidth" type="number" min="2.4" max="18" step="0.1" value="7.2"></td></tr>
 <tr><td>Entrance Height (m)</td><td><input id="podiumEntranceHeight" type="number" min="2.4" max="10" step="0.1" value="4.2"></td></tr>
 <tr><td>Position Along Facade</td><td><input id="podiumEntranceOffset" type="range" min="-0.35" max="0.35" step="0.05" value="0"></td></tr>
 <tr><td>Entrance Recess (m)</td><td><input id="podiumEntranceRecess" type="number" min="0" max="5" step="0.1" value="1.2"></td></tr>
@@ -1606,7 +1607,7 @@
   <option value="none">None</option><option value="blade" selected>Blade canopy</option>
   <option value="framed">Framed canopy</option><option value="deep-soffit">Deep soffit</option>
 </select></td></tr>
-<tr><td>Canopy Projection (m)</td><td><input id="podiumCanopyDepth" type="number" min="0.4" max="5" step="0.1" value="1.8"></td></tr>
+<tr><td>Canopy Projection (m)</td><td><input id="podiumCanopyDepth" type="number" min="0.4" max="5" step="0.1" value="2.4"></td></tr>
 <tr><td>Canopy Thickness (m)</td><td><input id="podiumCanopyThickness" type="number" min="0.08" max="0.8" step="0.02" value="0.22"></td></tr>
 <tr><td>Canopy / Soffit Color</td><td><input id="podiumCanopyColor" type="color" value="#8e9598"></td></tr>
 <tr><td>Visible Lobby Depth (m)</td><td><input id="podiumLobbyDepth" type="number" min="2" max="18" step="0.5" value="7"></td></tr>
@@ -1646,7 +1647,7 @@
 <tr><td>Bay Windows To Floor (0 = top)</td><td><input id="orielTo" type="number" min="0" max="200" step="1" value="0"></td></tr>
 <tr><td colspan="2"><strong>Front Doors (no podium, needs bay grid)</strong></td></tr>
 <tr><td>Entrance Type</td><td><select id="entryType">
-  <option value="none" selected>None</option><option value="door">Door + step</option><option value="stoop">Stoop + hood</option><option value="porch">Porch + canopy</option>
+  <option value="auto" selected>Auto (by building size)</option><option value="none">None</option><option value="door">Door + step</option><option value="stoop">Stoop + hood</option><option value="porch">Porch + canopy</option><option value="portal">Lobby portal + canopy</option>
 </select></td></tr>
 <tr><td>Door Every N Bays</td><td><input id="entryEvery" type="number" min="1" max="8" step="1" value="2"></td></tr>
 <tr><td>Door Color</td><td><input id="doorColor" type="color" value="#2f2a26"></td></tr>
@@ -1658,12 +1659,12 @@
 <tbody class="collapsible-content">
 <tr><td>Roof Style</td><td>
   <select id="roofProfile">
-    <option value="standard" selected>Standard Flat Roof</option>
+    <option value="standard">Standard Flat Roof</option>
     <option value="mechanical">Screened Mechanical Roof</option>
     <option value="terraced">Terraced Crown</option>
     <option value="green">Green Roof</option>
     <option value="tapered">Tapered Crown Roof</option>
-    <option value="crown">Pier Crown (screens plant)</option>
+    <option value="crown" selected>Pier Crown (screens plant)</option>
     <option value="gable">Pitched: gable</option>
     <option value="hip">Pitched: hip</option>
     <option value="mansard">Mansard with dormers</option>
@@ -1671,9 +1672,9 @@
   </select>
 </td></tr>
 <tr><td>Crown Style</td><td><select id="crownStyle">
-  <option value="crenellated" selected>Crenellated piers</option><option value="stepped">Stepped piers</option><option value="picture-frame">Open picture frame</option><option value="lantern">Art Deco lantern + finials</option><option value="blade">Sail blade + glass screen</option><option value="raked">Raked glass crown</option>
+  <option value="crenellated">Crenellated piers</option><option value="stepped">Stepped piers</option><option value="picture-frame" selected>Open picture frame</option><option value="lantern">Art Deco lantern + finials</option><option value="blade">Sail blade + glass screen</option><option value="raked">Raked glass crown</option>
 </select></td></tr>
-<tr><td>Crown Height (storeys)</td><td><input id="crownFloors" type="number" min="1" max="3" step="1" value="2"></td></tr>
+<tr><td>Crown Height (storeys)</td><td><input id="crownFloors" type="number" min="1" max="3" step="1" value="1"></td></tr>
 <tr><td>Crown Start Floor</td><td><input id="roofTaperStartFloor" type="number" min="1" step="1" value="60"></td></tr>
 <tr><td>Crown Taper / Floor</td><td><input id="roofTaperStep" type="number" min="-0.18" max="0" step="0.005" value="-0.03"></td></tr>
 <tr><td>Roof Pitch (°)</td><td><input id="roofPitch" type="number" min="10" max="65" step="1" value="35"></td></tr>
@@ -1685,10 +1686,10 @@
 <tr><td>Roof Color</td><td><input id="roofColor" type="color" value="#3b4043"></td></tr>
 <tr><td>Roof texture</td><td><select id="roofTex"><option value="none">none</option></select></td></tr>
 <tr><td>Roof Assembly Color</td><td><input id="roofAccentColor" type="color" value="#8e9598"></td></tr>
-<tr><td>Parapet Ht (m)</td><td><input id="parapetHeight" type="number" value="1.2" step="0.1" min="0"></td></tr>
+<tr><td>Parapet Ht (m)</td><td><input id="parapetHeight" type="number" value="1.1" step="0.1" min="0"></td></tr>
 <tr><td>Parapet Thick (m)</td><td><input id="parapetThickness" type="number" value="0.35" step="0.05" min="0.05"></td></tr>
 <tr><td>Parapet Color</td><td><input id="parapetColor" type="color" value="#8e9598"></td></tr>
-<tr><td>Penthouse Floors</td><td><input id="penthouseFloors" type="number" value="1" min="0"></td></tr>
+<tr><td>Penthouse Floors</td><td><input id="penthouseFloors" type="number" value="0" min="0"></td></tr>
 <tr><td>Penthouse Scale</td><td><input id="penthouseScale" type="range" min="0.2" max="0.8" step="0.05" value="0.6"></td></tr>
 <tr><td>Penthouse Color</td><td><input id="penthouseColor" type="color" value="#8e9598"></td></tr>
 <tr><td>Main Cornice Ht (m)</td><td><input id="corniceMainHeight" type="number" value="0.6" step="0.05" min="0"></td></tr>
@@ -1940,6 +1941,8 @@ const map=new mapboxgl.Map({container:'map',style:getBaseStyleSpec(activeBaseSty
   pitch:BOOT_CAMERA && Number.isFinite(BOOT_CAMERA.pitch) ? BOOT_CAMERA.pitch : LOAD_PITCH,
   bearing:BOOT_CAMERA && Number.isFinite(BOOT_CAMERA.bearing) ? BOOT_CAMERA.bearing : 20});
 if (new URLSearchParams(location.search).has('debug')) window.__map = map;   /* test hook: ?debug=1 */
+/* test hook: the settings the last render used (scripts/quality/capture.py records them) */
+if (new URLSearchParams(location.search).has('debug')) window.__mbgLastConfig = () => lastCfgSnapshot;
 
 /* geocoder */
 /* flyTo:false: the app flies itself (the plugin's own fly made the camera move twice).
@@ -2057,6 +2060,9 @@ let lastCfgSnapshot = null;
 let lastAssetFootprints = [];
 /* what the source said about the selected building, kept apart from what was generated */
 let lastSourceFacts = {};
+/* First-use massing follows the source: until the user picks a preset or edits the storey
+   controls, a building with a known height is generated at that height. */
+let massingFollowsSource = true;
 let lastFootprintSource = 'none';
 const MAX_MULTI_BUILDINGS = 5;
 let multiBuildMode = false;
@@ -4431,6 +4437,7 @@ const getPresetByValue = value => {
 
 const applyPresetConfig = config => {
   if (!config || typeof config !== 'object') return;
+  massingFollowsSource = false;
 
   interiorSettings = migrateSettings(config.interiorSettings);
   const normalizedConfig = migrateMassingConfig(applyPodiumConfigFallbacks({ ...config }));
@@ -4889,12 +4896,45 @@ map.on('click', async e => {
     minHeight: Number.isFinite(Number(fp.min_height)) ? Number(fp.min_height) : null,
     type: fp.type || null
   };
+  applySourceHeight();
   await renderWithLoader(lastPoly, cfg(), 'Generating Building', multiBuildMode
     ? 'Stacking selected parcels into one build/export set'
     : 'Deriving footprint and stacking layers');
   } finally {
     setBuildingLoader(false);
   }
+});
+
+/* Respect a known source height (Mapbox `height`, or an uploaded `height` /
+   `building:levels`): set the storey controls so the design stands as tall as the building
+   it replaces. Only while the massing is still the first-use default; a preset or an edit
+   to the storey controls takes over for good. Returns the height matched, or null. */
+function applySourceHeight() {
+  const facts = lastSourceFacts || {};
+  facts.heightApplied = null;
+  if (!massingFollowsSource || (presetSelect && presetSelect.value) || multiBuildMode) return null;
+  const levels = Number.isFinite(Number(facts.levels)) && Number(facts.levels) > 0 ? Number(facts.levels) : null;
+  const floorHeight = clamp(+$('floorHeight').value || 3.6, 2.4, 8);
+  const rawHeight = Number.isFinite(Number(facts.height)) && Number(facts.height) > 0
+    ? Number(facts.height) - Math.max(0, Number(facts.minHeight) || 0)
+    : (levels ? levels * floorHeight : null);
+  if (!(rawHeight >= 3)) return null;
+  const storeys = clamp(levels ? Math.round(levels) : Math.round(rawHeight / floorHeight), 1, 120);
+  /* a street-level storey with the entrance, two on anything taller than six storeys */
+  const podiumFloors = storeys <= 1 ? 0 : (storeys <= 6 ? 1 : 2);
+  const groundHeight = $('podiumSpecialGroundFloor').checked ? clamp(+$('podiumGroundFlrHt').value || 5, 2.8, 10) : clamp(+$('podiumUpperFloorHt').value || floorHeight, 2.4, 8);
+  const podiumHeight = podiumFloors ? groundHeight + (podiumFloors - 1) * clamp(+$('podiumUpperFloorHt').value || floorHeight, 2.4, 8) : 0;
+  const towerFloors = clamp(Math.round((rawHeight - podiumHeight) / floorHeight), 1, 120);
+  $('floors').value = String(towerFloors);
+  $('podiumFloors').value = String(podiumFloors);
+  facts.heightApplied = Math.round(rawHeight * 10) / 10;
+  const note = $('exportProvenanceNote');
+  if (note) note.textContent = `Footprint and location are from your source, and the storeys follow its recorded height (${facts.heightApplied} m) until you change Floors or pick a preset. Entrance, materials and details are generated, not surveyed; GeoJSON, GLB and IFC exports label which is which.`;
+  return facts.heightApplied;
+}
+['floors', 'floorHeight', 'podiumFloors'].forEach(id => {
+  const el = $(id);
+  if (el) ['input', 'change'].forEach(evt => el.addEventListener(evt, e => { if (e.isTrusted !== false) massingFollowsSource = false; }));
 });
 
 /* The level table every export shares: podium storeys, then tower storeys, then the roof,
@@ -5697,7 +5737,7 @@ function buildMerged(footprints, o) {
 function makeBalconies(shell, i, o, base, top){
   const balconies = [];
   const depth = clamp(Number(o.balD) || 0, 0, 6);
-  if (depth <= 0 || o.balType === 'none') return balconies;
+  if (depth <= 0 || o.balType === 'none' || o.balType === 'juliet') return balconies;
 
   const widthRatio = clamp(Number(o.balWidthRatio) || 0.62, 0.2, 1);
   const slabThickness = clamp(Number(o.balSlabH) || 0.22, 0.1, Math.min(0.6, o.F * 0.25));
@@ -5920,6 +5960,45 @@ function cleanRingIndices(pts, minSegLen, angleTol) {
   return idx;
 }
 
+/* The longest truly straight run of ring vertices between two kept indices (cyclic), as
+   [startIndex, endIndex], or null when the span is a single edge already. */
+function straightRunBetween(pts, from, to) {
+  const n = pts.length;
+  const order = [from];
+  for (let i = (from + 1) % n; order.length <= n; i = (i + 1) % n) {
+    order.push(i);
+    if (i === to) break;
+  }
+  if (order.length < 3) return null;
+  const dirOf = (i, j) => {
+    const dx = pts[j][0] - pts[i][0], dy = pts[j][1] - pts[i][1];
+    const len = Math.hypot(dx, dy);
+    return { len, ux: len > 0 ? dx / len : 0, uy: len > 0 ? dy / len : 0 };
+  };
+  let best = 0, bestLen = -1;
+  for (let e = 0; e < order.length - 1; e++) {
+    const d = dirOf(order[e], order[e + 1]);
+    if (d.len > bestLen) { bestLen = d.len; best = e; }
+  }
+  const ref = dirOf(order[best], order[best + 1]);
+  if (!(ref.len > 0)) return null;
+  /* within 1.5 degrees of the dominant edge and no more than 3 cm off its line */
+  const onLine = e => {
+    const d = dirOf(order[e], order[e + 1]);
+    if (d.len < 1e-6) return true;
+    if (d.ux * ref.ux + d.uy * ref.uy < 0.99966) return false;
+    const p = pts[order[e + 1]], q = pts[order[best]];
+    const p0 = pts[order[e]];
+    const off = pt => Math.abs((pt[0] - q[0]) * ref.uy - (pt[1] - q[1]) * ref.ux);
+    return off(p) < 0.03 && off(p0) < 0.03;
+  };
+  let s = best, t = best + 1;
+  while (s > 0 && onLine(s - 1)) s--;
+  while (t < order.length - 1 && onLine(t)) t++;
+  if (s === 0 && t === order.length - 1) return null;
+  return [order[s], order[t]];
+}
+
 const facadeGuideCache = new WeakMap();
 
 /* Facade guide: straight facade runs for every polygon part and ring.
@@ -5960,14 +6039,27 @@ function getFacadeGuide(poly, opts = {}) {
         outline = keep.map(i => coords[i]);
       }
       for (let k = 0; k < keep.length; k++) {
-        const pa = kept[k];
-        const pb = kept[(k + 1) % kept.length];
+        let pa = kept[k];
+        let pb = kept[(k + 1) % kept.length];
+        let a = coords[keep[k]];
+        let b = coords[keep[(k + 1) % keep.length]];
+        /* Rounded or chamfer-softened corners: the kept vertices sit part-way round the corner
+           arcs, so their chord is skewed off the wall (16 cm over a 40 m face) and everything
+           set out along it drifts in and out of the wall plane. Where one straight run makes
+           up most of the chord, the facade run is that true wall line. */
+        const run = straightRunBetween(pts, keep[k], keep[(k + 1) % keep.length]);
+        if (run) {
+          const chord = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
+          const runLen = Math.hypot(pts[run[1]][0] - pts[run[0]][0], pts[run[1]][1] - pts[run[0]][1]);
+          if (runLen >= minSegLen && runLen >= chord * 0.55) {
+            pa = pts[run[0]]; pb = pts[run[1]];
+            a = coords[run[0]]; b = coords[run[1]];
+          }
+        }
         const dx = pb[0] - pa[0];
         const dy = pb[1] - pa[1];
         const len = Math.hypot(dx, dy);
         if (!Number.isFinite(len) || len < minSegLen) continue;
-        const a = coords[keep[k]];
-        const b = coords[keep[(k + 1) % keep.length]];
         const bearing = bearingOfVector(dx, dy);
         segments.push({
           a,
@@ -6200,7 +6292,98 @@ function pushPodiumFeature(collection, poly, properties, label) {
   return true;
 }
 
+/* Structural gridlines of the tower's lowest plate, per facade run: the bay-grid pier
+   lines, or the structural bay lines of a ribbon wall. Null when the wall has no grid. */
+function towerGridLines(footprintPoly, o, mullionDensity = 1) {
+  const towerShell = safe(() => floorShell(footprintPoly, o, 0), 'podium tower shell');
+  if (!towerShell || !towerShell.geometry) return null;
+  const style = o.windowStyle || 'ribbon';
+  if (style === 'bay' || o.bayGrid) {
+    return getBayLayout(towerShell, o, null).segments.map(entry => ({ seg: entry.seg, coords: entry.pierCoords }));
+  }
+  if (style === 'ribbon' && o.wnw > 0) {
+    const plan = getRibbonPlan(towerShell, o, ribbonMullionSpacing(o, mullionDensity), towerShell);
+    return plan && plan.gridLines && plan.gridLines.length ? plan.gridLines : null;
+  }
+  return null;
+}
+
+/* Pier lines (distances along the face) for one podium face. Where the tower above has a
+   structural grid the piers stand under it: every m-th tower line when the storefront bay is
+   wider than the tower bay, or the tower lines plus even subdivisions when it is narrower.
+   Lines too close to a corner are dropped, so the corner bay is never a sliver. */
+function podiumPierLines(seg, grid, bayTarget, pierWidth) {
+  const len = seg.len;
+  const edge = Math.max(pierWidth * 1.6, Math.min(bayTarget * 0.45, 2.2));
+  let tower = null;
+  if (grid) {
+    let nearest = Infinity;
+    grid.forEach(g => {
+      if (!g.coords || g.coords.length < 2 || bearingDeltaDeg(g.seg.bearing, seg.bearing) > 2) return;
+      const mid = segmentProject(seg, segmentPointAt(g.seg, g.seg.len / 2));
+      const across = Math.abs(mid.across);
+      if (across > 6 || mid.along < -g.seg.len / 2 || mid.along > len + g.seg.len / 2 || across >= nearest) return;
+      nearest = across;
+      tower = g.coords.map(c => segmentProject(seg, c).along).sort((a, b) => a - b);
+    });
+  }
+  let lines = [];
+  if (tower && tower.length >= 2) {
+    const gaps = tower.slice(1).map((d, i) => d - tower[i]).sort((a, b) => a - b);
+    const pitch = gaps[Math.floor(gaps.length / 2)];
+    if (pitch > 0.5 && pitch <= bayTarget * 1.3) {
+      const m = Math.max(1, Math.round(bayTarget / pitch));
+      let best = null;
+      for (let r = 0; r < m; r++) {
+        const pick = tower.filter((_, i) => i % m === r).filter(d => d > edge && d < len - edge);
+        if (!pick.length) continue;
+        const asym = Math.abs(pick[0] - (len - pick[pick.length - 1]));
+        if (!best || asym < best.asym - 0.05 || (asym < best.asym + 0.05 && pick.length > best.pick.length)) best = { asym, pick };
+      }
+      if (best) lines = best.pick.map(d => ({ d, structural: true }));
+    } else if (pitch > 0.5) {
+      const s = Math.max(1, Math.round(pitch / bayTarget));
+      tower.forEach((d, i) => {
+        lines.push({ d, structural: true });
+        if (i < tower.length - 1) for (let k = 1; k < s; k++) lines.push({ d: d + ((tower[i + 1] - d) * k) / s, structural: false });
+      });
+      lines = lines.filter(l => l.d > edge && l.d < len - edge);
+    }
+  }
+  if (!lines.length) {
+    const n = Math.max(1, Math.round(len / bayTarget));
+    for (let k = 1; k < n; k++) lines.push({ d: (len * k) / n, structural: true });
+  }
+  return lines;
+}
+
+/* The run of bays the entrance takes: whole bays between pier lines when a run comes close
+   to the requested width, otherwise the requested width placed freely. */
+function podiumEntranceSpan(len, lines, desiredCentre, desiredWidth, pierWidth) {
+  const bounds = [0, ...lines.map(l => l.d), len];
+  let best = null;
+  for (let i = 0; i < bounds.length - 1; i++) {
+    for (let j = i + 1; j < bounds.length; j++) {
+      const clear = bounds[j] - bounds[i] - pierWidth;
+      if (clear < 2.2) continue;
+      if (clear > desiredWidth * 1.7 + 0.5) break;
+      const centre = (bounds[i] + bounds[j]) / 2;
+      const atCorner = (i === 0 || j === bounds.length - 1) && bounds.length > 3;
+      const cost = Math.abs(clear - desiredWidth) + Math.abs(centre - desiredCentre) * 0.6 + (atCorner ? 4 : 0);
+      if (!best || cost < best.cost) best = { cost, e0: bounds[i], e1: bounds[j], clear, snapped: true };
+    }
+  }
+  if (best && Math.abs(best.clear - desiredWidth) <= Math.max(1.6, desiredWidth * 0.45)) return best;
+  const margin = Math.min(1.2, len * 0.12);
+  const span = clamp(desiredWidth, 2.4, Math.max(2.4, len - margin * 2 - pierWidth)) + pierWidth;
+  const centre = clamp(desiredCentre, span / 2 + margin * 0.5, Math.max(span / 2 + margin * 0.5, len - span / 2 - margin * 0.5));
+  return { e0: centre - span / 2, e1: centre + span / 2, clear: span - pierWidth, snapped: false };
+}
+
+function facadeBuildContext() { return facadeBuildContext.current || {}; }
+
 function buildPodiumSystem(footprintPoly, o, out) {
+  const ctx = facadeBuildContext();
   const floorCount = Math.max(0, Math.floor(Number(o.podF) || 0));
   if (!floorCount) return 0;
   const podiumBaseExt = Number(o.podOut) > 0
@@ -6209,11 +6392,13 @@ function buildPodiumSystem(footprintPoly, o, out) {
   if (!podiumBaseExt || !podiumBaseExt.geometry) return 0;
   const podiumShell = scale(podiumBaseExt, o, -1) || safeClone(podiumBaseExt);
   if (!podiumShell || !podiumShell.geometry) return 0;
+  ['roofTerraces', 'parapets', 'railings', 'windows', 'roofPlanting'].forEach(k => { if (!out[k]) out[k] = []; });
 
   const upperFloorHeight = clamp(Number(o.podiumUpperFloorHt) || Number(o.F) || 3.6, 2.4, 8);
   const groundFloorHeight = o.podiumSpecialGroundFloor
     ? clamp(Number(o.podiumGroundFlrHt) || 5, 2.8, 10)
     : upperFloorHeight;
+  const totalHeight = groundFloorHeight + upperFloorHeight * (floorCount - 1);
   const facadeGuideOptions = {
     minSegLen: Math.max(1.2, Math.min(2.4, Number(o.podiumBayWidth) * 0.5 || 2)),
     angleTolDeg: 10
@@ -6237,26 +6422,134 @@ function buildPodiumSystem(footprintPoly, o, out) {
       return { ...seg, a: a.geometry.coordinates, b: b.geometry.coordinates, line };
     });
   }
-  const entranceSeg = selectPodiumEntranceSegment(segments, o.podiumEntranceSide || 'auto', o);
-  const entranceSegIndex = entranceSeg ? segments.indexOf(entranceSeg) : -1;
-  const entranceMode = o.podiumEntranceSide || 'auto';
-  const entryPosition = entranceMode === 'corner'
-    ? 0.22
-    : clamp(0.5 + (Number(o.podiumEntranceOffset) || 0), 0.15, 0.85);
-  const entryAlong = entranceSeg ? entranceSeg.len * entryPosition : 0;
-  const entranceMargin = entranceSeg ? Math.min(1.2, entranceSeg.len * 0.12) : 0;
-  const entranceWidth = entranceSeg
-    ? clamp(Number(o.podiumEntranceWidth) || 6.4, 2.4, Math.max(2.4, entranceSeg.len - entranceMargin * 2))
-    : 0;
+
   const baseHeight = clamp(Number(o.podiumBaseHeight) || 0.45, 0.15, Math.max(0.2, groundFloorHeight * 0.26));
   const bayTarget = clamp(Number(o.podiumBayWidth) || 4.2, 2.2, 10);
   const pierWidth = clamp(Number(o.podiumPierWidth) || 0.38, 0.12, Math.min(1.5, bayTarget * 0.35));
   const glazingRatio = clamp(Number(o.podiumWinRatio) || 0.72, 0.25, 0.95);
-  const glassDepth = 0.16;
+  /* Depths from the wall face: piers stand 6-30 cm proud, the glass sits in an 18 cm
+     reveal, and the solid backing wall starts behind the glass. */
   const frameDepth = clamp(0.28 + pierWidth * 0.45, 0.32, 0.85);
+  const pierProud = Math.max(0.04, frameDepth / 2 - 0.08);
+  const glassInset = 0.2;
+  const glassDepth = 0.06;
+  const frameInset = 0.17;
+  const capDepth = clamp(Number(o.podiumCapDepth) || 0, 0, 2.5);
+  const capThickness = capDepth > 0 ? clamp(capDepth * 0.45, 0.18, 0.45) : 0;
+  const pierTop = totalHeight - capThickness;
+  const heavyPiers = pierWidth >= 0.45;
   const podiumBackingVoids = [];
-  let currentHeight = 0;
 
+  /* ---- corners: a solid pier that follows the real corner (square, chamfered or rounded) ---- */
+  const cornerLeg = Math.max(pierWidth, 0.45) * 0.95;
+  const byRing = new Map();
+  segments.forEach(seg => {
+    const key = `${seg.component}|${seg.ring}`;
+    if (!byRing.has(key)) byRing.set(key, []);
+    byRing.get(key).push(seg);
+    seg.startCorner = false;
+    seg.endCorner = false;
+  });
+  const cornerBandOuter = safeBuf(podiumShell, pierProud, 'podium corner band outer');
+  const cornerBandInner = safeBuf(podiumShell, -0.42, 'podium corner band inner');
+  const cornerBand = cornerBandOuter && cornerBandInner && cornerBandInner.geometry
+    ? safeDiff(cornerBandOuter, cornerBandInner, 'podium corner band')
+    : null;
+  const cornerItems = [];
+  const cornerGlass = [];
+  const glassBandOuter = safeBuf(podiumShell, -(glassInset - glassDepth / 2), 'podium corner glass outer');
+  const glassBandInner = safeBuf(podiumShell, -(glassInset + glassDepth / 2), 'podium corner glass inner');
+  const glassBand = glassBandOuter && glassBandInner && glassBandInner.geometry
+    ? safeDiff(glassBandOuter, glassBandInner, 'podium corner glass band')
+    : null;
+  byRing.forEach(list => {
+    if (list.length < 2 || !cornerBand || !cornerBand.geometry) return;
+    list.forEach((seg, index) => {
+      const next = list[(index + 1) % list.length];
+      const gap = coordsDistanceMeters(seg.b, next.a);
+      if (!(gap <= 4.5)) return;
+      const mid = [(seg.b[0] + next.a[0]) / 2, (seg.b[1] + next.a[1]) / 2];
+      const disc = safe(() => turf.circle(mid, gap / 2 + cornerLeg, { steps: 20, units: 'meters' }), 'podium corner disc');
+      let mass = safeInt(cornerBand, disc, 'podium corner pier');
+      if (!mass || !mass.geometry || polyArea(mass) < 0.02) return;
+      /* A rounded or chamfered corner on a glass storefront is glazed round the turn, with a
+         post at each end; a masonry base keeps the corner solid. */
+      if (!heavyPiers && gap >= 1.2 && glassBand && glassBand.geometry) {
+        const core = safe(() => turf.circle(mid, gap / 2 - 0.04, { steps: 20, units: 'meters' }), 'podium corner glass disc');
+        const pane = safeInt(glassBand, core, 'podium corner glazing');
+        const posts = safeDiff(mass, core, 'podium corner posts');
+        if (pane && pane.geometry && polyArea(pane) > 0.02 && posts && posts.geometry && polyArea(posts) > 0.02) {
+          cornerGlass.push({ geometry: pane.geometry, component: seg.podiumComponent });
+          mass = posts;
+        }
+      }
+      cornerItems.push({ zone: bearingToZone(seg.outwardBearing), geometry: mass.geometry });
+      seg.endCorner = true;
+      next.startCorner = true;
+    });
+  });
+  pushMerged(out.podiumFrames, cornerItems, { b: 0, h: pierTop, c: o.podiumFrameColor, a: 1, part: 'corner_pier' });
+
+  /* ---- bay lines on every face, aligned with the tower grid where it has one ---- */
+  const grid = towerGridLines(footprintPoly, o, ctx && Number.isFinite(ctx.mullionDensity) ? ctx.mullionDensity : 1);
+  segments.forEach(seg => { seg.pierLines = podiumPierLines(seg, grid, bayTarget, pierWidth); });
+
+  /* ---- entrance: side, bays and dimensions ---- */
+  const entranceSeg = selectPodiumEntranceSegment(segments, o.podiumEntranceSide || 'auto', o);
+  const entranceMode = o.podiumEntranceSide || 'auto';
+  const entryPosition = entranceMode === 'corner'
+    ? 0.22
+    : clamp(0.5 + (Number(o.podiumEntranceOffset) || 0), 0.15, 0.85);
+  const portalWidth = clamp(Math.max(pierWidth * 1.1, 0.44), 0.18, 0.85);
+  let entrance = null;
+  if (entranceSeg) {
+    /* The entrance is in proportion to its facade: at least a seventh of a long front (to 12 m),
+       never less than the width asked for. */
+    const askedWidth = Number(o.podiumEntranceWidth) || 6.4;
+    const desiredWidth = clamp(Math.max(askedWidth, Math.min(12, entranceSeg.len * 0.145)), 2.4, Math.max(2.4, entranceSeg.len - 1.2));
+    const span = podiumEntranceSpan(entranceSeg.len, entranceSeg.pierLines, entranceSeg.len * entryPosition, desiredWidth, portalWidth);
+    const keepOut = pierWidth * 2.2 + 0.6;
+    entranceSeg.pierLines = entranceSeg.pierLines.filter(l =>
+      (l.d < span.e0 - keepOut || l.d > span.e1 + keepOut) || Math.abs(l.d - span.e0) < 0.02 || Math.abs(l.d - span.e1) < 0.02);
+    [span.e0, span.e1].forEach(d => {
+      if (d < 0.05 || d > entranceSeg.len - 0.05) return;
+      const hit = entranceSeg.pierLines.find(l => Math.abs(l.d - d) < 0.02);
+      if (hit) hit.portal = true;
+      else entranceSeg.pierLines.push({ d, structural: false, portal: true });
+    });
+    entranceSeg.pierLines.sort((a, b) => a.d - b.d);
+    const along = (span.e0 + span.e1) / 2;
+    const width = Math.max(1.6, span.e1 - span.e0 - portalWidth);
+    const height = clamp(Number(o.podiumEntranceHeight) || 4.2, 2.4, groundFloorHeight - 0.12);
+    entrance = {
+      seg: entranceSeg, e0: span.e0, e1: span.e1, along, width, height,
+      recess: clamp(Number(o.podiumEntranceRecess) || 0, 0, 5),
+      doorHeight: clamp(Number(o.podiumDoorHeight) || 2.7, 2, Math.min(4.5, height - 0.12)),
+      point: facadePointAt(entranceSeg, along, 'podium entrance anchor')
+    };
+    if (!entrance.point || !entrance.point.geometry) entrance = null;
+  }
+  const lobbyFloorTop = 0.12;
+  let lobbyRect = null;
+  if (entrance) {
+    const arrivalDepth = Math.max(1.2, entrance.recess + 0.8);
+    const arrivalVoid = rectAtFacadePoint(entrance.point, entrance.seg, entrance.width + portalWidth * 2, arrivalDepth, arrivalDepth * 0.5);
+    if (arrivalVoid && arrivalVoid.geometry) podiumBackingVoids.push(arrivalVoid);
+    entrance.lobbyDepth = clamp(Number(o.podiumLobbyDepth) || 7, 2, 18);
+    entrance.lobbyWidth = entrance.width * 1.35;
+    const lobbyCenter = safe(
+      () => turf.destination(entrance.point, entrance.recess + entrance.lobbyDepth * 0.5, entrance.seg.outwardBearing + 180, { units: 'meters' }),
+      'lobby center'
+    );
+    if (lobbyCenter && lobbyCenter.geometry) {
+      lobbyRect = buildOrientedRect(lobbyCenter.geometry.coordinates, entrance.lobbyWidth, entrance.lobbyDepth, entrance.seg.bearing);
+      podiumBackingVoids.push(lobbyRect);
+    }
+  }
+
+  /* ---- floors: plinth, spandrels, glazing, frames and piers ---- */
+  let currentHeight = 0;
+  let groundGlassTop = groundFloorHeight;
   for (let floorIndex = 0; floorIndex < floorCount; floorIndex++) {
     const floorHeight = floorIndex === 0 ? groundFloorHeight : upperFloorHeight;
     const floorBase = currentHeight;
@@ -6266,8 +6559,17 @@ function buildPodiumSystem(footprintPoly, o, out) {
     const headHeight = clamp(floorHeight * (1 - glazingRatio) * 0.58, 0.32, floorHeight * 0.34);
     const glassBase = floorBase + sillHeight;
     const glassTop = Math.max(glassBase + 0.8, floorTop - headHeight);
+    if (floorIndex === 0) groundGlassTop = glassTop;
 
-    pushPodiumFeature(out.podium, podiumShell, {
+    /* The plinth stops at the doorway: the entrance and lobby are at pavement level. */
+    let plate = podiumShell;
+    if (floorIndex === 0) {
+      podiumBackingVoids.forEach((voidPoly, index) => {
+        const carved = safeDiff(plate, voidPoly, `podium plinth entrance void ${index}`);
+        if (carved && carved.geometry && polyArea(carved) > 1) plate = carved;
+      });
+    }
+    pushPodiumFeature(out.podium, plate, {
       b: floorBase,
       h: Math.min(floorTop, floorBase + Math.max(plateThickness, sillHeight)),
       part: floorIndex === 0 ? 'podium_plinth' : 'podium_floor_plate'
@@ -6280,188 +6582,277 @@ function buildPodiumSystem(footprintPoly, o, out) {
       }, `podium spandrel ${floorIndex}`);
     }
 
-    segments.forEach((seg, segIndex) => {
-      const bayCount = Math.max(1, Math.round(seg.len / bayTarget));
-      const bayWidth = seg.len / bayCount;
-      for (let bayIndex = 0; bayIndex < bayCount; bayIndex++) {
-        const centerAlong = (bayIndex + 0.5) * bayWidth;
-        const overlapsEntrance = floorIndex === 0
-          && segIndex === entranceSegIndex
-          && Math.abs(centerAlong - entryAlong) < entranceWidth * 0.56;
-        if (!overlapsEntrance) {
-          const center = facadePointAt(seg, centerAlong, `podium glass ${floorIndex}-${segIndex}-${bayIndex}`);
-          const panelWidth = Math.max(0.6, bayWidth - pierWidth * 1.15);
-          const glass = rectAtFacadePoint(center, seg, panelWidth, glassDepth, 0.12);
-          pushPodiumFeature(out.podiumGlass, glass, {
-            b: glassBase,
-            h: glassTop,
-            c: o.podiumGlassColor,
-            a: clamp(Number(o.windowAlpha) || 0.75, 0.2, 0.86),
-            part: floorIndex === 0 ? 'storefront_glazing' : 'podium_upper_glazing',
-            floor: floorIndex,
-            podium_component: seg.podiumComponent
-          }, `podium glazing ${floorIndex}-${segIndex}-${bayIndex}`);
+    /* Storefront transom at door-head height; upper floors take a mid rail only when tall. */
+    const transomAt = floorIndex === 0
+      ? floorBase + (entrance ? entrance.doorHeight : 2.7) + 0.1
+      : null;
+    const transomZ = transomAt !== null && transomAt - glassBase >= 1.4 && glassTop - transomAt >= 0.55 ? transomAt : null;
+    const rails = [];
+    const mullions = [];
+    const minorPiers = [];
+
+    segments.forEach(seg => {
+      const zone = bearingToZone(seg.outwardBearing);
+      const isEntranceSeg = entrance && seg === entrance.seg;
+      const startInset = seg.startCorner ? cornerLeg : pierWidth;
+      const endInset = seg.endCorner ? cornerLeg : pierWidth;
+      const bounds = [{ d: 0, inset: startInset }, ...seg.pierLines.map(l => ({ d: l.d, inset: (l.portal ? portalWidth : pierWidth * (l.structural ? 1 : 0.6)) / 2 })), { d: seg.len, inset: endInset }];
+      for (let k = 0; k < bounds.length - 1; k++) {
+        const d0 = bounds[k].d + bounds[k].inset;
+        const d1 = bounds[k + 1].d - bounds[k + 1].inset;
+        const isEntranceBay = floorIndex === 0 && isEntranceSeg && bounds[k].d >= entrance.e0 - 0.02 && bounds[k + 1].d <= entrance.e1 + 0.02;
+        if (isEntranceBay) continue;
+        const panelWidth = d1 - d0 - 0.06;
+        if (panelWidth < 0.5) continue;
+        const mid = (d0 + d1) / 2;
+        const center = facadePointAt(seg, mid, `podium glass ${floorIndex}-${k}`);
+        const glass = rectAtFacadePoint(center, seg, panelWidth, glassDepth, glassInset);
+        const lights = clamp(Math.round(panelWidth / 1.5), 1, 5);
+        pushPodiumFeature(out.podiumGlass, glass, {
+          b: glassBase,
+          h: glassTop,
+          c: o.podiumGlassColor,
+          a: clamp(Number(o.windowAlpha) || 0.75, 0.2, 0.86),
+          part: floorIndex === 0 ? 'storefront_glazing' : 'podium_upper_glazing',
+          floor: floorIndex,
+          lights,
+          podium_component: seg.podiumComponent
+        }, `podium glazing ${floorIndex}-${k}`);
+        const rail = rectAtFacadePoint(center, seg, panelWidth + 0.06, 0.12, frameInset);
+        if (rail && rail.geometry) rails.push({ zone, geometry: rail.geometry });
+        for (let m = 1; m < lights; m++) {
+          const at = facadePointAt(seg, d0 + 0.03 + (panelWidth * m) / lights, 'storefront mullion');
+          const bar = rectAtFacadePoint(at, seg, 0.06, 0.12, frameInset);
+          if (bar && bar.geometry) mullions.push({ zone, geometry: bar.geometry });
         }
       }
-
-      for (let pierIndex = 0; pierIndex <= bayCount; pierIndex++) {
-        const along = clamp(pierIndex * bayWidth, pierWidth * 0.5, Math.max(pierWidth * 0.5, seg.len - pierWidth * 0.5));
-        const overlapsEntrance = floorIndex === 0
-          && segIndex === entranceSegIndex
-          && Math.abs(along - entryAlong) < entranceWidth * 0.48;
-        if (overlapsEntrance) continue;
-        const center = facadePointAt(seg, along, `podium pier ${floorIndex}-${segIndex}-${pierIndex}`);
-        const pier = rectAtFacadePoint(center, seg, pierWidth, frameDepth, 0.08);
-        pushPodiumFeature(out.podiumFrames, pier, {
-          b: floorBase + Math.min(sillHeight * 0.25, 0.18),
-          h: glassTop,
-          c: o.podiumFrameColor,
-          a: 1,
-          part: 'streetwall_pier',
-          floor: floorIndex,
-          podium_component: seg.podiumComponent
-        }, `podium pier ${floorIndex}-${segIndex}-${pierIndex}`);
-      }
+      seg.pierLines.forEach(l => {
+        if (l.structural || l.portal) return;
+        const at = facadePointAt(seg, l.d, 'podium minor pier');
+        const pier = rectAtFacadePoint(at, seg, pierWidth * 0.6, frameDepth * 0.7, 0.1);
+        if (pier && pier.geometry) minorPiers.push({ zone, geometry: pier.geometry });
+      });
     });
+
+    cornerGlass.forEach((pane, index) => pushPodiumFeature(out.podiumGlass, turf.feature(pane.geometry), {
+      b: glassBase,
+      h: glassTop,
+      c: o.podiumGlassColor,
+      a: clamp(Number(o.windowAlpha) || 0.75, 0.2, 0.86),
+      part: 'corner_glazing',
+      floor: floorIndex,
+      podium_component: pane.component
+    }, `podium corner glazing ${floorIndex}-${index}`));
+
+    const frameProps = { c: o.podiumFrameColor, a: 1, floor: floorIndex };
+    pushMerged(out.podiumFrames, rails, { ...frameProps, b: glassBase, h: glassBase + 0.07, part: 'storefront_sill_rail' });
+    pushMerged(out.podiumFrames, rails, { ...frameProps, b: glassTop - 0.07, h: glassTop, part: 'storefront_head_rail' });
+    if (transomZ !== null) pushMerged(out.podiumFrames, rails, { ...frameProps, b: transomZ - 0.035, h: transomZ + 0.035, part: 'storefront_transom' });
+    pushMerged(out.podiumFrames, mullions, { ...frameProps, b: glassBase + 0.07, h: glassTop - 0.07, part: 'storefront_mullion' });
+    pushMerged(out.podiumFrames, minorPiers, { ...frameProps, b: floorBase + Math.min(sillHeight * 0.25, 0.18), h: glassTop, part: 'streetwall_pier_minor' });
 
     currentHeight = floorTop;
   }
 
-  if (entranceSeg && entranceWidth > 0) {
-    const entryPoint = facadePointAt(entranceSeg, entryAlong, 'podium entrance anchor');
-    const entranceHeight = clamp(Number(o.podiumEntranceHeight) || 4.2, 2.4, groundFloorHeight - 0.12);
-    const recess = clamp(Number(o.podiumEntranceRecess) || 0, 0, 5);
-    const doorHeight = clamp(Number(o.podiumDoorHeight) || 2.7, 2, Math.min(4.5, entranceHeight - 0.12));
-    const portalWidth = clamp(pierWidth * 1.1, 0.18, 0.85);
+  /* ---- structural piers: one pilaster from pavement to the underside of the cap ---- */
+  const pierItems = [];
+  const pierBases = [];
+  segments.forEach(seg => {
+    const zone = bearingToZone(seg.outwardBearing);
+    const stations = seg.pierLines.filter(l => l.structural && !l.portal).map(l => l.d);
+    if (!seg.startCorner) stations.push(pierWidth * 0.5);
+    if (!seg.endCorner) stations.push(Math.max(pierWidth * 0.5, seg.len - pierWidth * 0.5));
+    stations.forEach(d => {
+      const at = facadePointAt(seg, d, 'podium pier');
+      const pier = rectAtFacadePoint(at, seg, pierWidth, frameDepth, 0.08);
+      if (pier && pier.geometry) pierItems.push({ zone, geometry: pier.geometry });
+      if (heavyPiers) {
+        const base = rectAtFacadePoint(at, seg, pierWidth + 0.14, frameDepth + 0.08, 0.06);
+        if (base && base.geometry) pierBases.push({ zone, geometry: base.geometry });
+      }
+    });
+  });
+  const pierFoot = Math.min(baseHeight * 0.25, 0.11);
+  pushMerged(out.podiumFrames, pierItems, { b: pierFoot, h: pierTop, c: o.podiumFrameColor, a: 1, part: 'streetwall_pier' });
+  /* The portal jambs carry on as piers above the entrance head. */
+  if (entrance && pierTop - entrance.height > 0.3) {
+    const overPortal = entrance.seg.pierLines.filter(l => l.portal).map(l => {
+      const pier = rectAtFacadePoint(facadePointAt(entrance.seg, l.d, 'podium pier over portal'), entrance.seg, portalWidth, frameDepth, 0.08);
+      return pier && pier.geometry ? { zone: bearingToZone(entrance.seg.outwardBearing), geometry: pier.geometry } : null;
+    }).filter(Boolean);
+    pushMerged(out.podiumFrames, overPortal, { b: entrance.height, h: pierTop, c: o.podiumFrameColor, a: 1, part: 'streetwall_pier' });
+  }
+  pushMerged(out.podiumFrames, pierBases, { b: 0, h: baseHeight + 0.06, c: o.podiumFrameColor, a: 1, part: 'pier_base' });
+
+  /* ---- entrance: portal, glazed door screen, vestibule, lobby and canopy ---- */
+  if (entrance) {
+    const { seg: eSeg, point: entryPoint, width: entranceWidth, height: entranceHeight, recess, doorHeight } = entrance;
+    const inwardBearing = eSeg.outwardBearing + 180;
+    const zone = bearingToZone(eSeg.outwardBearing);
     const jambDepth = clamp(recess + 0.45, 0.45, 5.45);
-    const arrivalDepth = Math.max(1.2, recess + 0.8);
-    const arrivalVoid = rectAtFacadePoint(
-      entryPoint,
-      entranceSeg,
-      entranceWidth + portalWidth * 2,
-      arrivalDepth,
-      arrivalDepth * 0.5
-    );
-    if (arrivalVoid && arrivalVoid.geometry) podiumBackingVoids.push(arrivalVoid);
+    const headerBase = Math.max(doorHeight + 0.18, entranceHeight - 0.5);
+    const frameC = o.podiumDoorFrameColor;
 
     [-1, 1].forEach((side, index) => {
-      const jambPoint = facadePointAt(
-        entranceSeg,
-        entryAlong + side * (entranceWidth / 2 + portalWidth / 2),
-        `entrance jamb ${index}`
-      );
-      const jamb = rectAtFacadePoint(jambPoint, entranceSeg, portalWidth, jambDepth, recess * 0.5);
-      pushPodiumFeature(out.podiumFrames, jamb, {
-        b: baseHeight * 0.4,
-        h: entranceHeight,
-        c: o.podiumDoorFrameColor,
-        a: 1,
-        part: 'entrance_jamb'
-      }, `entrance jamb ${index}`);
+      const jambPoint = facadePointAt(eSeg, entrance.along + side * (entranceWidth / 2 + portalWidth / 2), `entrance jamb ${index}`);
+      const jamb = rectAtFacadePoint(jambPoint, eSeg, portalWidth, jambDepth + pierProud + 0.12, (recess - pierProud - 0.12) * 0.5 + 0.12);
+      pushPodiumFeature(out.podiumFrames, jamb, { b: 0, h: entranceHeight, c: frameC, a: 1, part: 'entrance_jamb' }, `entrance jamb ${index}`);
     });
-
-    const header = rectAtFacadePoint(entryPoint, entranceSeg, entranceWidth + portalWidth * 2, frameDepth, 0.08);
-    pushPodiumFeature(out.podiumFrames, header, {
-      b: Math.max(doorHeight + 0.18, entranceHeight - 0.34),
-      h: entranceHeight,
-      c: o.podiumDoorFrameColor,
-      a: 1,
-      part: 'entrance_header'
-    }, 'entrance header');
+    const header = rectAtFacadePoint(entryPoint, eSeg, entranceWidth + portalWidth * 2, frameDepth + 0.12, 0.02);
+    pushPodiumFeature(out.podiumFrames, header, { b: headerBase, h: entranceHeight, c: frameC, a: 1, part: 'entrance_header' }, 'entrance header');
+    /* Between the portal head and the storefront head: a glazed overlight, not a hole. */
+    if (groundGlassTop - entranceHeight >= 0.12) {
+      const over = rectAtFacadePoint(entryPoint, eSeg, entranceWidth + portalWidth * 2, glassDepth, glassInset);
+      pushPodiumFeature(out.podiumGlass, over, {
+        b: entranceHeight, h: groundGlassTop, c: o.podiumGlassColor, a: clamp(Number(o.windowAlpha) || 0.75, 0.2, 0.86),
+        part: 'entrance_overlight', floor: 0, podium_component: eSeg.podiumComponent
+      }, 'entrance overlight');
+    }
+    /* Vestibule soffit: closes the recess between the door screen and the street. */
+    const soffitDepth = recess + 0.5;
+    const soffit = rectAtFacadePoint(entryPoint, eSeg, entranceWidth, soffitDepth, soffitDepth * 0.5 + 0.05);
+    pushPodiumFeature(out.podiumLobby, soffit, {
+      b: headerBase + 0.04, h: Math.max(entranceHeight, groundGlassTop), c: darkenHex(o.podiumLobbyWallColor || '#827767', 0.1), a: 1, part: 'vestibule_soffit'
+    }, 'vestibule soffit');
 
     const doorCenter = recess > 0
-      ? safe(() => turf.destination(entryPoint, recess, entranceSeg.outwardBearing + 180, { units: 'meters' }), 'door recess')
+      ? safe(() => turf.destination(entryPoint, recess, inwardBearing, { units: 'meters' }), 'door recess')
       : entryPoint;
     const doorStyle = o.podiumDoorStyle || 'double';
     const configuredDoorCount = clamp(Math.round(Number(o.podiumDoorCount) || 4), 2, 8);
-    const doorCount = doorStyle === 'double' ? Math.min(4, configuredDoorCount) : configuredDoorCount;
     const doorAssemblyWidth = entranceWidth * (doorStyle === 'retail-pairs' ? 0.88 : 0.72);
+    const doorBase = lobbyFloorTop;
+    const doorA = 0.58;
+    if (doorCenter && doorCenter.geometry) {
+      const screenItems = { stiles: [], pulls: [] };
+      const leafSpans = [];
+      let drumRadius = 0;
+      if (doorStyle === 'revolving') {
+        drumRadius = clamp(doorAssemblyWidth * 0.16, 0.7, Math.min(1.4, entranceWidth * 0.3));
+        /* The drum stands half proud of the screen; a swing door either side for egress. */
+        const drumCentre = offsetPoint(doorCenter, drumRadius * 0.35, 0, eSeg.outwardBearing);
+        const vestibule = safe(() => turf.circle(drumCentre, drumRadius, { steps: 24, units: 'meters' }), 'revolving door vestibule');
+        pushPodiumFeature(out.podiumDoors, vestibule, { b: doorBase, h: doorHeight, c: o.podiumDoorColor, a: 0.5, part: 'revolving_door' }, 'revolving door');
+        const head = safe(() => turf.circle(drumCentre, drumRadius + 0.06, { steps: 24, units: 'meters' }), 'revolving door head');
+        pushPodiumFeature(out.podiumFrames, head, { b: doorHeight, h: doorHeight + 0.24, c: frameC, a: 1, part: 'revolving_door_head' }, 'revolving door head');
+        const leafWidth = clamp((entranceWidth / 2 - drumRadius - 0.3) * 0.8, 0.75, 1.1);
+        if (entranceWidth / 2 - drumRadius - 0.2 >= leafWidth) {
+          [-1, 1].forEach(side => leafSpans.push({ mid: side * (drumRadius + 0.2 + leafWidth / 2), width: leafWidth, hinge: side }));
+        }
+      } else {
+        const fit = Math.max(1, Math.floor(doorAssemblyWidth / 0.85));
+        let leafCount = Math.min(doorStyle === 'double' ? Math.min(4, configuredDoorCount) : configuredDoorCount, fit);
+        if (leafCount > 1 && leafCount % 2 === 1) leafCount -= 1;
+        const leafWidth = clamp(doorAssemblyWidth / leafCount, 0.75, 1.4);
+        for (let i = 0; i < leafCount; i++) {
+          leafSpans.push({ mid: (i - (leafCount - 1) / 2) * leafWidth, width: leafWidth, hinge: i % 2 === 0 ? -1 : 1 });
+        }
+      }
+      leafSpans.forEach((leaf, leafIndex) => {
+        const leafCoords = offsetPoint(doorCenter, leaf.mid, 0, eSeg.bearing);
+        pushPodiumFeature(out.podiumDoors, buildOrientedRect(leafCoords, leaf.width - 0.07, 0.07, eSeg.bearing), {
+          b: doorBase, h: doorHeight, c: o.podiumDoorColor, a: doorA,
+          part: doorStyle === 'retail-pairs' ? 'retail_door_leaf' : 'entrance_door_leaf', door_index: leafIndex
+        }, `door leaf ${leafIndex}`);
+        [-1, 1].forEach(edge => {
+          const stile = buildOrientedRect(offsetPoint(doorCenter, leaf.mid + edge * leaf.width / 2, 0, eSeg.bearing), 0.07, 0.14, eSeg.bearing);
+          screenItems.stiles.push({ zone, geometry: stile.geometry });
+        });
+        /* A pull handle on the meeting edge, proud of the leaf on the street side. */
+        const pullAt = offsetPoint(offsetPoint(doorCenter, leaf.mid - leaf.hinge * (leaf.width / 2 - 0.16), 0, eSeg.bearing), 0.09, 0, eSeg.outwardBearing);
+        screenItems.pulls.push({ zone, geometry: buildOrientedRect(pullAt, 0.04, 0.06, eSeg.bearing).geometry });
+      });
+      /* de-duplicate the stiles two neighbouring leaves share */
+      const seenStiles = [];
+      const stiles = screenItems.stiles.filter(item => {
+        const c = item.geometry.coordinates[0][0];
+        if (seenStiles.some(q => coordsDistanceMeters(q, c) < 0.03)) return false;
+        seenStiles.push(c);
+        return true;
+      });
+      pushMerged(out.podiumFrames, stiles, { b: doorBase, h: doorHeight + 0.08, c: frameC, a: 1, part: 'door_mullion' });
+      pushMerged(out.podiumFrames, screenItems.pulls, { b: doorBase + 0.85, h: doorBase + 1.5, c: lightenHex(frameC, 0.35), a: 1, part: 'door_pull' });
 
-    if (doorStyle === 'revolving' && doorCenter && doorCenter.geometry) {
-      const revolvingRadius = clamp(doorAssemblyWidth * 0.16, 0.7, 1.4);
-      const vestibule = safe(
-        () => turf.circle(doorCenter, revolvingRadius, { steps: 24, units: 'meters' }),
-        'revolving door vestibule'
-      );
-      pushPodiumFeature(out.podiumDoors, vestibule, {
-        b: baseHeight * 0.45,
-        h: doorHeight,
-        c: o.podiumDoorColor,
-        a: 0.5,
-        part: 'revolving_door'
-      }, 'revolving door');
-    }
-
-    const leafCount = doorStyle === 'revolving' ? 2 : doorCount;
-    const leafWidth = clamp(doorAssemblyWidth / Math.max(1, leafCount), 0.7, 1.4);
-    for (let leafIndex = 0; leafIndex < leafCount; leafIndex++) {
-      const leafAlong = (leafIndex - (leafCount - 1) / 2) * leafWidth;
-      const leafCoords = doorCenter && doorCenter.geometry
-        ? offsetPoint(doorCenter, leafAlong, 0, entranceSeg.bearing)
-        : null;
-      if (!leafCoords) continue;
-      const leaf = buildOrientedRect(leafCoords, leafWidth * 0.92, 0.1, entranceSeg.bearing);
-      pushPodiumFeature(out.podiumDoors, leaf, {
-        b: baseHeight * 0.45,
-        h: doorHeight,
-        c: o.podiumDoorColor,
-        a: 0.58,
-        part: doorStyle === 'retail-pairs' ? 'retail_door_leaf' : 'entrance_door_leaf',
-        door_index: leafIndex
-      }, `door leaf ${leafIndex}`);
-      if (leafIndex < leafCount - 1) {
-        const mullionCoords = offsetPoint(doorCenter, leafAlong + leafWidth / 2, 0, entranceSeg.bearing);
-        const doorMullion = buildOrientedRect(mullionCoords, 0.08, 0.16, entranceSeg.bearing);
-        pushPodiumFeature(out.podiumFrames, doorMullion, {
-          b: baseHeight * 0.42,
-          h: doorHeight + 0.08,
-          c: o.podiumDoorFrameColor,
-          a: 1,
-          part: 'door_mullion'
-        }, `door mullion ${leafIndex}`);
+      /* The rest of the screen: sidelights beside the doors, a head rail and a transom light. */
+      const doorsHalf = leafSpans.length
+        ? Math.max(...leafSpans.map(l => Math.abs(l.mid) + l.width / 2))
+        : drumRadius;
+      const sideWidth = entranceWidth / 2 - doorsHalf - 0.04;
+      const glassProps = { c: o.podiumGlassColor, a: clamp(Number(o.windowAlpha) || 0.75, 0.2, 0.86), floor: 0, podium_component: eSeg.podiumComponent };
+      if (sideWidth >= 0.25) {
+        [-1, 1].forEach((side, index) => {
+          const at = offsetPoint(doorCenter, side * (doorsHalf + 0.04 + sideWidth / 2), 0, eSeg.bearing);
+          pushPodiumFeature(out.podiumGlass, buildOrientedRect(at, sideWidth, glassDepth, eSeg.bearing), {
+            ...glassProps, b: doorBase, h: doorHeight, part: 'entrance_sidelight'
+          }, `entrance sidelight ${index}`);
+        });
+      }
+      if (doorStyle === 'revolving') {
+        /* glazed infill between the drum and the swing doors */
+        const gapWidth = (leafSpans.length ? Math.min(...leafSpans.map(l => Math.abs(l.mid) - l.width / 2)) : doorsHalf) - drumRadius * 0.92;
+        if (gapWidth >= 0.12 && leafSpans.length) {
+          [-1, 1].forEach((side, index) => {
+            const at = offsetPoint(doorCenter, side * (drumRadius * 0.92 + gapWidth / 2), 0, eSeg.bearing);
+            pushPodiumFeature(out.podiumGlass, buildOrientedRect(at, gapWidth, glassDepth, eSeg.bearing), {
+              ...glassProps, b: doorBase, h: doorHeight, part: 'entrance_sidelight'
+            }, `revolving infill ${index}`);
+          });
+        }
+      }
+      const screenTop = Math.max(entranceHeight, groundGlassTop) - 0.02;
+      const headRail = buildOrientedRect(doorCenter.geometry ? doorCenter.geometry.coordinates : doorCenter, entranceWidth, 0.14, eSeg.bearing);
+      pushPodiumFeature(out.podiumFrames, headRail, { b: doorHeight + 0.08, h: doorHeight + 0.18, c: frameC, a: 1, part: 'door_head_rail' }, 'door head rail');
+      if (screenTop - (doorHeight + 0.18) >= 0.35) {
+        pushPodiumFeature(out.podiumGlass, buildOrientedRect(doorCenter.geometry ? doorCenter.geometry.coordinates : doorCenter, entranceWidth, glassDepth, eSeg.bearing), {
+          ...glassProps, b: doorHeight + 0.18, h: Math.min(screenTop, headerBase + 0.04), part: 'entrance_transom_glazing'
+        }, 'entrance transom glazing');
       }
     }
 
-    const lobbyDepth = clamp(Number(o.podiumLobbyDepth) || 7, 2, 18);
-    const lobbyCenter = safe(
-      () => turf.destination(entryPoint, recess + lobbyDepth * 0.5, entranceSeg.outwardBearing + 180, { units: 'meters' }),
-      'lobby center'
-    );
-    if (lobbyCenter && lobbyCenter.geometry) {
-      const lobbyRect = buildOrientedRect(lobbyCenter.geometry.coordinates, entranceWidth * 1.35, lobbyDepth, entranceSeg.bearing);
-      podiumBackingVoids.push(lobbyRect);
+    /* Lobby: floor at pavement level, side and back walls and a reception desk, so the
+       depth behind the doors reads as a room. */
+    if (lobbyRect) {
+      const lobbyDepth = entrance.lobbyDepth;
       const lobby = safeInt(lobbyRect, podiumShell, 'lobby clip');
-      pushPodiumFeature(out.podiumLobby, lobby, {
-        b: 0.05,
-        h: 0.17,
-        c: o.podiumLobbyFloorColor,
-        a: 1,
-        part: 'lobby_floor'
-      }, 'lobby floor');
-
+      pushPodiumFeature(out.podiumLobby, lobby, { b: 0.02, h: lobbyFloorTop, c: o.podiumLobbyFloorColor, a: 1, part: 'lobby_floor' }, 'lobby floor');
+      const wallTop = Math.min(entranceHeight * 0.9, groundFloorHeight - 0.3);
       const backPoint = safe(
-        () => turf.destination(entryPoint, recess + lobbyDepth * 0.92, entranceSeg.outwardBearing + 180, { units: 'meters' }),
+        () => turf.destination(entryPoint, recess + lobbyDepth * 0.92, inwardBearing, { units: 'meters' }),
         'lobby back wall'
       );
       if (backPoint && backPoint.geometry) {
-        const backWall = buildOrientedRect(backPoint.geometry.coordinates, entranceWidth * 1.18, 0.18, entranceSeg.bearing);
-        const clippedBackWall = safeInt(backWall, podiumShell, 'lobby back wall clip');
-        pushPodiumFeature(out.podiumLobby, clippedBackWall, {
-          b: baseHeight,
-          h: Math.min(entranceHeight * 0.9, groundFloorHeight - 0.3),
-          c: o.podiumLobbyWallColor,
-          a: 1,
-          part: 'lobby_back_wall'
+        const backWall = buildOrientedRect(backPoint.geometry.coordinates, entranceWidth * 1.18, 0.18, eSeg.bearing);
+        pushPodiumFeature(out.podiumLobby, safeInt(backWall, podiumShell, 'lobby back wall clip'), {
+          b: lobbyFloorTop, h: wallTop, c: o.podiumLobbyWallColor, a: 1, part: 'lobby_back_wall'
         }, 'lobby back wall');
+        if (lobbyDepth >= 5 && entranceWidth >= 3.2) {
+          const deskPoint = safe(() => turf.destination(entryPoint, recess + lobbyDepth * 0.92 - 1.5, inwardBearing, { units: 'meters' }), 'lobby desk');
+          if (deskPoint && deskPoint.geometry) {
+            const desk = buildOrientedRect(deskPoint.geometry.coordinates, Math.min(3.2, entranceWidth * 0.45), 0.75, eSeg.bearing);
+            pushPodiumFeature(out.podiumLobby, safeInt(desk, podiumShell, 'lobby desk clip'), {
+              b: lobbyFloorTop, h: lobbyFloorTop + 1.05, c: darkenHex(o.podiumLobbyWallColor || '#827767', 0.28), a: 1, part: 'lobby_desk'
+            }, 'lobby desk');
+          }
+        }
+      }
+      const sideMid = safe(() => turf.destination(entryPoint, recess + lobbyDepth * 0.5, inwardBearing, { units: 'meters' }), 'lobby side wall');
+      if (sideMid && sideMid.geometry) {
+        [-1, 1].forEach((side, index) => {
+          const at = offsetPoint(sideMid, side * (entrance.lobbyWidth / 2 - 0.09), 0, eSeg.bearing);
+          const wall = buildOrientedRect(at, 0.18, lobbyDepth * 0.84, eSeg.bearing);
+          pushPodiumFeature(out.podiumLobby, safeInt(wall, podiumShell, 'lobby side wall clip'), {
+            b: lobbyFloorTop, h: wallTop, c: o.podiumLobbyWallColor, a: 1, part: 'lobby_side_wall'
+          }, `lobby side wall ${index}`);
+        });
       }
     }
 
     if (o.podiumEntranceStyle === 'colonnade') {
       [-2, -1, 1, 2].forEach((columnIndex, idx) => {
-        const columnAlong = entryAlong + Math.sign(columnIndex) * (entranceWidth / 2 + Math.abs(columnIndex) * 0.85);
-        if (columnAlong <= 0.3 || columnAlong >= entranceSeg.len - 0.3) return;
-        const columnPoint = facadePointAt(entranceSeg, columnAlong, `entry colonnade ${idx}`);
-        const column = rectAtFacadePoint(columnPoint, entranceSeg, Math.max(0.34, pierWidth * 0.85), 0.62, -0.16);
+        const columnAlong = entrance.along + Math.sign(columnIndex) * (entranceWidth / 2 + Math.abs(columnIndex) * 0.85);
+        if (columnAlong <= 0.3 || columnAlong >= eSeg.len - 0.3) return;
+        const columnPoint = facadePointAt(eSeg, columnAlong, `entry colonnade ${idx}`);
+        const column = rectAtFacadePoint(columnPoint, eSeg, Math.max(0.34, pierWidth * 0.85), 0.62, -0.16);
         pushPodiumFeature(out.podiumFrames, column, {
           b: 0,
           h: Math.min(groundFloorHeight - 0.1, entranceHeight + 0.35),
@@ -6474,11 +6865,11 @@ function buildPodiumSystem(footprintPoly, o, out) {
 
     if (o.podiumEntranceStyle === 'sculpted') {
       [-1, 1].forEach((side, idx) => {
-        const wingPoint = facadePointAt(entranceSeg, entryAlong + side * entranceWidth * 0.58, `sculpted wing ${idx}`);
+        const wingPoint = facadePointAt(eSeg, entrance.along + side * entranceWidth * 0.58, `sculpted wing ${idx}`);
         if (!wingPoint || !wingPoint.geometry) return;
-        const wing = buildOrientedRect(wingPoint.geometry.coordinates, 0.32, Math.max(1.2, recess + 0.8), entranceSeg.bearing + side * 13);
+        const wing = buildOrientedRect(wingPoint.geometry.coordinates, 0.32, Math.max(1.2, recess + 0.8), eSeg.bearing + side * 13);
         pushPodiumFeature(out.podiumFrames, wing, {
-          b: baseHeight * 0.2,
+          b: 0,
           h: entranceHeight,
           c: o.podiumFrameColor,
           a: 1,
@@ -6492,12 +6883,12 @@ function buildPodiumSystem(footprintPoly, o, out) {
       const canopyDepth = clamp(Number(o.podiumCanopyDepth) || 1.8, 0.4, 5);
       const canopyThickness = clamp(Number(o.podiumCanopyThickness) || 0.22, 0.08, 0.8);
       const canopyCenter = safe(
-        () => turf.destination(entryPoint, canopyDepth * 0.46, entranceSeg.outwardBearing, { units: 'meters' }),
+        () => turf.destination(entryPoint, canopyDepth * 0.46, eSeg.outwardBearing, { units: 'meters' }),
         'canopy center'
       );
       if (canopyCenter && canopyCenter.geometry) {
-        const canopyWidth = entranceWidth + (canopyStyle === 'deep-soffit' ? 2.4 : 1.2);
-        const canopy = buildOrientedRect(canopyCenter.geometry.coordinates, canopyWidth, canopyDepth, entranceSeg.bearing);
+        const canopyWidth = entranceWidth + portalWidth * 2 + (canopyStyle === 'deep-soffit' ? 2.4 : 1.2);
+        const canopy = buildOrientedRect(canopyCenter.geometry.coordinates, canopyWidth, canopyDepth, eSeg.bearing);
         const canopyBase = clamp(
           /* seated on the entrance header, so the canopy is carried, not hovering above it */
           canopyStyle === 'deep-soffit' ? entranceHeight - 0.35 : entranceHeight - 0.04,
@@ -6512,12 +6903,27 @@ function buildPodiumSystem(footprintPoly, o, out) {
           part: canopyStyle === 'deep-soffit' ? 'entrance_soffit' : 'entrance_canopy',
           canopy_style: canopyStyle
         }, 'entrance canopy');
+        /* What carries it: posts under a deep framed canopy, cantilever brackets otherwise. */
+        const supports = [];
+        if (canopyStyle === 'framed' && canopyDepth >= 1.8) {
+          [-1, 1].forEach(side => {
+            const at = offsetPoint(offsetPoint(entryPoint, side * (canopyWidth / 2 - 0.2), 0, eSeg.bearing), canopyDepth * 0.92 - 0.2, 0, eSeg.outwardBearing);
+            supports.push({ part: 'canopy_post', b: 0, h: canopyBase, geometry: buildOrientedRect(at, 0.16, 0.16, eSeg.bearing).geometry });
+          });
+        } else if (canopyStyle !== 'deep-soffit' && canopyDepth >= 0.9) {
+          const reach = canopyDepth * 0.72;
+          [-1, 1].forEach(side => {
+            const at = offsetPoint(offsetPoint(entryPoint, side * (entranceWidth / 2 + portalWidth / 2), 0, eSeg.bearing), reach / 2, 0, eSeg.outwardBearing);
+            supports.push({ part: 'canopy_bracket', b: canopyBase - Math.min(0.34, canopyBase - doorHeight - 0.1), h: canopyBase, geometry: buildOrientedRect(at, 0.08, reach, eSeg.bearing).geometry });
+          });
+        }
+        supports.forEach(sp => out.podiumFrames.push(turf.feature(sp.geometry, { b: sp.b, h: sp.h, c: o.podiumCanopyColor, a: 1, part: sp.part })));
       }
     }
   }
 
   if (currentHeight > 0) {
-    const backingOuterInset = clamp(Math.max(glassDepth + 0.12, frameDepth * 0.58), 0.26, 0.52);
+    const backingOuterInset = clamp(Math.max(glassInset + glassDepth / 2 + 0.1, frameDepth * 0.58), 0.33, 0.52);
     const backingThickness = clamp(Math.max(0.28, pierWidth * 0.9), 0.28, 0.72);
     const backingOuter = safeBuf(podiumShell, -backingOuterInset, 'podium perimeter backing outer');
     const backingInner = backingOuter && backingOuter.geometry
@@ -6541,16 +6947,51 @@ function buildPodiumSystem(footprintPoly, o, out) {
     }, 'podium continuous perimeter backing');
   }
 
-  const capDepth = clamp(Number(o.podiumCapDepth) || 0, 0, 2.5);
   if (capDepth > 0 && currentHeight > 0) {
     const cap = safeBuf(podiumShell, capDepth, 'podium cap projection') || podiumShell;
     pushPodiumFeature(out.podiumCap, cap, {
-      b: Math.max(0, currentHeight - clamp(capDepth * 0.45, 0.18, 0.45)),
+      b: Math.max(0, currentHeight - capThickness),
       h: currentHeight,
       c: o.podiumCapColor,
       a: 1,
       part: 'podium_cap'
     }, 'podium cap');
+  }
+
+  /* ---- podium roof: where the tower stands back, a paved terrace behind an upstand ---- */
+  if (currentHeight > 0) {
+    const towerShell = safe(() => floorShell(footprintPoly, o, 0), 'podium terrace tower shell');
+    const ring = towerShell && towerShell.geometry ? safeDiff(podiumShell, towerShell, 'podium terrace ring') : null;
+    const ringArea = ring && ring.geometry ? polyArea(ring) : 0;
+    const perimeter = segments.reduce((sum, seg) => sum + seg.len, 0) || 1;
+    const ringWidth = ringArea / perimeter;
+    if (ringArea > 4 && ringWidth >= 0.7) {
+      const deckTop = currentHeight + 0.05;
+      out.roofTerraces.push(turf.feature(ring.geometry, { b: currentHeight, h: deckTop, part: 'podium_terrace', c: terracePavingColor(o) }));
+      const edgeInner = safeBuf(podiumShell, -0.22, 'podium upstand inner');
+      const upstand = edgeInner && edgeInner.geometry ? safeDiff(podiumShell, edgeInner, 'podium upstand') : null;
+      if (upstand && upstand.geometry) {
+        const upstandTop = currentHeight + (ringWidth >= 2.4 ? 0.3 : 0.5);
+        out.podiumCap.push(turf.feature(upstand.geometry, { b: currentHeight, h: upstandTop, c: o.podiumCapColor, a: 1, part: 'podium_parapet' }));
+        if (ringWidth >= 2.4 && o.setbackTerraces !== false) {
+          /* deep enough to use: a glass balustrade on the upstand and a planter strip */
+          const railInner = safeBuf(podiumShell, -0.16, 'podium rail inner');
+          const railOuter = safeBuf(podiumShell, -0.1, 'podium rail outer');
+          const railBand = railInner && railOuter ? safeDiff(railOuter, railInner, 'podium rail band') : null;
+          if (railBand && railBand.geometry) {
+            out.windows.push(turf.feature(railBand.geometry, { b: upstandTop, h: currentHeight + 1.1, part: 'terrace_balustrade_glass' }));
+            out.railings.push(turf.feature(railBand.geometry, { b: currentHeight + 1.1, h: currentHeight + 1.15, part: 'terrace_handrail' }));
+          }
+          const planterOuter = safeBuf(podiumShell, -0.45, 'podium planter outer');
+          const planterInner = safeBuf(podiumShell, -0.45 - clamp(ringWidth * 0.28, 0.6, 1.1), 'podium planter inner');
+          const planterRing = planterOuter && planterInner ? safeDiff(planterOuter, planterInner, 'podium planter ring') : null;
+          const planters = planterRing ? safeInt(planterRing, ring, 'podium planter clip') : null;
+          if (planters && planters.geometry && polyArea(planters) > 0.5) {
+            out.roofPlanting.push(turf.feature(planters.geometry, { b: deckTop, h: deckTop + 0.5, part: 'terrace_planter', c: '#5f7d55' }));
+          }
+        }
+      }
+    }
   }
 
   return currentHeight;
@@ -8933,6 +9374,19 @@ function mergeZoneParts(items) {
   }));
 }
 
+/* Structural module of a ribbon-glazed face: whole bays of about 6 m, each a whole number
+   of mullion lights. */
+function ribbonStructBay() { return 6; }
+function ribbonModule(len, mullionSpacing) {
+  const bays = Math.max(1, Math.round(len / ribbonStructBay()));
+  const sub = mullionSpacing > 0 ? Math.max(1, Math.round(len / bays / mullionSpacing)) : 1;
+  return { bays, sub, count: bays * sub };
+}
+/* Vertical mullion spacing from the mullion count per structural bay. */
+function ribbonMullionSpacing(o, density = 1) {
+  return (Number(o.mullionV) || 0) > 0 ? clamp(ribbonStructBay() / (Number(o.mullionV) * density + 1), 0.9, ribbonStructBay()) : 0;
+}
+
 /* Ribbon glazing plan for one floor plate: recessed glass line, a frame ring
    between glass and facade face (sills, heads, transoms) and a measured
    mullion rhythm laid out along every glass facade run. */
@@ -8951,6 +9405,7 @@ function getRibbonPlan(shell, o, mullionSpacing, refShell = null) {
     const faceLine = shellBuf(shell, -faceInset, 'ribbon frame face');
     const frameRing = faceLine && faceLine.geometry ? safeDiff(faceLine, glass, 'ribbon frame ring') : null;
     const mullions = [];
+    const gridLines = [];
     if (bay) {
       /* Bay grid: a heavy mullion on every pier line, light mullions between. */
       const depth = Math.max(0.02, recess - faceInset - 0.003) + 0.02;
@@ -8958,6 +9413,7 @@ function getRibbonPlan(shell, o, mullionSpacing, refShell = null) {
       getBayLayout(shell, o, refShell).segments.forEach(entry => {
         const { seg, zone } = entry;
         const positions = entry.piers.map(d => ({ d, w: Math.max(thick * 2.6, 0.07) }));
+        gridLines.push({ seg, coords: entry.pierCoords });
         entry.bays.forEach(b => {
           for (let m = 1; m < bay.lights; m++) positions.push({ d: b.d0 + ((b.d1 - b.d0) * m) / bay.lights, w: thick });
         });
@@ -8969,21 +9425,30 @@ function getRibbonPlan(shell, o, mullionSpacing, refShell = null) {
           mullions.push({ zone, geometry: buildOrientedRect(centre, w, depth, seg.bearing).geometry });
         });
       });
-    } else if (mullionSpacing > 0) {
-      /* From 2 cm inside the glass to 3 mm short of the frame face (no coincident edges). */
+    } else {
+      /* From 2 cm inside the glass to 3 mm short of the frame face (no coincident edges).
+         Mullions are set out inside structural bays (about 6 m): a whole number of bays per
+         face, a whole number of lights per bay. The bay lines carry a heavier mullion and are
+         the lines the podium piers stand under. */
       const depth = Math.max(0.02, recess - faceInset - 0.003) + 0.02;
       const guide = getFacadeGuide(glass, { minSegLen: Math.max(0.8, thick * 6), angleTolDeg: 8 });
       const placed = [];
       guide.segments.forEach(seg => {
-        const count = Math.max(1, Math.round(seg.len / mullionSpacing));
+        const mod = ribbonModule(seg.len, mullionSpacing);
         const zone = bearingToZone(seg.outwardBearing);
-        for (let k = 0; k <= count; k++) {
-          const p = segmentPointAt(seg, (seg.len * k) / count);
+        const lineCoords = [];
+        for (let k = 0; k <= mod.count; k++) {
+          const p = segmentPointAt(seg, (seg.len * k) / mod.count);
+          const structural = k % mod.sub === 0;
+          if (structural) lineCoords.push(p);
+          if (!(mullionSpacing > 0)) continue;
           if (placed.some(q => coordsDistanceMeters(p, q) < thick * 2.5)) continue;
           placed.push(p);
+          const w = structural && mod.sub > 1 ? Math.max(thick * 2.2, 0.06) : thick;
           const center = offsetPoint(p, depth / 2 - 0.02, 0, seg.outwardBearing);
-          mullions.push({ zone, geometry: buildOrientedRect(center, thick, depth, seg.bearing).geometry });
+          mullions.push({ zone, geometry: buildOrientedRect(center, w, depth, seg.bearing).geometry });
         }
+        gridLines.push({ seg, coords: lineCoords });
       });
     }
     /* Clip only members that poke past the frame face (at corners); clipping one
@@ -8995,7 +9460,7 @@ function getRibbonPlan(shell, o, mullionSpacing, refShell = null) {
       const clippedGeom = safeInt(turf.feature(m.geometry), faceLine, 'ribbon mullion clip');
       return clippedGeom && clippedGeom.geometry && polyArea(clippedGeom) > 0.0005 ? { zone: m.zone, geometry: clippedGeom.geometry } : null;
     }).filter(Boolean);
-    return { glass, frameRing, mullions: mergeZoneParts(fitted), recess };
+    return { glass, frameRing, mullions: mergeZoneParts(fitted), recess, gridLines };
   });
 }
 
@@ -9568,10 +10033,12 @@ function accentSelected(o, key) {
 }
 
 /* Accent panels for one floor, stacked by opening so they read as designed bays. */
-function pushAccentPanels(out, plan, o, base, winBase, winTop) {
+function pushAccentPanels(out, plan, o, base, winBase, winTop, portal = null) {
   const mode = o.accentPanels || 'none';
   if (mode === 'none' || !plan || !plan.accents.length) return;
-  const items = plan.accents.filter(a => accentSelected(o, a.key));
+  /* no spandrel panel across a portal's doors */
+  const atPortal = a => portal && portal.reach && safe(() => turf.booleanPointInPolygon(a.spandrel.coordinates[0][0], portal.reach), 'accent at portal');
+  const items = plan.accents.filter(a => accentSelected(o, a.key) && !atPortal(a));
   if (!items.length) return;
   if (mode === 'spandrel') {
     if (winBase - base < 0.35) return;
@@ -9588,13 +10055,17 @@ function pushAccentPanels(out, plan, o, base, winBase, winTop) {
 /* One floor of bay-grid openings: wall zones around the cut openings, recessed
    glass, jambs, head/sill rails, transoms, mullions, sills, piers and accents.
    `prof` gives the wall cut and glass heights (grouped floors share a cut). */
-function emitBayOpenings(out, plan, shell, o, base, top, prof) {
+function emitBayOpenings(out, plan, shell, o, base, top, prof, portal = null) {
   const p = bayGridParams(o);
   if (!plan || !plan.openingWall || !plan.glass.length) {
     out.core.push(turf.feature(shell.geometry, { b: base, h: top, part: 'facade_shell' }));
     return;
   }
-  if (prof.wallBase > base + 0.01) out.core.push(turf.feature(shell.geometry, { b: base, h: prof.wallBase, part: 'wall_sill_zone' }));
+  if (prof.wallBase > base + 0.01) {
+    /* The wall under the sills stops at a portal: its doors open at pavement level. */
+    const sillWall = portal && portal.sillCut.length ? (safeDiff(shell, turf.multiPolygon(portal.sillCut), 'portal sill cut') || shell) : shell;
+    out.core.push(turf.feature(sillWall.geometry, { b: base, h: prof.wallBase, part: 'wall_sill_zone' }));
+  }
   out.core.push(turf.feature(plan.openingWall.geometry, { b: prof.wallBase, h: prof.wallTop, part: 'wall_opening_zone' }));
   if (prof.wallTop < top - 0.01) out.core.push(turf.feature(shell.geometry, { b: prof.wallTop, h: top, part: 'wall_lintel_zone' }));
 
@@ -9607,8 +10078,21 @@ function emitBayOpenings(out, plan, shell, o, base, top, prof) {
   /* Transom height is measured from the floor, like a door head. */
   const transomAt = base + p.transomHeight;
   const transomZ = p.transomHeight > 0 && transomAt > prof.glassBase + 0.4 && transomAt < prof.glassTop - 0.3 ? transomAt : null;
-  plan.rails.forEach(r => {
+  /* Sills and sill rails stop at a portal: nothing crosses its doors. */
+  const clearOfPortal = items => (!portal || !portal.reach ? items : items.map(item => {
+    const polys = item.geometry.type === 'Polygon' ? [item.geometry.coordinates] : item.geometry.coordinates;
+    const kept = polys.filter(coords => {
+      const ring = coords[0].slice(0, -1);
+      const mid = [ring.reduce((sum, c) => sum + c[0], 0) / ring.length, ring.reduce((sum, c) => sum + c[1], 0) / ring.length];
+      return !safe(() => turf.booleanPointInPolygon(mid, portal.reach), 'portal sill test');
+    });
+    if (!kept.length) return null;
+    return { zone: item.zone, geometry: kept.length === 1 ? { type: 'Polygon', coordinates: kept[0] } : { type: 'MultiPolygon', coordinates: kept } };
+  }).filter(Boolean));
+  clearOfPortal(plan.rails).forEach(r => {
     out.borders.push(turf.feature(r.geometry, { b: prof.glassBase, h: prof.glassBase + railH, part: 'bay_sill_rail', orientation: r.zone }));
+  });
+  plan.rails.forEach(r => {
     out.borders.push(turf.feature(r.geometry, { b: prof.glassTop - railH, h: prof.glassTop, part: 'bay_head_rail', orientation: r.zone }));
     if (prof.panel) {
       out.borders.push(turf.feature(r.geometry, { b: prof.panel[0], h: prof.panel[1], part: 'bay_spandrel_panel', c: darkenHex(o.bCol || '#555555', 0.22), orientation: r.zone }));
@@ -9620,12 +10104,27 @@ function emitBayOpenings(out, plan, shell, o, base, top, prof) {
   plan.mullions.forEach(m => out.mullions.push(turf.feature(m.geometry, { b: prof.glassBase, h: prof.glassTop, part: 'bay_mullion', orientation: m.zone })));
   emitMuntins(out, plan, o, prof.glassBase, prof.glassTop);
   if (prof.glassBase > base + 0.3) {
-    plan.sills.forEach(sl => out.windowSills.push(turf.feature(sl.geometry, {
+    clearOfPortal(plan.sills).forEach(sl => out.windowSills.push(turf.feature(sl.geometry, {
       b: prof.glassBase - 0.07, h: prof.glassBase - 0.01, c: lightenHex(o.wallColor, 0.12), a: 1, part: 'window_sill', orientation: sl.zone
     })));
   }
   plan.piers.forEach(pr => out.piers.push(turf.feature(pr.geometry, { b: base, h: top, part: 'facade_pier', orientation: pr.zone })));
-  pushAccentPanels(out, plan, o, base, prof.glassBase, prof.glassTop);
+  pushAccentPanels(out, plan, o, base, prof.glassBase, prof.glassTop, portal);
+}
+
+/* Juliet guard across every bay opening: a glass panel under a top rail, set just inside
+   the wall face. */
+function emitJulietRails(out, plan, o, base) {
+  if (!plan || !plan.openings || !plan.openings.length) return;
+  const guards = planPartMemo(plan, 'juliet-guards', () => mergeZoneParts(plan.openings.map(op => ({
+    zone: op.zone,
+    geometry: segLocalPolygon(op.seg, [[op.mid - op.width / 2, -0.07], [op.mid + op.width / 2, -0.07], [op.mid + op.width / 2, -0.02], [op.mid - op.width / 2, -0.02]]).geometry
+  }))));
+  /* two parts per face and floor (pane, rail): a third member cost a frame-rate step on phones */
+  guards.forEach(g => {
+    out.windows.push(turf.feature(g.geometry, { b: base + 0.1, h: base + 1.02, part: 'juliet_guard_glass', orientation: g.zone }));
+    out.railings.push(turf.feature(g.geometry, { b: base + 1.02, h: base + 1.09, part: 'juliet_top_rail', orientation: g.zone }));
+  });
 }
 
 /* Pier crown: the facade piers rise 1-3 storeys past the roof slab, joined by a
@@ -9676,7 +10175,13 @@ function buildPierCrown(topShell, o, roofTop, out, refShell) {
   let bulkhead = safeBuf(topShell, -clamp(halfMin * 0.4, 2.5, 6), 'crown bulkhead setback');
   if (!bulkhead || !bulkhead.geometry || polyArea(bulkhead) < 6) bulkhead = insetPlate(topShell, 0.5, 'crown bulkhead inset');
   if (bulkhead && bulkhead.geometry) {
-    out.roofEquipment.push(turf.feature(bulkhead.geometry, { b: roofTop, h: roofTop + Math.max(2.2, H - 0.7), part: 'screened_bulkhead' }));
+    const bulkheadTop = roofTop + Math.max(2.2, H - 0.7);
+    out.roofEquipment.push(turf.feature(bulkhead.geometry, { b: roofTop, h: bulkheadTop, part: 'screened_bulkhead', c: plantMetalColor(o), p: 'none' }));
+    emitLouvreBand(out, bulkhead, roofTop + Math.min(1.2, (bulkheadTop - roofTop) * 0.4), bulkheadTop - 0.25, darkenHex(plantMetalColor(o), 0.3), 'crown bulkhead');
+    /* a cap slab that oversails the louvres */
+    const capOuter = safeBuf(bulkhead, 0.18, 'crown bulkhead cap');
+    if (capOuter && capOuter.geometry) out.roofEquipment.push(turf.feature(capOuter.geometry, { b: bulkheadTop, h: bulkheadTop + 0.16, part: 'bulkhead_cap', c: lightenHex(o.roofCol || '#3b4043', 0.16), p: 'none' }));
+    emitPlantRow(out, bulkhead, bulkheadTop + 0.16, o);
   }
   return roofTop + H;
 }
@@ -9686,7 +10191,7 @@ function buildPierCrown(topShell, o, roofTop, out, refShell) {
 function buildSetbackTerrace(out, lowerShell, upperShell, o, deck, depth, idx) {
   const terrace = safeDiff(lowerShell, upperShell, `setback terrace ${idx}`);
   if (!terrace || !terrace.geometry || polyArea(terrace) < 1.5) return;
-  out.roofTerraces.push(turf.feature(terrace.geometry, { b: deck, h: deck + 0.06, part: 'setback_terrace' }));
+  out.roofTerraces.push(turf.feature(terrace.geometry, { b: deck, h: deck + 0.06, part: 'setback_terrace', c: terracePavingColor(o) }));
   if (o.setbackTerraces === false) return;
   const edgeInner = shellBuf(lowerShell, -0.06, 'terrace rail inner');
   const railBand = edgeInner && edgeInner.geometry ? safeInt(terrace, safeDiff(lowerShell, edgeInner, 'terrace edge band'), 'terrace rail band') : null;
@@ -9854,7 +10359,7 @@ function exportMaterialProfile(layerKey, pattern) {
   if (['windows', 'podiumGlass', 'podiumDoors'].includes(layerKey)) {
     /* Exports have no interiors behind the panes: low transmission reads as dark, reflective
        glass in any viewer instead of see-through boxes. */
-    return { kind: 'glass', roughness: 0.05, metalness: 0.08, transmission: 0.3, ior: 1.52, thickness: 0.02 };
+    return { kind: 'glass', roughness: 0.06, metalness: 0.45, transmission: 0.12, ior: 1.52, thickness: 0.02 };
   }
   if (['mullions', 'borders', 'railings', 'stairRailings', 'exoskeleton', 'podiumFrames', 'podiumCanopies', 'roofScreens', 'spires', 'facadeJoints'].includes(layerKey)) {
     return { kind: 'metal', roughness: 0.34, metalness: 0.82 };
@@ -9998,7 +10503,7 @@ function windowHeadParts(plan, o) {
   return planPartMemo(plan, `heads|${head}`, () => {
     const lintels = [];
     const keystones = [];
-    const ARCH_COURSES = 10;
+    const ARCH_COURSES = 20;
     const arch = Array.from({ length: ARCH_COURSES }, () => []);
     (plan.openings || []).forEach(op => {
       const { seg, zone, mid, width, recess } = op;
@@ -10052,7 +10557,7 @@ function emitWindowHeads(out, plan, o, floorIndex, base, top, glassBase, glassTo
 /* ---------- rustication and quoins ---------- */
 /* Channel-jointed stone courses (0.62 m, 0.07 m proud), pierced where windows open.
    Courses run a shade lighter than the wall so the recessed joints read as shadow. */
-function emitRustication(out, shell, plan, o, base, top, glassBase, glassTop) {
+function emitRustication(out, shell, plan, o, base, top, glassBase, glassTop, portal = null) {
   /* Rustication wraps projecting piers: the stone base reads as one coursed mass. */
   const pierOut = o.windowStyle === 'bay' ? clamp(Number(o.pierProjection) || 0, 0, 1.2) : 0;
   const proud = 0.07 + pierOut;
@@ -10075,15 +10580,22 @@ function emitRustication(out, shell, plan, o, base, top, glassBase, glassTop) {
     return reach && reach.geometry ? safeDiff(jointRing, reach, 'rustic joint pierce') : null;
   }) : null;
   const jointColor = darkenHex(c, 0.32);
+  /* The courses stop either side of a lobby portal, which has its own stone surround. */
+  const portalCuts = new Map();
+  const clearOfPortal = geom => {
+    if (!portal || !portal.reach || !geom || !geom.geometry) return geom;
+    if (!portalCuts.has(geom)) portalCuts.set(geom, safeDiff(geom, portal.reach, 'rustication at portal') || geom);
+    return portalCuts.get(geom);
+  };
   for (let z = base; z < top - 0.08; z += course) {
     const zb = z + joint / 2;
     const zt = Math.min(top, z + course) - joint / 2;
     const throughGlass = glassBase !== null && zt > glassBase && zb < glassTop;
-    const geom = throughGlass ? (pierced && pierced.geometry ? pierced : null) : ring;
+    const geom = clearOfPortal(throughGlass ? (pierced && pierced.geometry ? pierced : null) : ring);
     if (!geom || zt - zb < 0.08) continue;
     out.seps.push(turf.feature(geom.geometry, { b: zb, h: zt, part: 'rustication_course', c, p }));
     const jz = Math.min(top, z + course);
-    const jointGeom = (glassBase !== null && jz > glassBase && jz < glassTop) ? jointPierced : jointRing;
+    const jointGeom = clearOfPortal((glassBase !== null && jz > glassBase && jz < glassTop) ? jointPierced : jointRing);
     if (jointGeom && jointGeom.geometry && jz < top - 0.02) {
       out.seps.push(turf.feature(jointGeom.geometry, { b: jz - joint / 2 - 0.005, h: jz + joint / 2 + 0.005, part: 'rustication_joint', c: jointColor }));
     }
@@ -10273,6 +10785,128 @@ function emitEntrances(out, parts, o, base) {
   pushMerged(out.cornices, parts.hoods, { b: transomTop + 0.16, h: transomTop + 0.32, part: 'door_hood', c: trim });
   pushMerged(out.podiumCanopies, parts.canopies, { b: transomTop + 0.2, h: transomTop + 0.38, part: 'porch_roof', c: trim });
   pushMerged(out.borders, parts.posts, { b: parts.stoopTop, h: transomTop + 0.2, part: 'porch_post', c: trim });
+}
+
+/* ---------- lobby portal ----------
+   The entrance of a building that meets the street without a podium: the central bay (three
+   bays on a tall, wide tower) of the street face opens to the pavement behind a stone
+   surround of pilasters and an entablature, with framed doors, a glazed transom and a
+   bracketed canopy. It is set out on the bay grid, so it lines up with every storey above. */
+function resolveEntryType(o) {
+  const type = o.entryType || 'none';
+  if (type !== 'auto') return type;
+  if (Number(o.podF) > 0) return 'none';
+  if (Math.round(Number(o.floors) || 0) >= 5) return 'portal';
+  return Number(o.raisedGround) > 0.3 ? 'stoop' : 'door';
+}
+
+function portalEntranceParts(shell, plan, o) {
+  if (!plan || !plan.layout || !plan.openings || !plan.openings.length) return null;
+  const p = bayGridParams(o);
+  const key = `portal|${o.podiumEntranceSide || 'auto'}|${o.podiumEntranceOffset || 0}|${Math.round(Number(o.floors) || 0)}|${Number.isFinite(o.__streetBearing) ? Math.round(o.__streetBearing) : 'x'}`;
+  return planPartMemo(plan, key, () => {
+    const faces = plan.layout.segments.filter(entry => entry.bays.length && !entry.seg.isHole);
+    const seg = selectPodiumEntranceSegment(faces.map(entry => entry.seg), o.podiumEntranceSide || 'auto', { ...o, podiumEntranceWidth: 3 });
+    if (!seg) return null;
+    const ops = plan.openings.filter(op => op.seg === seg).sort((a, b) => a.mid - b.mid);
+    if (!ops.length) return null;
+    const target = seg.len * clamp(0.5 + (Number(o.podiumEntranceOffset) || 0), 0.15, 0.85);
+    let c = 0;
+    ops.forEach((op, i) => { if (Math.abs(op.mid - target) < Math.abs(ops[c].mid - target)) c = i; });
+    const wide = Math.round(Number(o.floors) || 0) >= 12 && ops.length >= 7 && c >= 1 && c <= ops.length - 2;
+    const doors = wide ? [ops[c - 1], ops[c], ops[c + 1]] : [ops[c]];
+    if (doors.some(op => op.width < 1.0)) return null;
+    const zone = bearingToZone(seg.outwardBearing);
+    const poly = pts => ({ zone, geometry: segLocalPolygon(seg, pts).geometry });
+    const rect = (a0, a1, c0, c1) => poly([[a0, c0], [a1, c0], [a1, c1], [a0, c1]]);
+    const pierOut = o.windowStyle === 'bay' ? p.pierProjection : 0;
+    const pw = o.windowStyle === 'bay' ? p.pierWidth : 0.45;
+    const leftEdge = doors[0].mid - doors[0].width / 2;
+    const rightEdge = doors[doors.length - 1].mid + doors[doors.length - 1].width / 2;
+    /* Surround pilasters stand 22 cm proud of the piers they wrap and a little wider. */
+    const pilasterOut = pierOut + 0.22;
+    const side = Math.max(pw, 0.5) + 0.14;
+    const pilasters = [
+      rect(leftEdge - 0.05 - side, leftEdge + 0.01, -0.02, pilasterOut),
+      rect(rightEdge - 0.01, rightEdge + 0.05 + side, -0.02, pilasterOut)
+    ];
+    const a0 = leftEdge - 0.05 - side;
+    const a1 = rightEdge + 0.05 + side;
+    const canopyDepth = wide ? 2.4 : 1.7;
+    const parts = {
+      wide, zone,
+      pilasters,
+      entablature: [rect(a0 - 0.1, a1 + 0.1, -0.02, pierOut + 0.3)],
+      entablatureCap: [rect(a0 - 0.22, a1 + 0.22, -0.02, pierOut + 0.44)],
+      canopy: [rect(leftEdge - 0.3, rightEdge + 0.3, 0.02, canopyDepth)],
+      brackets: [leftEdge + 0.12, rightEdge - 0.12].map(a => rect(a - 0.04, a + 0.04, 0.02, canopyDepth * 0.7)),
+      steps: n => Array.from({ length: n }, (_, s) => rect(leftEdge - 0.25, rightEdge + 0.25, 0, 1.3 + (n - 1 - s) * 0.32)),
+      cheeks: n => [rect(a0 - 0.05, leftEdge - 0.25, 0, 1.3 + (n - 1) * 0.32), rect(rightEdge + 0.25, a1 + 0.05, 0, 1.3 + (n - 1) * 0.32)],
+      thresholds: [], glazing: [], leaves: [], leafRails: [], frames: [], heads: [], pulls: [],
+      sillCut: [],
+      reach: segLocalPolygon(seg, [[a0 - 0.12, -0.6], [a1 + 0.12, -0.6], [a1 + 0.12, pierOut + 1.2], [a0 - 0.12, pierOut + 1.2]])
+    };
+    doors.forEach(op => {
+      const { mid, width: w, recess } = op;
+      parts.sillCut.push(segLocalPolygon(seg, [[mid - w / 2, -(recess + 0.14)], [mid + w / 2, -(recess + 0.14)], [mid + w / 2, pierOut + 0.3], [mid - w / 2, pierOut + 0.3]]).geometry.coordinates);
+      parts.thresholds.push(rect(mid - w / 2, mid + w / 2, -(recess + 0.12), 0.02));
+      parts.glazing.push(rect(mid - w / 2, mid + w / 2, -(recess + 0.08), -recess));
+      const leafCount = w >= 1.9 ? 2 : 1;
+      const leafW = Math.min(1.05, (w - 0.2) / leafCount);
+      for (let i = 0; i < leafCount; i++) {
+        const lm = mid + (i - (leafCount - 1) / 2) * leafW;
+        parts.leaves.push(rect(lm - leafW / 2 + 0.035, lm + leafW / 2 - 0.035, -recess + 0.01, -recess + 0.06));
+        parts.leafRails.push(rect(lm - leafW / 2 + 0.035, lm + leafW / 2 - 0.035, -recess, -recess + 0.08));
+        const pullAt = leafCount === 2 ? lm + (i === 0 ? 1 : -1) * (leafW / 2 - 0.16) : lm + leafW / 2 - 0.16;
+        parts.pulls.push(rect(pullAt - 0.02, pullAt + 0.02, -recess + 0.06, -recess + 0.12));
+      }
+      const half = (leafCount * leafW) / 2;
+      [-half, 0, half].filter((d, i) => leafCount === 2 || i !== 1).forEach(d => parts.frames.push(rect(mid + d - 0.035, mid + d + 0.035, -recess, -recess + 0.1)));
+      parts.heads.push(rect(mid - w / 2, mid + w / 2, -recess, -recess + 0.1));
+    });
+    ['pilasters', 'entablature', 'entablatureCap', 'canopy', 'brackets', 'thresholds', 'glazing', 'leaves', 'leafRails', 'frames', 'heads', 'pulls'].forEach(k => { parts[k] = mergeZoneParts(parts[k]); });
+    return parts;
+  });
+}
+
+function emitPortalEntrance(out, portal, o, base, top, prof, stoopH, archSpring = null) {
+  const trim = trimColorFor(o);
+  const frameColor = o.bCol || '#3b3530';
+  const floors = Math.round(Number(o.floors) || 0);
+  const sill = base;
+  const doorH = clamp(floors >= 10 ? 2.7 : 2.35, 2.1, Math.max(2.1, prof.glassTop - sill - 0.6));
+  const doorTop = sill + 0.04 + doorH;
+  const entTop = top - 0.14;
+  const entBase = Math.max(Math.min(prof.glassTop + 0.04, entTop - 0.3), entTop - 0.6);
+  pushMerged(out.seps, portal.pilasters, { b: 0, h: entBase, part: 'portal_pilaster', c: trim });
+  pushMerged(out.seps, portal.entablature, { b: entBase, h: entTop, part: 'portal_entablature', c: trim });
+  pushMerged(out.seps, portal.entablatureCap, { b: entTop, h: entTop + 0.1, part: 'portal_cornice', c: lightenHex(trim, 0.06) });
+  pushMerged(out.windowSills, portal.thresholds, { b: Math.max(0, sill - 0.02), h: sill + 0.04, part: 'portal_threshold', c: darkenHex(trim, 0.12) });
+  if (prof.glassBase > sill + 0.12) {
+    pushMerged(out.windows, portal.glazing, { b: sill + 0.04, h: prof.glassBase + 0.01, part: 'portal_glazing', c: o.windowColor, a: clamp(o.windowAlpha, 0.15, 1) });
+  }
+  /* Glazed doors: a glass leaf between a kick rail and a top rail in the frame metal. */
+  pushMerged(out.accentPanels, portal.leaves, { b: sill + 0.3, h: doorTop - 0.12, part: 'front_door_glazing', c: lightenHex(o.windowColor || '#55666d', 0.12) });
+  pushMerged(out.accentPanels, portal.leafRails, { b: sill + 0.04, h: sill + 0.3, part: 'front_door_kick_rail', c: frameColor });
+  pushMerged(out.accentPanels, portal.leafRails, { b: doorTop - 0.12, h: doorTop, part: 'front_door_top_rail', c: frameColor });
+  pushMerged(out.borders, portal.frames, { b: sill + 0.04, h: doorTop, part: 'door_surround', c: frameColor });
+  pushMerged(out.borders, portal.heads, { b: doorTop, h: doorTop + 0.1, part: 'door_surround', c: frameColor });
+  pushMerged(out.borders, portal.pulls, { b: sill + 0.9, h: sill + 1.5, part: 'door_pull', c: lightenHex(frameColor, 0.4) });
+  /* Canopy above the transom light, seated between the pilasters on two brackets. */
+  /* On an arched storey the canopy sits on the springing line, so it reads as an impost
+     band and the arch heads stay whole above it. */
+  const canopyBase = archSpring !== null && archSpring - 0.2 > doorTop + 0.3
+    ? Math.min(archSpring - 0.2, entBase - 0.5)
+    : Math.min(doorTop + 0.55, entBase - 0.5);
+  if (canopyBase > doorTop + 0.12) {
+    pushMerged(out.podiumCanopies, portal.canopy, { b: canopyBase, h: canopyBase + 0.18, part: 'entrance_canopy', c: frameColor });
+    pushMerged(out.borders, portal.brackets, { b: canopyBase - 0.3, h: canopyBase, part: 'canopy_bracket', c: frameColor });
+  }
+  if (stoopH > 0.2) {
+    const n = Math.max(2, Math.round(stoopH / 0.17));
+    portal.steps(n).forEach((step, s) => out.windowSills.push(turf.feature(step.geometry, { b: 0, h: ((s + 1) * stoopH) / n, part: 'stoop_step', c: trim, orientation: portal.zone })));
+    portal.cheeks(n).forEach(cheek => out.windowSills.push(turf.feature(cheek.geometry, { b: 0, h: stoopH + 0.5, part: 'stoop_cheek_wall', c: trim, orientation: portal.zone })));
+  }
 }
 
 /* ---------- flowing slab bands ---------- */
@@ -10922,6 +11556,228 @@ function emitTerraceEdge(out, railBand, o, deck) {
   return false;
 }
 
+/* Plant enclosures and units are a neutral metal: the roof accent when it is already a grey,
+   otherwise a zinc grey taken from the roof colour (a brick-red plant room reads as an error). */
+function plantMetalColor(o) {
+  const hex = /^#[0-9a-f]{6}$/i.test(String(o.roofAccentCol || '')) ? o.roofAccentCol : '#8e9598';
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+  if (chroma <= 28) return darkenHex(hex, 0.18);
+  const roof = /^#[0-9a-f]{6}$/i.test(String(o.roofCol || '')) ? o.roofCol : '#3b4043';
+  return lightenHex(roof, 0.28);
+}
+
+/* Terrace paving: pale stone pavers, tinted by the roof colour so they sit with the scheme. */
+function terracePavingColor(o) {
+  const roof = /^#[0-9a-f]{6}$/i.test(String(o.roofCol || '')) ? o.roofCol : '#3b4043';
+  return lightenHex(roof, 0.46);
+}
+
+/* A row of fan units on plinths along the top of a plant enclosure: carried by its roof,
+   set in from every edge, and sized to it (none on an enclosure too small to take them). */
+function emitPlantRow(out, enclosure, top, o) {
+  if (!enclosure || !enclosure.geometry) return;
+  const anchor = safe(() => turf.centerOfMass(enclosure), 'plant row anchor');
+  const zone = safeBuf(enclosure, -0.9, 'plant row zone');
+  if (!anchor || !zone || !zone.geometry) return;
+  const bearing = getPrimaryBearing(enclosure);
+  const ext = getLocalExtents(zone, anchor, bearing);
+  if (!ext || ext.alongSpan < 3.2 || ext.acrossSpan < 2.2) return;
+  const unitColor = lightenHex(plantMetalColor(o), 0.12);
+  const inside = (along, across) => [[-1.1, -0.75], [1.1, -0.75], [1.1, 0.75], [-1.1, 0.75], [0, 0]]
+    .every(([a, c]) => safe(() => turf.booleanPointInPolygon(offsetPoint(anchor, along + a, across + c, bearing), zone), 'plant row inside'));
+  /* The longest run of unit positions on one of three lines along the enclosure (an L-shaped
+     or courtyard enclosure has no usable centre line). */
+  const acrossMid = (ext.acrossMin + ext.acrossMax) / 2;
+  let best = [];
+  [0, -0.28, 0.28].forEach(shift => {
+    const across = acrossMid + shift * ext.acrossSpan;
+    const count = Math.floor((ext.alongSpan - 2.2) / 3.1) + 1;
+    const start = (ext.alongMin + ext.alongMax) / 2 - ((count - 1) * 3.1) / 2;
+    let run = [];
+    for (let i = 0; i <= count; i++) {
+      const along = start + i * 3.1;
+      if (i < count && inside(along, across)) { run.push([along, across]); continue; }
+      if (run.length > best.length) best = run;
+      run = [];
+    }
+  });
+  if (best.length > 5) best = best.slice(Math.floor((best.length - 5) / 2), Math.floor((best.length - 5) / 2) + 5);
+  best.forEach(([along, across]) => {
+    out.roofEquipment.push(turf.feature(buildLocalAxisRect(anchor, bearing, along - 1.1, along + 1.1, across - 0.75, across + 0.75).geometry, { b: top, h: top + 1.35, part: 'rooftop_unit', c: unitColor, p: 'none' }));
+    const fan = safe(() => turf.circle(offsetPoint(anchor, along, across, bearing), 0.5, { steps: 16, units: 'meters' }), 'plant row fan');
+    if (fan) out.roofEquipment.push(turf.feature(fan.geometry, { b: top + 1.35, h: top + 1.55, part: 'rooftop_unit_fan', c: darkenHex(unitColor, 0.35), p: 'none' }));
+  });
+}
+
+/* Louvre blades round a plant enclosure: horizontal slats 4 cm proud of the wall, so the
+   louvred zone carries real shadow lines in the map, AR and every export. */
+function emitLouvreBand(out, enclosure, base, top, color, label = 'plant') {
+  const outer = safeBuf(enclosure, 0.05, `${label} louvre outer`);
+  const ring = outer && outer.geometry ? safeDiff(outer, enclosure, `${label} louvre ring`) : null;
+  if (!ring || !ring.geometry || !(top - base > 0.5)) return;
+  const pitch = clamp((top - base) / Math.max(3, Math.round((top - base) / 0.34)), 0.24, 0.5);
+  const count = Math.max(2, Math.floor((top - base) / pitch));
+  for (let i = 0; i < count; i++) {
+    const z = base + i * pitch;
+    out.roofEquipment.push(turf.feature(ring.geometry, { b: z, h: z + pitch * 0.5, part: 'plant_louvre_blade', c: color, p: 'none' }));
+  }
+}
+
+/* Roofscape for a flat roof: a ballasted field inside a perimeter gutter, then, on the
+   free area between the parapet and whatever already stands on the roof, a screened plant
+   yard with fan units, vent stacks, rooflights, roof access where there is no plant room,
+   and a facade-maintenance unit on towers. Everything is set out on the roof's own axes,
+   kept clear of the parapet and of each other, and dropped when it does not fit. */
+function buildRoofscape(topShell, o, roofTop, out) {
+  if (!topShell || !topShell.geometry) return;
+  const area = polyArea(topShell);
+  if (area < 40) return;
+  const crown = o.roofProfile === 'crown';
+  if (crown && ['lantern', 'blade', 'raked'].includes(o.crownStyle)) return;
+  const parapetT = o.parapetH > 0 && o.parapetThick > 0 ? clamp(Number(o.parapetThick), 0.1, 1.5) : 0.15;
+
+  /* What already stands on this roof (plant room, crown bulkhead, screens, planting). */
+  let blocked = null;
+  ['rooftopStructures', 'roofEquipment', 'roofScreens', 'roofPlanting', 'spires', 'parapets'].forEach(layer => (out[layer] || []).forEach(f => {
+    const p = f.properties || {};
+    if (!(Number(p.h) > roofTop + 0.05) || Number(p.b) > roofTop + 0.6 || Number(p.b) < roofTop - 0.2) return;
+    if (layer === 'parapets' && p.part !== 'crown_screen_wall') return;
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    polys.forEach(coords => {
+      /* a parapet-like ring is an edge condition, not an obstacle in the field */
+      const solid = layer === 'parapets' ? turf.polygon(coords) : turf.polygon([coords[0]]);
+      blocked = blocked ? (safe(() => turf.union(blocked, solid), 'roof obstacle union') || blocked) : solid;
+    });
+  }));
+
+  const roofColor = /^#[0-9a-f]{6}$/i.test(String(o.roofCol || '')) ? o.roofCol : '#3b4043';
+  const fieldEdge = safeBuf(topShell, -(parapetT + 0.45), 'roof field inset');
+  if (!fieldEdge || !fieldEdge.geometry) return;
+  if (o.roofProfile !== 'green') {
+    const field = blocked ? (safeDiff(fieldEdge, blocked, 'roof field around plant') || fieldEdge) : fieldEdge;
+    if (field && field.geometry && polyArea(field) > 6) {
+      out.roof.push(turf.feature(field.geometry, { b: roofTop, h: roofTop + 0.04, part: 'roof_field', c: lightenHex(roofColor, 0.2) }));
+    }
+  }
+  if (o.roofProfile === 'green' || crown) return;
+
+  const edge = safeBuf(topShell, -(parapetT + (area >= 500 ? 1.7 : 1.2)), 'roof equipment zone');
+  const keepClear = blocked ? safeBuf(blocked, 1.0, 'roof obstacle clearance') : null;
+  const free = edge && edge.geometry && keepClear && keepClear.geometry ? safeDiff(edge, keepClear, 'roof free area') : edge;
+  if (!free || !free.geometry || polyArea(free) < 30) return;
+  const anchor = safe(() => turf.centerOfMass(topShell), 'roofscape anchor');
+  if (!anchor) return;
+  const bearing = getPrimaryBearing(topShell);
+  const ext = getLocalExtents(free, anchor, bearing);
+  if (!ext || ext.alongSpan < 4 || ext.acrossSpan < 3) return;
+  const at = (along, across) => offsetPoint(anchor, along, across, bearing);
+  const rectAt = (along, across, w, d) => buildLocalAxisRect(anchor, bearing, along - w / 2, along + w / 2, across - d / 2, across + d / 2);
+  const taken = [];
+  const fits = (along, across, w, d, gap) => {
+    if (taken.some(t => Math.abs(t.along - along) < (t.w + w) / 2 + gap && Math.abs(t.across - across) < (t.d + d) / 2 + gap)) return false;
+    for (const fa of [-0.5, 0, 0.5]) for (const fc of [-0.5, 0, 0.5]) {
+      if (!safe(() => turf.booleanPointInPolygon(at(along + fa * w, across + fc * d), free), 'roof item inside test')) return false;
+    }
+    return true;
+  };
+  /* Nearest fitting position to a target, on a 0.8 m lattice in the roof's own frame. */
+  const place = (w, d, target, gap = 0.7) => {
+    let best = null;
+    for (let a = ext.alongMin + w / 2; a <= ext.alongMax - w / 2 + 1e-6; a += 0.8) {
+      for (let c = ext.acrossMin + d / 2; c <= ext.acrossMax - d / 2 + 1e-6; c += 0.8) {
+        const dist = Math.hypot(a - target[0], c - target[1]);
+        if (best && dist >= best.dist) continue;
+        if (fits(a, c, w, d, gap)) best = { along: a, across: c, w, d, dist };
+      }
+    }
+    if (best) taken.push(best);
+    return best;
+  };
+  const plantLocal = blocked ? getLocalCoordinates(anchor, safe(() => turf.centerOfMass(blocked), 'plant centre') || anchor, bearing) : null;
+  const floorsTotal = Math.round(Number(o.floors) || 0) + Math.max(0, Math.floor(Number(o.podF) || 0));
+  const accent = /^#[0-9a-f]{6}$/i.test(String(o.roofAccentCol || '')) ? o.roofAccentCol : '#8e9598';
+  const unitColor = lightenHex(plantMetalColor(o), 0.12);
+  const alongMid = (ext.alongMin + ext.alongMax) / 2;
+  const acrossMid = (ext.acrossMin + ext.acrossMax) / 2;
+  const hasPlantRoom = (out.rooftopStructures || []).some(f => Number(f.properties.b) >= roofTop - 0.05 && Number(f.properties.h) > roofTop + 2);
+
+  /* Roof access where no plant room or stair bulkhead exists. */
+  if (!hasPlantRoom && !blocked && floorsTotal >= 4 && area >= 140) {
+    const core = place(4.6, 3.2, [alongMid - ext.alongSpan * 0.16, acrossMid], 1.0);
+    if (core) {
+      const walls = rectAt(core.along, core.across, 4.6, 3.2);
+      out.rooftopStructures.push(turf.feature(walls.geometry, { b: roofTop, h: roofTop + 2.75, part: 'roof_access_core' }));
+      out.roofEquipment.push(turf.feature(rectAt(core.along, core.across, 5.0, 3.6).geometry, { b: roofTop + 2.75, h: roofTop + 2.93, part: 'roof_access_cap', c: darkenHex(roofColor, 0.05), p: 'none' }));
+      out.roofEquipment.push(turf.feature(rectAt(core.along + 2.33, core.across - 0.6, 0.08, 0.95).geometry, { b: roofTop + 0.04, h: roofTop + 2.14, part: 'roof_access_door', c: darkenHex(accent, 0.45), p: 'none' }));
+    }
+  }
+
+  /* Plant yard: fan units in a row inside a louvred screen. The mechanical roof profile
+     already carries its own screened plant. */
+  if (o.roofProfile !== 'mechanical' && area >= 150) {
+    const unitH = 1.55;
+    const target = plantLocal
+      ? [plantLocal.along + (plantLocal.along > alongMid ? -1 : 1) * ext.alongSpan * 0.3, plantLocal.across]
+      : [alongMid + ext.alongSpan * 0.2, acrossMid];
+    for (let n = clamp(Math.round(area / 260), 1, 4); n >= 1; n--) {
+      const rowW = n * 2.4 + (n - 1) * 0.7;
+      const screened = floorsTotal >= 6;
+      const margin = screened ? 0.85 : 0.2;
+      const yard = place(rowW + margin * 2, 1.7 + margin * 2, target, 0.9);
+      if (!yard) continue;
+      for (let i = 0; i < n; i++) {
+        const a = yard.along - rowW / 2 + 1.2 + i * 3.1;
+        out.roofEquipment.push(turf.feature(rectAt(a, yard.across, 2.4, 1.7).geometry, { b: roofTop + 0.04, h: roofTop + 0.16, part: 'rooftop_unit_plinth', c: lightenHex(roofColor, 0.3), p: 'none' }));
+        out.roofEquipment.push(turf.feature(rectAt(a, yard.across, 2.2, 1.5).geometry, { b: roofTop + 0.16, h: roofTop + unitH, part: 'rooftop_unit', c: unitColor, p: 'none' }));
+        const fan = safe(() => turf.circle(at(a, yard.across), 0.52, { steps: 16, units: 'meters' }), 'rooftop fan');
+        if (fan) out.roofEquipment.push(turf.feature(fan.geometry, { b: roofTop + unitH, h: roofTop + unitH + 0.2, part: 'rooftop_unit_fan', c: darkenHex(unitColor, 0.35), p: 'none' }));
+      }
+      if (screened) {
+        const outer = rectAt(yard.along, yard.across, yard.w, yard.d);
+        const inner = rectAt(yard.along, yard.across, yard.w - 0.2, yard.d - 0.2);
+        const ring = safeDiff(outer, inner, 'plant screen ring');
+        if (ring && ring.geometry) out.roofEquipment.push(turf.feature(ring.geometry, { b: roofTop + 0.04, h: roofTop + unitH + 0.5, part: 'plant_screen', c: accent, p: 'none' }));
+      }
+      /* vent stacks beside the yard */
+      for (let v = 0; v < Math.min(3, n + 1); v++) {
+        const vent = place(0.45, 0.45, [yard.along - yard.w / 2 - 1.2 - v * 1.3, yard.across + yard.d / 2 - 0.4], 0.5);
+        if (vent) out.roofEquipment.push(turf.feature(rectAt(vent.along, vent.across, 0.45, 0.45).geometry, { b: roofTop + 0.04, h: roofTop + 0.95, part: 'roof_vent', c: unitColor, p: 'none' }));
+      }
+      break;
+    }
+  }
+
+  /* Rooflights over the deep plan, away from the plant. */
+  if (area >= 300) {
+    const count = clamp(Math.round(area / 480), 1, 3);
+    const side = plantLocal && plantLocal.along > alongMid ? -1 : 1;
+    for (let i = 0; i < count; i++) {
+      const light = place(1.9, 1.9, [alongMid + side * ext.alongSpan * (0.3 - i * 0.02) - side * i * 3.0, acrossMid + (plantLocal ? -Math.sign(plantLocal.across || 1) * ext.acrossSpan * 0.18 : 0)], 1.0);
+      if (!light) continue;
+      out.roof.push(turf.feature(rectAt(light.along, light.across, 1.9, 1.9).geometry, { b: roofTop + 0.04, h: roofTop + 0.34, part: 'rooflight_curb', c: lightenHex(roofColor, 0.42) }));
+      out.roofEquipment.push(turf.feature(rectAt(light.along, light.across, 1.6, 1.6).geometry, { b: roofTop + 0.34, h: roofTop + 0.44, part: 'rooflight_glass', c: o.windowColor || '#5d7682', p: 'none' }));
+    }
+  }
+
+  /* Facade maintenance unit on towers: a carriage on twin rails with a mast and a jib that
+     stays inside the parapet. */
+  if (floorsTotal >= 15 && ext.alongSpan >= 12 && ext.acrossSpan >= 7) {
+    const bmu = place(3.0, 1.9, [ext.alongMax - 1.5, ext.acrossMin + 0.95], 1.0);
+    if (bmu) {
+      const steel = lightenHex(darkenHex(accent, 0.4), 0.05);
+      const jibLen = clamp(ext.alongSpan * 0.3, 4, 7.5);
+      const dirSign = bmu.along > alongMid ? -1 : 1;
+      const jibMid = bmu.along + dirSign * (jibLen / 2 - 0.4);
+      const jibInside = [0, 0.5, 1].every(t => safe(() => turf.booleanPointInPolygon(at(bmu.along + dirSign * (jibLen - 0.4) * t, bmu.across), fieldEdge), 'bmu jib inside'));
+      [-0.6, 0.6].forEach(off => out.roofEquipment.push(turf.feature(rectAt(bmu.along + dirSign * (jibLen * 0.35), bmu.across + off, 3.0 + jibLen * 0.7, 0.1).geometry, { b: roofTop + 0.04, h: roofTop + 0.16, part: 'bmu_rail', c: steel, p: 'none' })));
+      out.roofEquipment.push(turf.feature(rectAt(bmu.along, bmu.across, 2.6, 1.5).geometry, { b: roofTop + 0.16, h: roofTop + 1.5, part: 'bmu_carriage', c: lightenHex(steel, 0.18), p: 'none' }));
+      out.roofEquipment.push(turf.feature(rectAt(bmu.along, bmu.across, 0.6, 0.6).geometry, { b: roofTop + 1.5, h: roofTop + 2.9, part: 'bmu_mast', c: steel, p: 'none' }));
+      if (jibInside) out.roofEquipment.push(turf.feature(rectAt(jibMid, bmu.across, jibLen, 0.34).geometry, { b: roofTop + 2.55, h: roofTop + 2.9, part: 'bmu_jib', c: steel, p: 'none' }));
+    }
+  }
+}
+
 function build(footprintPoly,o){
   const F=o.F; 
   const out={core:[],windows:[],borders:[],windowSills:[],seps:[],balconies:[],roof:[],podium:[],
@@ -10943,6 +11799,8 @@ function build(footprintPoly,o){
   const facadeModifiers = getFacadeFieldModifiers(facadeField, climateState);
   const deterministicSeed = facadeField.seed || deriveFacadeSeed(footprintPoly, o.facadeSeed, o.floors);
 
+  /* shared with the podium, so its piers stand under the tower's own mullion module */
+  facadeBuildContext.current = { mullionDensity: facadeModifiers.mullionDensity };
   const currentPodiumHeight = buildPodiumSystem(footprintPoly, o, out);
   const plinthH = plinthHeightFor(o);
   const totalPodiumHeight = currentPodiumHeight + plinthH;
@@ -10991,9 +11849,7 @@ function build(footprintPoly,o){
     const windowStyle = o.windowStyle || 'ribbon';
 
     /* Vertical mullions: count per 6 m structural bay -> measured spacing along each facade run. */
-    const mullionSpacing = (Number(o.mullionV) || 0) > 0
-      ? clamp(6 / (Number(o.mullionV) * facadeModifiers.mullionDensity + 1), 0.9, 6)
-      : 0;
+    const mullionSpacing = ribbonMullionSpacing(o, facadeModifiers.mullionDensity);
     const transomCount = clamp(Math.round(Number(o.mullionH) || 0), 0, 4);
     const ribPlanScale = clamp(taperComponentScale, 0.55, 1.25);
     const ribCountEffective = Math.max(0, Math.round(o.ribCount * facadeModifiers.ribDensity * ribPlanScale));
@@ -11074,8 +11930,12 @@ function build(footprintPoly,o){
       const mode = windowStyle === 'bay' ? 'bay' : 'punched';
       const plan = getBayOpeningPlan(shell, o, baseFacadeShell, mode);
       let prof;
+      /* Juliet rails: bay windows run down to the floor behind a glass guard (not on a
+         street-level storey). */
+      const juliet = o.balType === 'juliet' && mode === 'bay' && (i > 0 || Number(o.podF) > 0);
       if (mode === 'bay') {
         prof = bayVerticalProfile(o, i, base, top);
+        if (juliet && !prof.panel) prof = { ...prof, wallBase: base + 0.12, glassBase: base + 0.12 };
       } else {
         const proportion = ['tall', 'square', 'wide'].includes(o.windowProportion) ? o.windowProportion : 'tall';
         const profile = proportion === 'wide' ? { base: 0.29, top: 0.71 } : (proportion === 'square' ? { base: 0.235, top: 0.765 } : { base: 0.18, top: 0.86 });
@@ -11083,16 +11943,23 @@ function build(footprintPoly,o){
       }
       visionBase = prof.glassBase;
       visionTop = prof.glassTop;
-      emitBayOpenings(out, plan, shell, o, base, top, prof);
+      const entryType = i === 0 && !(Number(o.podF) > 0) ? resolveEntryType(o) : 'none';
+      const portal = entryType === 'portal' ? portalEntranceParts(shell, plan, o) : null;
+      emitBayOpenings(out, plan, shell, o, base, top, prof, portal);
+      if (juliet) emitJulietRails(out, plan, o, base);
       emitWindowHeads(out, plan, o, i, base, top, prof.glassBase, prof.glassTop);
-      if (i < Math.round(Number(o.rusticFloors) || 0)) emitRustication(out, shell, plan, o, base, top, prof.glassBase, prof.glassTop);
+      if (i < Math.round(Number(o.rusticFloors) || 0)) emitRustication(out, shell, plan, o, base, top, prof.glassBase, prof.glassTop, portal);
       const orielFrom = Math.max(1, Math.round(Number(o.orielFrom) || 1)) - 1;
       const orielTo = Math.round(Number(o.orielTo) || 0) > 0 ? Math.round(Number(o.orielTo)) - 1 : o.floors - 1;
       if (o.orielType && o.orielType !== 'none' && i >= orielFrom && i <= orielTo) {
         emitOriels(out, orielParts(shell, plan.layout, o, massing.streetBearing), o, base, top, prof.glassBase, prof.glassTop, i === orielTo);
       }
-      if (i === 0 && !(Number(o.podF) > 0) && o.entryType && o.entryType !== 'none') {
-        emitEntrances(out, entranceParts(shell, plan.layout, o, massing.streetBearing, plinthH), o, base);
+      if (portal) {
+        const archedGround = i < Math.round(Number(o.archFloors) || 0);
+        const archRadius = archedGround ? windowHeadParts(plan, o).maxWidth / 2 : 0;
+        emitPortalEntrance(out, portal, o, base, top, prof, plinthH, archedGround && prof.glassTop - prof.glassBase > archRadius + 0.7 ? prof.glassTop - archRadius : null);
+      } else if (entryType !== 'none' && entryType !== 'portal') {
+        emitEntrances(out, entranceParts(shell, plan.layout, { ...o, entryType }, massing.streetBearing, plinthH), { ...o, entryType }, base);
       }
     } else if (windowStyle === 'punched') {
       /* Punched windows: isolated openings in a heavy opaque facade */
@@ -11475,11 +12342,11 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
         const parapetFootprint = safeDiff(topFloorShell, parapetInner, "Parapet diff");
         parapetFootprint && parapetFootprint.geometry && out.parapets.push(turf.feature(parapetFootprint.geometry, {b: mainRoofTop, h: mainRoofTop + o.parapetH, part: 'parapet'}));
         /* Coping: a thin cap that oversails the parapet on both faces. */
-        const copingH = clamp(o.parapetH * 0.12, 0.05, 0.14);
-        const copingOuter = safeBuf(topFloorShell, 0.04, "Parapet coping outer");
-        const copingInner = safeBuf(topFloorShell, -(o.parapetThick + 0.04), "Parapet coping inner");
+        const copingH = clamp(o.parapetH * 0.14, 0.07, 0.18);
+        const copingOuter = safeBuf(topFloorShell, 0.07, "Parapet coping outer");
+        const copingInner = safeBuf(topFloorShell, -(o.parapetThick + 0.05), "Parapet coping inner");
         const coping = safeDiff(copingOuter, copingInner, "Parapet coping");
-        coping && coping.geometry && out.parapets.push(turf.feature(coping.geometry, {b: mainRoofTop + o.parapetH, h: mainRoofTop + o.parapetH + copingH, part: 'parapet_coping'}));
+        coping && coping.geometry && out.parapets.push(turf.feature(coping.geometry, {b: mainRoofTop + o.parapetH, h: mainRoofTop + o.parapetH + copingH, part: 'parapet_coping', c: lightenHex(o.parapetCol || '#8e9598', 0.2)}));
     }
 
     if (!['tapered', 'terraced', 'crown', ...PITCHED_ROOF_STYLES].includes(o.roofProfile) && o.penthouseF > 0 && o.penthouseScale > 0) {
@@ -11500,9 +12367,14 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
                 const penthouseWallBase = mainRoofTop;
                 const penthouseWallTop = penthouseWallBase + o.penthouseF * F;
                 out.rooftopStructures.push(turf.feature(penthouseBasePoly.geometry, {b: penthouseWallBase, h: penthouseWallTop, part:'roof_penthouse'}));
+                /* A plant room reads as one: louvres round the upper wall. */
+                if (penthouseWallTop - penthouseWallBase >= 2.4) {
+                  emitLouvreBand(out, penthouseBasePoly, penthouseWallBase + Math.min(1.5, (penthouseWallTop - penthouseWallBase) * 0.42), penthouseWallTop - 0.3, darkenHex(o.penthouseCol || '#8e9598', 0.32), 'penthouse');
+                }
                 out.roof.push(turf.feature(penthouseBasePoly.geometry, {b: penthouseWallTop, h: penthouseWallTop + o.roofSlabH, part:'penthouse_roof'}));
                 roofCapTop = penthouseWallTop + o.roofSlabH;
                 roofCapShell = penthouseBasePoly;
+                if (!o.enableSpire) emitPlantRow(out, penthouseBasePoly, roofCapTop, o);
             }
         }
     }
@@ -11565,6 +12437,7 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
           h: screenTop,
           part: 'mechanical_screen'
         }));
+        emitLouvreBand(out, screenOuter, equipmentBase + 0.45, screenTop - 0.2, darkenHex(o.roofAccentCol || '#8e9598', 0.38), 'mechanical screen');
       }
       roofCapTop = Math.max(roofCapTop, equipmentTop, screenTop);
     }
@@ -11587,6 +12460,8 @@ if (i % balconyFrequencyEffective === 0 && i < o.floors-1){
         }));
       }
     }
+
+    if (!pitchedRoof) buildRoofscape(topFloorShell, o, mainRoofTop, out);
 
     if (o.enableSpire && o.spireHeight > 0) {
       const spireShellBase = roofCapShell && roofCapShell.geometry ? roofCapShell : topFloorShell;
@@ -12387,6 +13262,7 @@ function archetypeMassingControls(type, values, palette, randomize) {
 
 function applyBuildingArchetype(type, options = {}) {
   const { label, values } = buildArchetypeControlSet(type, Boolean(options.randomize));
+  massingFollowsSource = false;
   applyControlSet(values);
   const status = $('randomizerStatus');
   if (status && options.status !== false) {
@@ -12478,6 +13354,7 @@ async function buildFromFootprintGeoJSON(geojson, source, hiddenIds, detail) {
   setActiveFootprints(footprints, false);
   lastFootprintSource = source;
   updateMultiBuildUI();
+  applySourceHeight();
   await renderWithLoader(lastPoly, cfg(), 'Loading Footprint', detail);
   return footprints;
 }
@@ -13551,6 +14428,7 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     return levelGroups.get(index);
   };
   const materialCache = new Map();
+  const assetTopM = Math.max(1, ...featuresFlat.map(f => Number((f.feature.properties || {}).h) || 0));
   const geometryBuckets = new Map();
   const featureOrdinals = new Map();
   Object.entries(geometryTree || {}).forEach(([layerKey, collection]) =>
@@ -13573,26 +14451,39 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     const overrideOpacity = Number.isFinite(overrideOpacityRaw) ? clamp(overrideOpacityRaw, 0, 1) : Number(style.fillOpacity ?? 1);
     const overridePattern = (typeof props.p === 'string' && props.p) ? props.p : style.pattern;
 
-    const matKey = `${layerKey}|${overrideColor}|${overrideOpacity}|${overridePattern}`;
+    const profile = exportMaterialProfile(layerKey, overridePattern !== 'none' ? overridePattern : style.pattern);
+    /* Glazing (glass layers, rooflights and glass balustrades in any layer) exports opaque
+       unless the editor is in a see-through mode: alpha-blended panes sort badly in other
+       viewers and show the hollow model behind them. */
+    const isGlass = profile.kind === 'glass' || /glass|glazing|rooflight/.test(String(props.part || ''));
+    const seeThrough = ['xray', 'custom'].includes(transparencyModeFor(cfgSnapshot));
+    const lobbyGlass = layerKey === 'podiumDoors' || /entrance_(sidelight|transom|overlight)|front_door_glazing/.test(String(props.part || ''));
+    const exportOpacity = isGlass && !seeThrough ? (lobbyGlass ? 0.3 : 1) : overrideOpacity;
+    const matKey = `${layerKey}|${overrideColor}|${exportOpacity}|${overridePattern}|${isGlass ? 'g' : ''}`;
     let material = materialCache.get(matKey);
     if (!material) {
-      const profile = exportMaterialProfile(layerKey, overridePattern !== 'none' ? overridePattern : style.pattern);
+      const baseColor = new THREE.Color(overrideColor || '#999999');
+      /* Exported glass is the pane as it photographs: the specified tint lifted toward the
+         sky it reflects, graded per pane and by height through vertex colours below. */
+      if (isGlass) baseColor.lerp(new THREE.Color('#a9bfce'), 0.34);
       const common = {
-        color: new THREE.Color(overrideColor || '#999999'),
-        transparent: Number(overrideOpacity) < 1,
-        opacity: Number(overrideOpacity ?? 1),
+        color: baseColor,
+        transparent: Number(exportOpacity) < 1,
+        opacity: Number(exportOpacity ?? 1),
         roughness: profile.roughness,
         metalness: profile.metalness,
+        vertexColors: isGlass,
         side: THREE.DoubleSide
       };
       /* Glass exports as transmissive PBR (KHR_materials_transmission / ior). */
-      material = profile.kind === 'glass'
+      material = isGlass
         /* Panes are thin double-sided sheets (thickness 0). The exporter still writes
            KHR_materials_volume for transmission, and three's default infinite attenuation
            distance serialises as null, which the glTF validator rejects; 1 km is no attenuation. */
-        ? new THREE.MeshPhysicalMaterial({ ...common, transmission: profile.transmission, ior: profile.ior, thickness: 0, attenuationDistance: 1000, specularIntensity: 1 })
+        ? new THREE.MeshPhysicalMaterial({ ...common, transmission: profile.transmission || 0.12, ior: profile.ior || 1.52, roughness: 0.06, metalness: 0.45, thickness: 0, attenuationDistance: 1000, specularIntensity: 1 })
         : new THREE.MeshStandardMaterial(common);
-      material.name = `${layerKey}-${profile.kind}`;
+      /* One readable, unique name per material: finish, component group, colour. */
+      material.name = `${isGlass ? 'glass' : profile.kind}_${layerKey}_${String(overrideColor || '#999999').replace('#', '')}${Number(exportOpacity) < 1 ? `_a${Math.round(exportOpacity * 100)}` : ''}`;
       const tex = await getThreeTexture(overridePattern);
       if (tex) {
         material.map = tex;
@@ -13607,6 +14498,18 @@ async function buildThreeGroupFromCurrentBuilding(geometryTree, cfgSnapshot) {
     const addPolygon = coords => {
       const geo = polygonCoordinatesToMeshGeometry(coords, project, depth, base);
       if (!geo) return;
+      if (isGlass) {
+        /* Sky grading: darker at street level, lighter toward the top, with a faint
+           pane-to-pane shift, as 8-bit vertex colours (COLOR_0 multiplies the base colour). */
+        const lift = clamp((base + depth / 2) / assetTopM, 0, 1);
+        const pane = finishHash(coords[0][0][0] * 9173.3, coords[0][0][1] * 7919.7, base) - 0.5;
+        const tone = Math.round(255 * clamp(0.7 + 0.3 * lift + pane * 0.05, 0.6, 1));
+        const count = geo.attributes.position.count;
+        /* RGBA: glTF vertex attributes are 4-byte aligned, so 3 x 8-bit would be invalid */
+        const colors = new Uint8Array(count * 4).fill(tone);
+        for (let v = 3; v < colors.length; v += 4) colors[v] = 255;
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 4, true));
+      }
       if (!geometryBuckets.has(bucketKey)) geometryBuckets.set(bucketKey, { layerKey, material, component, geometries: [], ids: new Set() });
       const bucket = geometryBuckets.get(bucketKey);
       bucket.geometries.push(geo);
@@ -13959,6 +14862,7 @@ function restoreSession(s) {
   if (!s) return false;
   interiorSettings = migrateSettings(s.interiorSettings);
   writeSessionControls(s.controls);
+  if (s.controls) massingFollowsSource = false;   // a restored session is the user's own massing
   updateExteriorControlVisibility();
   multiBuildMode = Boolean(s.multi);
   removedIds.clear();

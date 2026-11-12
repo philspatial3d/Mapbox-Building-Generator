@@ -1,0 +1,47 @@
+{
+  "site": {
+    "lng": 144.94773,
+    "lat": -37.82025,
+    "frontBearing": 252,
+    "note": "Open lot on Harbour Esplanade, Docklands, Melbourne. No mapped building on or beside the lot, so every camera is unobstructed. Footprints come from make_footprints.py."
+  },
+  "cases": [
+    {
+      "id": "rect-tower-default",
+      "covers": "rectangular tower, first-use defaults",
+      "footprint": "rect-40x28.geojson",
+      "preset": null,
+      "note": "No preset: what a new user gets from a fresh session after one upload."
+    },
+    {
+      "id": "irregular-masonry",
+      "covers": "irregular footprint (concave, chamfer, skewed edge, hole), masonry building",
+      "footprint": "irregular-L.geojson",
+      "preset": "Upper East Side Pre-War Co-op"
+    },
+    {
+      "id": "residential-tower",
+      "covers": "residential building, residential tower",
+      "footprint": "rect-34x26.geojson",
+      "preset": "Brick-Carried Point Tower (Toronto)"
+    },
+    {
+      "id": "office-commercial",
+      "covers": "office building, commercial office",
+      "footprint": "trapezoid-46x32.geojson",
+      "preset": "Bronze Rainscreen Exchange"
+    },
+    {
+      "id": "podium-tower",
+      "covers": "podium-and-tower composition",
+      "footprint": "rect-56x40.geojson",
+      "preset": "Setback Crown Office Tower"
+    },
+    {
+      "id": "art-deco-tower",
+      "covers": "Art Deco tower, masonry setbacks and crown",
+      "footprint": "rect-36x30.geojson",
+      "preset": "Limestone Art Deco Tower (RAMSA style)"
+    }
+  ]
+}

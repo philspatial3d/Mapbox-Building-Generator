@@ -1,0 +1,80 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Quality viewer</title>
+<style>html,body{margin:0;background:#dfe3e6;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.185.1","three/addons/":"https://esm.sh/three@0.185.1/examples/jsm/"}}</script></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+/* An independent three.js viewer for exported GLBs (no app code), used by the architectural
+   quality evaluation (docs/ARCHITECTURAL_QUALITY.md). ?m=<glb url>&az=<compass bearing from
+   the building to the street camera>. Fixed lighting and three matched views:
+   street (eye level, across the street), oblique (aerial three-quarter) and roof. */
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1100, H = +q.get('h') || 800;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#dfe6ec');
+/* Image-based light from a plain overcast-to-blue sky dome (no studio light panels, which
+   would mirror in the glazing as bright blobs): zenith blue, pale horizon, grey ground. */
+const skyScene = new THREE.Scene();
+const skyGeo = new THREE.SphereGeometry(50, 48, 24);
+const skyCol = [];
+const zen = new THREE.Color('#8fb4dc'), hor = new THREE.Color('#f2f5f7'), gnd = new THREE.Color('#8f8e88');
+for (let i = 0; i < skyGeo.attributes.position.count; i++) {
+  const y = skyGeo.attributes.position.getY(i) / 50;
+  const col = y >= 0 ? hor.clone().lerp(zen, Math.pow(y, 0.6)) : hor.clone().lerp(gnd, Math.min(1, -y * 6));
+  skyCol.push(col.r, col.g, col.b);
+}
+skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(skyCol, 3));
+skyScene.add(new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(skyScene, 0).texture; scene.environmentIntensity = 0.85;
+const sun = new THREE.DirectionalLight('#fff4e6', 1.9); sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.05;
+scene.add(sun, sun.target, new THREE.HemisphereLight('#dfe9f2', '#7a756d', 0.25));
+const ground = new THREE.Mesh(new THREE.CircleGeometry(600, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#b9bcb7', roughness: 1 }));
+ground.receiveShadow = true; scene.add(ground);
+const gltf = await new GLTFLoader().loadAsync(q.get('m'));
+const root = gltf.scene;
+root.updateMatrixWorld(true);
+const box = new THREE.Box3().setFromObject(root);
+const c = box.getCenter(new THREE.Vector3());
+root.position.set(-c.x, -box.min.y, -c.z);
+let meshes = 0, tris = 0; const materials = new Set(), names = new Set();
+root.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; meshes++; materials.add(o.material.name); names.add(o.name);
+  tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
+scene.add(root);
+const size = box.getSize(new THREE.Vector3());
+const height = size.y, plan = Math.max(size.x, size.z);
+/* crowns and spires: frame from the main roof up (&rise=<m above the main roof slab>) */
+const roofRise = +q.get('rise') || 0;
+/* compass bearing -> unit vector on the ground plane; the export has +X east and -Z north */
+const az = (+q.get('az') || 0) * Math.PI / 180;
+const dir = new THREE.Vector3(Math.sin(az), 0, -Math.cos(az));
+const side = new THREE.Vector3(Math.cos(az), 0, Math.sin(az));
+/* sun from the street side, 35 degrees off the facade normal, so reveals and projections cast */
+const sunDir = dir.clone().multiplyScalar(0.8).add(side.clone().multiplyScalar(0.55)).add(new THREE.Vector3(0, 1.05, 0)).normalize();
+sun.position.copy(sunDir.clone().multiplyScalar(Math.max(height, plan) * 2 + 80));
+const reach = Math.max(height, plan) * 1.1 + 20;
+Object.assign(sun.shadow.camera, { left: -reach, right: reach, top: reach, bottom: -reach, near: 1, far: reach * 6 });
+sun.shadow.camera.updateProjectionMatrix();
+const half = Math.abs(dir.x) * size.x / 2 + Math.abs(dir.z) * size.z / 2;   // centre to the street face
+const cam = (fov, pos, look) => { const camera = new THREE.PerspectiveCamera(fov, W / H, 0.1, 6000); camera.position.copy(pos); camera.lookAt(look); return camera; };
+const VIEWS = {
+  /* eye level across a 22 m street, looking at the base and lower floors */
+  street: () => cam(58, dir.clone().multiplyScalar(half + 22).add(side.clone().multiplyScalar(5)).setY(1.7), new THREE.Vector3(0, Math.min(height * 0.5, 13), 0).add(dir.clone().multiplyScalar(half * 0.6))),
+  /* close on the entrance bay */
+  entrance: () => cam(50, dir.clone().multiplyScalar(half + 11).add(side.clone().multiplyScalar(3)).setY(1.7), new THREE.Vector3(0, 4.2, 0).add(dir.clone().multiplyScalar(half))),
+  /* aerial three-quarter, whole building */
+  oblique: () => { const d = Math.max(height * 1.9, plan * 2.4) + 40; return cam(30, dir.clone().add(side).normalize().multiplyScalar(d).setY(height * 0.55 + d * 0.3), new THREE.Vector3(0, height * 0.5, 0)); },
+  /* the roof as a fifth facade: steep, close on the top third */
+  roof: () => { const d = plan * 1.5 + 18 + roofRise * 1.2; return cam(34, dir.clone().add(side.clone().multiplyScalar(0.6)).normalize().multiplyScalar(d * 0.72).setY(height + d * 0.95), new THREE.Vector3(0, height - 2 - roofRise * 0.5, 0)); },
+  /* mid-height facade detail, slightly raking */
+  facade: () => cam(26, dir.clone().multiplyScalar(half + 46).add(side.clone().multiplyScalar(24)).setY(height * 0.5 + 6), new THREE.Vector3(0, height * 0.5, 0).add(dir.clone().multiplyScalar(half)))
+};
+window.shoot = name => { renderer.render(scene, VIEWS[name]()); return renderer.domElement.toDataURL('image/jpeg', 0.92); };
+window.info = { size: size.toArray().map(v => +v.toFixed(2)), meshes, triangles: Math.round(tris), materials: [...materials].sort(), meshNames: names.size, levels: root.children.length ? (root.children[0].children || []).length : 0 };
+window.ready = true;
+</script></body></html>

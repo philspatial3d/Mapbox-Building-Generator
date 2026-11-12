@@ -1,0 +1,96 @@
+{
+ "measuredAt": "2026-11-11T21:14:28-0500",
+ "app": "http://127.0.0.1:8162/app.html",
+ "footprint": "lot-40x28.geojson",
+ "note": "phone-emulated = Chromium, 390x844 @3x, CPU 4x throttled; not a real device",
+ "results": [
+  {
+   "profile": "desktop",
+   "preset": "Bronze Rainscreen Exchange",
+   "exportSeconds": 0.49,
+   "glbMB": 7.43,
+   "features": 986,
+   "layers": 23,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.7,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "exportSeconds": 0.8,
+   "glbMB": 10.37,
+   "features": 1353,
+   "layers": 20,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.5,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 0.74,
+   "glbMB": 10.26,
+   "features": 1191,
+   "layers": 25,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.7,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 0.49,
+   "glbMB": 6.51,
+   "features": 1289,
+   "layers": 21,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.6,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Bronze Rainscreen Exchange",
+   "exportSeconds": 1.85,
+   "glbMB": 7.43,
+   "features": 986,
+   "layers": 23,
+   "frameMsP50": 25.4,
+   "frameMsP95": 41.7,
+   "fpsMedian": 39.4
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "exportSeconds": 3.07,
+   "glbMB": 10.37,
+   "features": 1353,
+   "layers": 20,
+   "frameMsP50": 24.4,
+   "frameMsP95": 32.8,
+   "fpsMedian": 41.0
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 2.71,
+   "glbMB": 10.26,
+   "features": 1191,
+   "layers": 25,
+   "frameMsP50": 25.1,
+   "frameMsP95": 41.9,
+   "fpsMedian": 39.8
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 1.74,
+   "glbMB": 6.51,
+   "features": 1289,
+   "layers": 21,
+   "frameMsP50": 17.5,
+   "frameMsP95": 32.3,
+   "fpsMedian": 57.1
+  }
+ ]
+}

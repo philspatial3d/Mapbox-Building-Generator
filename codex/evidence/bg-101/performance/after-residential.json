@@ -1,0 +1,52 @@
+{
+ "measuredAt": "2026-11-11T21:21:45-0500",
+ "app": "http://127.0.0.1:8161/app.html",
+ "footprint": "lot-40x28.geojson",
+ "note": "phone-emulated = Chromium, 390x844 @3x, CPU 4x throttled; not a real device",
+ "results": [
+  {
+   "profile": "desktop",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 0.55,
+   "glbMB": 7.78,
+   "features": 1506,
+   "layers": 22,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.6,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 0.72,
+   "glbMB": 10.32,
+   "features": 1223,
+   "layers": 27,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.7,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 2.05,
+   "glbMB": 7.78,
+   "features": 1506,
+   "layers": 22,
+   "frameMsP50": 17.5,
+   "frameMsP95": 26,
+   "fpsMedian": 57.1
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 2.59,
+   "glbMB": 10.32,
+   "features": 1223,
+   "layers": 27,
+   "frameMsP50": 24.7,
+   "frameMsP95": 34.3,
+   "fpsMedian": 40.5
+  }
+ ]
+}

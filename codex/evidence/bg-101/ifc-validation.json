@@ -1,0 +1,335 @@
+[
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 1550,
+  "byClass": {
+   "IfcBeam": 2,
+   "IfcBuildingElementProxy": 6,
+   "IfcColumn": 31,
+   "IfcCovering": 72,
+   "IfcDoor": 3,
+   "IfcMember": 916,
+   "IfcPlate": 152,
+   "IfcRailing": 3,
+   "IfcRoof": 8,
+   "IfcSlab": 5,
+   "IfcWall": 186,
+   "IfcWindow": 163,
+   "IfcGeographicElement": 3
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 1550,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   169.71
+  ],
+  "storeys": 39,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.9477303361171,
+    -37.82025000512569
+   ],
+   "siteLngLat": [
+    144.94772999999998,
+    -37.82025
+   ],
+   "agreementM": 0.029562204371446795,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 1079.201954,
+   "InferredHeight": 169.71,
+   "InferredStoreys": 38,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ },
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 1191,
+  "byClass": {
+   "IfcBeam": 62,
+   "IfcBuildingElementProxy": 22,
+   "IfcColumn": 16,
+   "IfcCovering": 418,
+   "IfcDoor": 3,
+   "IfcMember": 549,
+   "IfcRailing": 4,
+   "IfcRoof": 2,
+   "IfcSlab": 3,
+   "IfcWall": 47,
+   "IfcWindow": 64,
+   "IfcGeographicElement": 1
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 1191,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   56.49
+  ],
+  "storeys": 16,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.9477137976719,
+    -37.820245389745175
+   ],
+   "siteLngLat": [
+    144.94771346166667,
+    -37.82024538472222
+   ],
+   "agreementM": 0.029552152770044797,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 1575.590821,
+   "InferredHeight": 56.49,
+   "InferredStoreys": 15,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ },
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 955,
+  "byClass": {
+   "IfcBeam": 1,
+   "IfcBuildingElementProxy": 17,
+   "IfcColumn": 9,
+   "IfcCovering": 38,
+   "IfcDoor": 4,
+   "IfcMember": 411,
+   "IfcPlate": 256,
+   "IfcRailing": 9,
+   "IfcRoof": 2,
+   "IfcSlab": 8,
+   "IfcWall": 75,
+   "IfcWindow": 122,
+   "IfcGeographicElement": 3
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 955,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   148.19
+  ],
+  "storeys": 36,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.94772058613165,
+    -37.82024800512236
+   ],
+   "siteLngLat": [
+    144.94772025,
+    -37.820248
+   ],
+   "agreementM": 0.029563475017015867,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 1374.980352,
+   "InferredHeight": 148.19,
+   "InferredStoreys": 35,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ },
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 1205,
+  "byClass": {
+   "IfcBeam": 1,
+   "IfcBuildingElementProxy": 12,
+   "IfcColumn": 39,
+   "IfcCovering": 25,
+   "IfcDoor": 3,
+   "IfcMember": 483,
+   "IfcPlate": 304,
+   "IfcRailing": 9,
+   "IfcRoof": 1,
+   "IfcSlab": 9,
+   "IfcWall": 87,
+   "IfcWindow": 229,
+   "IfcGeographicElement": 3
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 1205,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   170.63
+  ],
+  "storeys": 42,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.9477303361171,
+    -37.82025000512569
+   ],
+   "siteLngLat": [
+    144.94772999999998,
+    -37.82025
+   ],
+   "agreementM": 0.029562204371446795,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 2243.185573,
+   "InferredHeight": 170.63,
+   "InferredStoreys": 41,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ },
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 428,
+  "byClass": {
+   "IfcBeam": 2,
+   "IfcBuildingElementProxy": 12,
+   "IfcColumn": 13,
+   "IfcCovering": 22,
+   "IfcDoor": 4,
+   "IfcMember": 215,
+   "IfcRailing": 2,
+   "IfcRoof": 1,
+   "IfcSlab": 5,
+   "IfcWall": 41,
+   "IfcWindow": 110,
+   "IfcGeographicElement": 1
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 428,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   71.41000000000001
+  ],
+  "storeys": 19,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.9477303361171,
+    -37.82025000512569
+   ],
+   "siteLngLat": [
+    144.94772999999998,
+    -37.82025
+   ],
+   "agreementM": 0.029562204371446795,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 1120.086118,
+   "InferredHeight": 71.41,
+   "InferredStoreys": 18,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ },
+ {
+  "file": "building.ifc",
+  "ok": true,
+  "notes": [],
+  "schema": "IFC4",
+  "schemaIssues": 0,
+  "schemaIssueSamples": [],
+  "elements": 1498,
+  "byClass": {
+   "IfcBeam": 2,
+   "IfcBuildingElementProxy": 10,
+   "IfcColumn": 25,
+   "IfcCovering": 4,
+   "IfcDoor": 3,
+   "IfcMember": 739,
+   "IfcRailing": 355,
+   "IfcRoof": 1,
+   "IfcSlab": 4,
+   "IfcWall": 139,
+   "IfcWindow": 215,
+   "IfcGeographicElement": 1
+  },
+  "uncontained": 0,
+  "withoutMbgPset": 0,
+  "geometryBuilt": 1498,
+  "geometryFailed": 0,
+  "heightRange": [
+   0.0,
+   144.92999999999998
+  ],
+  "storeys": 46,
+  "georef": {
+   "crs": "EPSG:32755",
+   "mapConversionLngLat": [
+    144.9477303361171,
+    -37.82025000512569
+   ],
+   "siteLngLat": [
+    144.94772999999998,
+    -37.82025
+   ],
+   "agreementM": 0.029562204371446795,
+   "xAxis": [
+    0.999759,
+    0.021962
+   ]
+  },
+  "provenance": {
+   "SourceType": "upload",
+   "SourceFootprintArea": 884.754304,
+   "InferredHeight": 144.93,
+   "InferredStoreys": 45,
+   "EntranceBasis": "widest suitable facade (no mapped street within 90 m)"
+  }
+ }
+]

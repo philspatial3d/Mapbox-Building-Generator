@@ -1,0 +1,494 @@
+{
+ "art-deco-tower": {
+  "baseline": {
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "footprint": "rect-36x30.geojson",
+   "heightM": 169.71,
+   "features": 1353,
+   "mapLayers": 20,
+   "entranceBearing": null,
+   "uploadToReadySeconds": 0.2,
+   "exportSeconds": {
+    "glb": 0.65,
+    "ifc": 0.57,
+    "geojson": 0.13
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 10420912,
+     "sha256": "4f5b7515df4fae09"
+    },
+    "building.ifc": {
+     "bytes": 7232792,
+     "sha256": "0fc47b1a95946639"
+    },
+    "building.geojson": {
+     "bytes": 9589242,
+     "sha256": "5a585b8d7d131808"
+    }
+   },
+   "viewer": {
+    "size": [
+     40.15,
+     169.71,
+     44.13
+    ],
+    "meshes": 353,
+    "triangles": 191860,
+    "levels": 39
+   },
+   "materials": 15,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "footprint": "rect-36x30.geojson",
+   "heightM": 169.71,
+   "features": 1550,
+   "mapLayers": 22,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.21,
+   "exportSeconds": {
+    "glb": 0.76,
+    "ifc": 0.7,
+    "geojson": 0.13
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 11464016,
+     "sha256": "56386d29401d1ee1"
+    },
+    "building.ifc": {
+     "bytes": 8154267,
+     "sha256": "571a62438e5d4416"
+    },
+    "building.geojson": {
+     "bytes": 10693105,
+     "sha256": "b1ec6fe3e594140d"
+    }
+   },
+   "viewer": {
+    "size": [
+     40.15,
+     169.71,
+     44.13
+    ],
+    "meshes": 281,
+    "triangles": 208336,
+    "levels": 39
+   },
+   "materials": 30,
+   "consoleErrors": 0
+  }
+ },
+ "irregular-masonry": {
+  "baseline": {
+   "preset": "Upper East Side Pre-War Co-op",
+   "footprint": "irregular-L.geojson",
+   "heightM": 54.94,
+   "features": 1149,
+   "mapLayers": 20,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.22,
+   "exportSeconds": {
+    "glb": 0.87,
+    "ifc": 0.85,
+    "geojson": 0.17
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 14484768,
+     "sha256": "e18a058fc1449ff3"
+    },
+    "building.ifc": {
+     "bytes": 11093131,
+     "sha256": "645ff826886f531a"
+    },
+    "building.geojson": {
+     "bytes": 13971257,
+     "sha256": "e0cc5ebdee0f0a5c"
+    }
+   },
+   "viewer": {
+    "size": [
+     49.87,
+     54.94,
+     59.37
+    ],
+    "meshes": 173,
+    "triangles": 273792,
+    "levels": 16
+   },
+   "materials": 19,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": "Upper East Side Pre-War Co-op",
+   "footprint": "irregular-L.geojson",
+   "heightM": 56.49,
+   "features": 1191,
+   "mapLayers": 22,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.26,
+   "exportSeconds": {
+    "glb": 0.94,
+    "ifc": 0.96,
+    "geojson": 0.2
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 14795692,
+     "sha256": "2fa4d63c244731c0"
+    },
+    "building.ifc": {
+     "bytes": 11230098,
+     "sha256": "73491c2626dca267"
+    },
+    "building.geojson": {
+     "bytes": 14157826,
+     "sha256": "9ce67c175a7b578b"
+    }
+   },
+   "viewer": {
+    "size": [
+     48.38,
+     56.49,
+     59.37
+    ],
+    "meshes": 140,
+    "triangles": 278536,
+    "levels": 16
+   },
+   "materials": 34,
+   "consoleErrors": 0
+  }
+ },
+ "office-commercial": {
+  "baseline": {
+   "preset": "Bronze Rainscreen Exchange",
+   "footprint": "trapezoid-46x32.geojson",
+   "heightM": 146.64,
+   "features": 1004,
+   "mapLayers": 23,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.23,
+   "exportSeconds": {
+    "glb": 0.52,
+    "ifc": 0.46,
+    "geojson": 0.1
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 8287880,
+     "sha256": "9e0a789464de8d9a"
+    },
+    "building.ifc": {
+     "bytes": 5057601,
+     "sha256": "d375999b96c31435"
+    },
+    "building.geojson": {
+     "bytes": 6987212,
+     "sha256": "18827da070217cac"
+    }
+   },
+   "viewer": {
+    "size": [
+     47.45,
+     146.64,
+     56.1
+    ],
+    "meshes": 261,
+    "triangles": 160328,
+    "levels": 36
+   },
+   "materials": 23,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": "Bronze Rainscreen Exchange",
+   "footprint": "trapezoid-46x32.geojson",
+   "heightM": 148.19,
+   "features": 955,
+   "mapLayers": 24,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.24,
+   "exportSeconds": {
+    "glb": 0.53,
+    "ifc": 0.52,
+    "geojson": 0.09
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 8636124,
+     "sha256": "71727eaa92cfdfff"
+    },
+    "building.ifc": {
+     "bytes": 5129047,
+     "sha256": "b6cc771bf8f7d378"
+    },
+    "building.geojson": {
+     "bytes": 7083451,
+     "sha256": "ae429850a349c77e"
+    }
+   },
+   "viewer": {
+    "size": [
+     47.45,
+     148.19,
+     56.1
+    ],
+    "meshes": 273,
+    "triangles": 164116,
+    "levels": 36
+   },
+   "materials": 35,
+   "consoleErrors": 0
+  }
+ },
+ "podium-tower": {
+  "baseline": {
+   "preset": "Setback Crown Office Tower",
+   "footprint": "rect-56x40.geojson",
+   "heightM": 169.62,
+   "features": 1218,
+   "mapLayers": 23,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.23,
+   "exportSeconds": {
+    "glb": 0.61,
+    "ifc": 0.59,
+    "geojson": 0.12
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 10244816,
+     "sha256": "c401d52580381f81"
+    },
+    "building.ifc": {
+     "bytes": 6666105,
+     "sha256": "2bce48da48045cf6"
+    },
+    "building.geojson": {
+     "bytes": 8954520,
+     "sha256": "0dc4eb1bed02fccb"
+    }
+   },
+   "viewer": {
+    "size": [
+     59.99,
+     169.62,
+     70.22
+    ],
+    "meshes": 285,
+    "triangles": 195992,
+    "levels": 42
+   },
+   "materials": 22,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": "Setback Crown Office Tower",
+   "footprint": "rect-56x40.geojson",
+   "heightM": 170.63,
+   "features": 1205,
+   "mapLayers": 23,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.24,
+   "exportSeconds": {
+    "glb": 0.63,
+    "ifc": 0.62,
+    "geojson": 0.13
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 10434232,
+     "sha256": "12b186c542a063c4"
+    },
+    "building.ifc": {
+     "bytes": 6839491,
+     "sha256": "87b22e6fd446b643"
+    },
+    "building.geojson": {
+     "bytes": 9113962,
+     "sha256": "a2e7c62a3cab770e"
+    }
+   },
+   "viewer": {
+    "size": [
+     59.99,
+     170.63,
+     70.22
+    ],
+    "meshes": 296,
+    "triangles": 196696,
+    "levels": 42
+   },
+   "materials": 35,
+   "consoleErrors": 0
+  }
+ },
+ "rect-tower-default": {
+  "baseline": {
+   "preset": null,
+   "footprint": "rect-40x28.geojson",
+   "heightM": 70.8,
+   "features": 343,
+   "mapLayers": 16,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.16,
+   "exportSeconds": {
+    "glb": 0.21,
+    "ifc": 0.16,
+    "geojson": 0.04
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 2752708,
+     "sha256": "1d82a66572ec1077"
+    },
+    "building.ifc": {
+     "bytes": 1607209,
+     "sha256": "8298bf5c4f89694c"
+    },
+    "building.geojson": {
+     "bytes": 2278843,
+     "sha256": "39c0c3e84be96a7e"
+    }
+   },
+   "viewer": {
+    "size": [
+     43.34,
+     70.8,
+     50.91
+    ],
+    "meshes": 99,
+    "triangles": 57556,
+    "levels": 19
+   },
+   "materials": 16,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": null,
+   "footprint": "rect-40x28.geojson",
+   "heightM": 71.41,
+   "features": 428,
+   "mapLayers": 21,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.24,
+   "exportSeconds": {
+    "glb": 0.32,
+    "ifc": 0.26,
+    "geojson": 0.06
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 3990960,
+     "sha256": "64910bb40ffdf2d8"
+    },
+    "building.ifc": {
+     "bytes": 2434825,
+     "sha256": "99b415bfa539ae47"
+    },
+    "building.geojson": {
+     "bytes": 3357053,
+     "sha256": "a489f41c640376f0"
+    }
+   },
+   "viewer": {
+    "size": [
+     44.53,
+     71.41,
+     52.1
+    ],
+    "meshes": 132,
+    "triangles": 80092,
+    "levels": 19
+   },
+   "materials": 33,
+   "consoleErrors": 0
+  }
+ },
+ "residential-tower": {
+  "baseline": {
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "footprint": "rect-34x26.geojson",
+   "heightM": 143.92,
+   "features": 1281,
+   "mapLayers": 21,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.19,
+   "exportSeconds": {
+    "glb": 0.38,
+    "ifc": 0.37,
+    "geojson": 0.09
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 5618884,
+     "sha256": "ab4854460a6e741c"
+    },
+    "building.ifc": {
+     "bytes": 5081629,
+     "sha256": "237e6b49307ece52"
+    },
+    "building.geojson": {
+     "bytes": 6582541,
+     "sha256": "042fe900c9ea2bfe"
+    }
+   },
+   "viewer": {
+    "size": [
+     36.17,
+     143.92,
+     41.45
+    ],
+    "meshes": 375,
+    "triangles": 109388,
+    "levels": 46
+   },
+   "materials": 21,
+   "consoleErrors": 0
+  },
+  "after": {
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "footprint": "rect-34x26.geojson",
+   "heightM": 144.93,
+   "features": 1498,
+   "mapLayers": 21,
+   "entranceBearing": 252.0,
+   "uploadToReadySeconds": 0.17,
+   "exportSeconds": {
+    "glb": 0.49,
+    "ifc": 0.47,
+    "geojson": 0.1
+   },
+   "exports": {
+    "building.glb": {
+     "bytes": 6694248,
+     "sha256": "86a73eb61ca9805f"
+    },
+    "building.ifc": {
+     "bytes": 5931141,
+     "sha256": "5d95e68828928042"
+    },
+    "building.geojson": {
+     "bytes": 7655640,
+     "sha256": "38d32a0e6e47b28e"
+    }
+   },
+   "viewer": {
+    "size": [
+     36.17,
+     144.93,
+     41.45
+    ],
+    "meshes": 294,
+    "triangles": 126924,
+    "levels": 46
+   },
+   "materials": 33,
+   "consoleErrors": 0
+  }
+ }
+}

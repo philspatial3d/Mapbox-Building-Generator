@@ -1,0 +1,96 @@
+{
+ "measuredAt": "2026-11-11T21:08:00-0500",
+ "app": "http://127.0.0.1:8161/app.html",
+ "footprint": "lot-40x28.geojson",
+ "note": "phone-emulated = Chromium, 390x844 @3x, CPU 4x throttled; not a real device",
+ "results": [
+  {
+   "profile": "desktop",
+   "preset": "Bronze Rainscreen Exchange",
+   "exportSeconds": 0.53,
+   "glbMB": 7.79,
+   "features": 936,
+   "layers": 24,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.7,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "exportSeconds": 0.8,
+   "glbMB": 10.96,
+   "features": 1516,
+   "layers": 22,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.6,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "desktop",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 0.72,
+   "glbMB": 10.3,
+   "features": 1224,
+   "layers": 27,
+   "frameMsP50": 8.4,
+   "frameMsP95": 16.7,
+   "fpsMedian": 119.0
+  },
+  {
+   "profile": "desktop",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 0.64,
+   "glbMB": 8.51,
+   "features": 1672,
+   "layers": 21,
+   "frameMsP50": 8.3,
+   "frameMsP95": 16.6,
+   "fpsMedian": 120.5
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Bronze Rainscreen Exchange",
+   "exportSeconds": 1.88,
+   "glbMB": 7.79,
+   "features": 936,
+   "layers": 24,
+   "frameMsP50": 24.4,
+   "frameMsP95": 33.2,
+   "fpsMedian": 41.0
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Limestone Art Deco Tower (RAMSA style)",
+   "exportSeconds": 3.39,
+   "glbMB": 10.96,
+   "features": 1516,
+   "layers": 22,
+   "frameMsP50": 24.2,
+   "frameMsP95": 26,
+   "fpsMedian": 41.4
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Upper East Side Pre-War Co-op",
+   "exportSeconds": 2.61,
+   "glbMB": 10.3,
+   "features": 1224,
+   "layers": 27,
+   "frameMsP50": 24.9,
+   "frameMsP95": 33.6,
+   "fpsMedian": 40.2
+  },
+  {
+   "profile": "phone-emulated",
+   "preset": "Brick-Carried Point Tower (Toronto)",
+   "exportSeconds": 2.8,
+   "glbMB": 8.51,
+   "features": 1672,
+   "layers": 21,
+   "frameMsP50": 32.5,
+   "frameMsP95": 42.1,
+   "fpsMedian": 30.8
+  }
+ ]
+}

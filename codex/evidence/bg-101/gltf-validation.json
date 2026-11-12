@@ -1,0 +1,47 @@
+{
+ "validator": "Khronos glTF Validator 2.0.0-dev.3.10",
+ "files": {
+  "art-deco-tower": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 2,
+   "hints": 0,
+   "samples": []
+  },
+  "irregular-masonry": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 3,
+   "hints": 0,
+   "samples": []
+  },
+  "office-commercial": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 3,
+   "hints": 0,
+   "samples": []
+  },
+  "podium-tower": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 3,
+   "hints": 0,
+   "samples": []
+  },
+  "rect-tower-default": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 1,
+   "hints": 0,
+   "samples": []
+  },
+  "residential-tower": {
+   "errors": 0,
+   "warnings": 0,
+   "infos": 3,
+   "hints": 0,
+   "samples": []
+  }
+ }
+}
